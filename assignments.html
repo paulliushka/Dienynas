@@ -67,7 +67,7 @@
 
         async function loadTeacherGroups() {
             try {
-                const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=teacher&only_mine=true`);
                 const groups = await response.json();
 
                 const select = document.getElementById('group_select');
@@ -123,8 +123,8 @@
 
                     if (showActions) {
                         const actionsTd = isOwner 
-                            ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
-                            : '<span style="color: #bdc3c7;">Neturite teisių</span>';
+                            ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="#" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
+                            : '<span style="color: #64748b;">Neturite teisių</span>';
                         
                         rowHtml += `<td>${actionsTd}</td>`;
                     }
@@ -160,7 +160,8 @@
                         this.reset();
                         loadAssignments();
                     } else {
-                        alert("Klaida pridedant užduotį.");
+                        const errResult = await response.json();
+                        alert(errResult.message || "Klaida pridedant užduotį.");
                     }
                 } catch (error) {
                     alert("Nepavyko prisijungti prie serverio.");
