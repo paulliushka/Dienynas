@@ -16,7 +16,7 @@
             <h2>Įrašyti naują pažymį</h2>
             <form id="addGradeForm">
                 <label>Grupė / Dalykas</label>
-                <select name="subject_id" id="subject_select" onchange="loadStudentsBySubject()" required>
+                <select name="group_id" id="group_select" onchange="loadStudentsByGroup()" required>
                     <option value="">-- Pasirinkite grupę --</option>
                 </select>
 
@@ -90,12 +90,12 @@
                 const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
                 const groups = await response.json();
 
-                const select = document.getElementById('subject_select');
+                const select = document.getElementById('group_select');
                 select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
 
                 groups.forEach(g => {
                     const opt = document.createElement('option');
-                    opt.value = g.subject_id;
+                    opt.value = g.group_id;
                     opt.textContent = `${g.subject} (${g.class} klasė)`;
                     select.appendChild(opt);
                 });
@@ -104,18 +104,18 @@
             }
         }
 
-        async function loadStudentsBySubject() {
-            const subjectId = document.getElementById('subject_select').value;
+        async function loadStudentsByGroup() {
+            const groupId = document.getElementById('group_select').value;
             const select = document.getElementById('student_select');
 
-            if (!subjectId) {
+            if (!groupId) {
                 select.innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
                 select.disabled = true;
                 return;
             }
 
             try {
-                const response = await fetch(`${API_URL}/get_students_by_subject/${subjectId}`);
+                const response = await fetch(`${API_URL}/get_students_by_group/${groupId}`);
                 const students = await response.json();
 
                 select.innerHTML = '<option value="">-- Pasirinkite mokinį --</option>';
@@ -191,7 +191,7 @@
             const formData = new FormData(this);
             const payload = {
                 student_id: formData.get('student_id'),
-                subject_id: formData.get('subject_id'),
+                group_id: formData.get('group_id'),
                 grade: formData.get('grade'),
                 type: formData.get('type'),
                 date: formData.get('date'),

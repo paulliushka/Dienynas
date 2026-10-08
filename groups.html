@@ -192,8 +192,8 @@
                     let actionsTd = '';
                     if (isOwner) {
                         actionsTd = `
-                            <a href="edit_group?id=${g.subject_id}">Redaguoti</a> | 
-                            <a href="#" onclick="deleteGroup(${g.subject_id}); return false;">Ištrinti</a>
+                            <a href="edit_group?id=${g.group_id}">Redaguoti</a> | 
+                            <a href="#" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>
                         `;
                     } else {
                         actionsTd = '<span style="color: #bdc3c7;">Neturite teisių</span>';
@@ -253,11 +253,11 @@
             }
         });
 
-        async function deleteGroup(subjectId) {
+        async function deleteGroup(groupId) {
             if (!confirm('Ar tikrai norite ištrinti šią grupę?')) return;
 
             try {
-                const response = await fetch(`${API_URL}/api/groups/delete/${subjectId}`, {
+                const response = await fetch(`${API_URL}/api/groups/delete/${groupId}`, {
                     method: 'DELETE'
                 });
 

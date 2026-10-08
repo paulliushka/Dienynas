@@ -16,7 +16,7 @@
             <h2>Paskirti naują užduotį</h2>
             <form id="addAssignmentForm">
                 <label>Grupė / Dalykas</label>
-                <select name="subject_id" id="subject_select" required>
+                <select name="group_id" id="group_select" required>
                     <option value="">-- Pasirinkite grupę --</option>
                 </select>
 
@@ -75,12 +75,12 @@
                 const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
                 const groups = await response.json();
 
-                const select = document.getElementById('subject_select');
+                const select = document.getElementById('group_select');
                 select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
 
                 groups.forEach(g => {
                     const opt = document.createElement('option');
-                    opt.value = g.subject_id;
+                    opt.value = g.group_id;
                     opt.textContent = `${g.subject} (${g.class} klasė)`;
                     select.appendChild(opt);
                 });
@@ -145,7 +145,7 @@
 
             const formData = new FormData(this);
             const payload = {
-                subject_id: formData.get('subject_id'),
+                group_id: formData.get('group_id'),
                 task: formData.get('task'),
                 due_date: formData.get('due_date'),
                 teacher_id: currentUser.user_id
