@@ -182,8 +182,8 @@
                     const isActualOwner = g.teacher_id == currentUser.user_id;
 
                     const ownerBadge = isActualOwner ? ' <span class="badge-owner">Mano grupė</span>' : '';
-                    const studentsText = (g.students && g.students.length > 0) 
-                        ? g.students.join(", ") 
+                    const studentsText = (g.student_names && g.student_names.length > 0) 
+                        ? g.student_names.join(", ") 
                         : '<span style="color: gray; font-style: italic;">Grupėje mokinių nėra</span>';
 
                     let actionsTd = '';
