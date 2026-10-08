@@ -104,22 +104,24 @@
 
                 if (assignments.length === 0) {
                     const colSpan = showActions ? 5 : 4;
-                    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Užduočių nėra.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Užduočių nėra.</td></tr>`;
                     return;
                 }
 
                 assignments.forEach(assign => {
                     const tr = document.createElement('tr');
+                    const isOwner = assign.teacher_id == currentUser.user_id;
+
+                    const ownerBadge = (currentUser.role === 'teacher' && isOwner) ? '<span class="badge-owner">Mano užduotis</span>' : '';
 
                     let rowHtml = `
-                        <td><strong>${assign.group_display}</strong></td>
+                        <td><strong>${assign.group_display}</strong> ${ownerBadge}</td>
                         <td>${assign.task}</td>
                         <td>${assign.due_date}</td>
                         <td>${assign.teacher || '-'}</td>
                     `;
 
                     if (showActions) {
-                        const isOwner = assign.teacher_id == currentUser.user_id;
                         const actionsTd = isOwner 
                             ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="#" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
                             : '<span style="color: #bdc3c7;">Neturite teisių</span>';
