@@ -34,7 +34,7 @@
 
             if (!homeworkId) {
                 alert("Nenurodytas namų darbo ID.");
-                window.location.href = 'homework.html';
+                window.location.href = 'homework';
             }
 
             // Užkrauname namų darbo duomenis
@@ -46,7 +46,7 @@
                     const item = homeworks.find(h => h.homework_id == homeworkId);
                     if (!item) {
                         alert("Namų darbas nerastas.");
-                        window.location.href = 'homework.html';
+                        window.location.href = 'homework';
                         return;
                     }
 
@@ -73,7 +73,7 @@
                     });
 
                     if (response.ok) {
-                        window.location.href = 'homework.html';
+                        window.location.href = 'homework';
                     } else {
                         const result = await response.json();
                         alert(result.message || "Klaida išsaugant namų darbą.");

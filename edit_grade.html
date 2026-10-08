@@ -50,7 +50,7 @@
 
             if (!gradeId) {
                 alert("Nenurodytas pažymio ID.");
-                window.location.href = 'grades.html';
+                window.location.href = 'grades';
             }
 
             // Užkrauname pažymio duomenis
@@ -62,7 +62,7 @@
                     const item = grades.find(g => g.grade_id == gradeId);
                     if (!item) {
                         alert("Pažymys nerastas.");
-                        window.location.href = 'grades.html';
+                        window.location.href = 'grades';
                         return;
                     }
 
@@ -92,7 +92,7 @@
                     });
 
                     if (response.ok) {
-                        window.location.href = 'grades.html';
+                        window.location.href = 'grades';
                     } else {
                         const result = await response.json();
                         alert(result.message || "Klaida išsaugant pažymį.");

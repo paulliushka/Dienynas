@@ -68,7 +68,7 @@
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
         if (!currentUser.user_id) {
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }
 
         async function initPage() {
@@ -189,7 +189,7 @@
                     let actionsTd = '';
                     if (isOwner) {
                         actionsTd = `
-                            <a href="edit_group.html?id=${g.subject_id}">Redaguoti</a> | 
+                            <a href="edit_group?id=${g.subject_id}">Redaguoti</a> | 
                             <a href="#" onclick="deleteGroup(${g.subject_id}); return false;">Ištrinti</a>
                         `;
                     } else {
