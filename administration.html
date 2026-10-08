@@ -100,7 +100,7 @@
                         <td>${u.class ? u.class : '-'}</td>
                         <td>
                             <a href="edit_user?id=${u.user_id}">Redaguoti</a> | 
-                            <a href="#" onclick="deleteUser(${u.user_id}); return false;">Ištrinti</a>
+                            <a href="javascript:void(0);" onclick="deleteUser(${u.user_id}); return false;">Ištrinti</a>
                         </td>
                     `;
                     tbody.appendChild(tr);

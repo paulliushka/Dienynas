@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Grupių valdymas</h1>
+        <h1>Grupės</h1>
 
         <div class="card">
             <h2>Sukurti naują grupę</h2>
@@ -191,7 +191,7 @@
                     if (isOwner) {
                         actionsTd = `
                             <a href="edit_group?id=${g.group_id}">Redaguoti</a> | 
-                            <a href="#" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>
+                            <a href="javascript:void(0);" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>
                         `;
                     } else {
                         actionsTd = '<span style="color: #bdc3c7;">Neturite teisių</span>';
