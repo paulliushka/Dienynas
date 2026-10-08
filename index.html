@@ -1,57 +1,64 @@
 <!DOCTYPE html>
 <html lang="lt">
-    <head>
-        <meta charset="UTF-8">
-        <title>Prisijungimas</title>
-        <link rel="icon" href="favicon.svg">
-        <link rel="stylesheet" href="style.css">
-        <script src="config.js"></script>
-        <style>
-            body { display: flex; align-items: center; justify-content: center; min-height: 90vh; }
-            .card { width: 100%; max-width: 400px; }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <h1>Prisijungimas</h1>
-            <form id="loginForm">
-                <label for="username">Vartotojo vardas</label>
-                <input type="text" id="username" name="username" required>
-                
-                <label for="password">Slaptažodis</label>
-                <input type="password" id="password" name="password" required>
-                
-                <button type="submit" class="btn btn-primary">Prisijungti</button>
-            </form>
-        </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Prisijungimas</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+    <style>
+        body { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 90vh; 
+        }
+        .card { 
+            width: 100%; 
+            max-width: 400px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Prisijungimas</h1>
+        <form id="loginForm">
+            <label for="username">Vartotojo vardas</label>
+            <input type="text" id="username" name="username" placeholder="Įveskite vartotojo vardą" required>
+            
+            <label for="password">Slaptažodis</label>
+            <input type="password" id="password" name="password" placeholder="Įveskite slaptažodį" required>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;">Prisijungti</button>
+        </form>
+    </div>
 
-        <script>
-            document.getElementById('loginForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
 
-                try {
-                    const response = await fetch(`${API_URL}/api/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-                    const result = await response.json();
+                const result = await response.json();
 
-                    if (response.ok) {
-                        // Įrašome prisijungusio vartotojo duomenis į local storage
-                        localStorage.setItem('user', JSON.stringify(result.user));
-                        window.location.href = 'dashboard';
-                    } else {
-                        alert(result.message || "Neteisingas vartotojo vardas arba slaptažodis.");
-                    }
-                } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
+                if (response.ok) {
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    window.location.href = 'dashboard';
+                } else {
+                    alert(result.message || "Neteisingas vartotojo vardas arba slaptažodis.");
                 }
-            });
-        </script>
-    </body>
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        });
+    </script>
+</body>
 </html>
