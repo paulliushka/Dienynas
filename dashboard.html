@@ -45,22 +45,22 @@
         // Pažymiai ir namų darbai (mokytojui ir mokiniui)
         if (user.role === 'teacher' || user.role === 'student') {
             menuList.innerHTML += `
-                <li><a href="grades.html">📊 Pažymiai ir vertinimai</a></li>
-                <li><a href="homework.html">📚 Namų darbų užduotys</a></li>
+                <li><a href="grades">📊 Pažymiai ir vertinimai</a></li>
+                <li><a href="homework">📚 Namų darbų užduotys</a></li>
             `;
         }
 
         // Grupių valdymas (mokytojui ir administratoriui)
         if (user.role === 'teacher' || user.role === 'administrator') {
             menuList.innerHTML += `
-                <li><a href="groups.html">👥 Grupių ir akademinių dalykų valdymas</a></li>
+                <li><a href="groups">👥 Grupių ir akademinių dalykų valdymas</a></li>
             `;
         }
 
         // Vartotojų valdymas (tik administratoriui)
         if (user.role === 'administrator') {
             menuList.innerHTML += `
-                <li><a href="administration.html">⚙️ Vartotojų kūrimas ir valdymas</a></li>
+                <li><a href="administration">⚙️ Vartotojų kūrimas ir valdymas</a></li>
             `;
         }
 
