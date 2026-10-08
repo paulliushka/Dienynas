@@ -13,8 +13,8 @@
             <h2>Redaguoti grupės duomenis</h2>
 
             <form id="editGroupForm">
-                <label>Dalyko pavadinimas</label>
-                <input type="text" name="subject" id="subject" required>
+                <label>Grupės pavadinimas</label>
+                <input type="text" name="group_name" id="group_name" required>
 
                 <label>Pasirinkite klasę</label>
                 <select name="class" id="class_select" onchange="fetchStudentsByClass()" required>
@@ -22,22 +22,19 @@
                 </select>
 
                 <div id="teacher_select_container" style="display: none;">
-                    <label>Grupės mokytojas</label>
-                    <select name="teacher_id" id="teacher_select">
-                        <option value="">-- Pasirinkite mokytoją --</option>
-                    </select>
+                    <label>Paskirti grupės mokytojus (galima pasirinkti kelis)</label>
+                    <div id="teachers_container" class="scroll-box" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-bottom: 12px;"></div>
                 </div>
 
                 <h3>Pasirinkite grupės mokinius</h3>
                 <div>
-                    <button type="button" class="btn btn-secondary" onclick="selectAllStudents()">Pasirinkti visus mokinius</button>
-                    <div id="students_container" class="scroll-box">
-                        <p style="color: gray; font-style: italic;">Kraunami mokiniai...</p>
+                    <button type="button" class="btn btn-secondary" onclick="selectAllStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
+                    <div id="students_container" class="scroll-box" style="max-height: 180px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px;">
+                        <p style="color: gray; font-style: italic; margin: 0;">Kraunami mokiniai...</p>
                     </div>
                 </div>
                 
-                <br>
-                <button type="submit" class="btn btn-primary">Išsaugoti pakeitimus</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
             </form>
 
             <br>
@@ -48,9 +45,9 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('id');
-
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         let currentGroupStudents = [];
+        let currentGroupTeachers = [];
 
         if (!groupId) {
             alert("Nenurodytas grupės ID.");
@@ -59,26 +56,23 @@
 
         async function initPage() {
             try {
-                const usersResp = await fetch(`${API_URL}/api/users`);
-                const users = await usersResp.json();
-
-                const groupsResp = await fetch(`${API_URL}/api/groups`);
-                const groups = await groupsResp.json();
-                const group = groups.find(g => g.group_id == groupId);
-
-                if (!group) {
+                const groupsResp = await fetch(`${API_URL}/api/groups/${groupId}`);
+                if (!groupsResp.ok) {
                     alert("Grupė nerasta.");
                     window.location.href = 'groups';
                     return;
                 }
+                const group = await groupsResp.json();
 
                 currentGroupStudents = group.students || [];
+                currentGroupTeachers = group.teachers || [];
 
-                document.getElementById('subject').value = group.subject;
+                document.getElementById('group_name').value = group.group_name || group.subject || '';
 
-                const classSelect = document.getElementById('class_select');
-                const classes = [...new Set(users.filter(u => u.role === 'student' && u.class).map(u => u.class))].sort();
+                const classesResp = await fetch(`${API_URL}/api/classes`);
+                const classes = await classesResp.json();
                 
+                const classSelect = document.getElementById('class_select');
                 classes.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c;
@@ -88,24 +82,42 @@
                 });
 
                 if (currentUser.role === 'administrator') {
-                    const teacherContainer = document.getElementById('teacher_select_container');
-                    const teacherSelect = document.getElementById('teacher_select');
-                    teacherContainer.style.display = 'block';
-
-                    const teachers = users.filter(u => u.role === 'teacher');
-                    teachers.forEach(t => {
-                        const opt = document.createElement('option');
-                        opt.value = t.user_id;
-                        opt.textContent = `${t.name} ${t.surname}`;
-                        if (t.user_id == group.teacher_id) opt.selected = true;
-                        teacherSelect.appendChild(opt);
-                    });
+                    document.getElementById('teacher_select_container').style.display = 'block';
+                    await loadTeachers();
                 }
 
-                fetchStudentsByClass();
-
+                await fetchStudentsByClass();
             } catch (error) {
                 console.error("Klaida inicijuojant puslapį:", error);
+            }
+        }
+
+        async function loadTeachers() {
+            try {
+                const response = await fetch(`${API_URL}/api/teachers`);
+                const teachers = await response.json();
+                const container = document.getElementById('teachers_container');
+                container.innerHTML = '';
+
+                teachers.forEach(t => {
+                    const label = document.createElement("label");
+                    label.style.display = "block";
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = "teachers";
+                    checkbox.className = "teacher-checkbox";
+                    checkbox.value = t.user_id;
+                    if (currentGroupTeachers.includes(t.user_id)) {
+                        checkbox.checked = true;
+                    }
+
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(` ${t.name} ${t.surname}`));
+                    container.appendChild(label);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant mokytojus:", error);
             }
         }
 
@@ -121,12 +133,14 @@
                 const data = await response.json();
 
                 if (data.length === 0) {
-                    studentsContainer.innerHTML = "<p style='color: gray; font-style: italic;'>Šioje klasėje mokinių nėra.</p>";
+                    studentsContainer.innerHTML = "<p style='color: gray; font-style: italic; margin:0;'>Šioje klasėje mokinių nėra.</p>";
                     return;
                 }
 
                 data.forEach(student => {
                     const label = document.createElement("label");
+                    label.style.display = "block";
+
                     const checkbox = document.createElement("input");
                     checkbox.type = "checkbox";
                     checkbox.name = "students";
@@ -138,7 +152,7 @@
                     }
 
                     label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(" " + student.name + " " + student.surname));
+                    label.appendChild(document.createTextNode(` ${student.name} ${student.surname}`));
                     studentsContainer.appendChild(label);
                 });
             } catch (error) {
@@ -147,8 +161,7 @@
         }
 
         function selectAllStudents() {
-            const checkboxes = document.querySelectorAll('.student-checkbox');
-            checkboxes.forEach(cb => cb.checked = true);
+            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true);
         }
 
         document.getElementById('editGroupForm').addEventListener('submit', async function(e) {
@@ -157,13 +170,13 @@
             const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
 
             const payload = {
-                subject: document.getElementById('subject').value,
+                group_name: document.getElementById('group_name').value,
                 class: document.getElementById('class_select').value,
                 students: selectedStudents
             };
 
             if (currentUser.role === 'administrator') {
-                payload.teacher_id = document.getElementById('teacher_select').value;
+                payload.teachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
             }
 
             try {

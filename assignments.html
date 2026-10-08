@@ -11,11 +11,10 @@
     <div class="container">
         <h1>Užduotys</h1>
 
-        <!-- Sukūrimo forma (Mokytojui / Adminui) -->
         <div class="card" id="addAssignmentCard" style="display: none;">
             <h2>Paskirti naują užduotį</h2>
             <form id="addAssignmentForm">
-                <label>Grupė / Dalykas</label>
+                <label>Grupė</label>
                 <select name="group_id" id="group_select" required>
                     <option value="">-- Pasirinkite grupę --</option>
                 </select>
@@ -30,23 +29,19 @@
             </form>
         </div>
 
-        <!-- Užduočių sąrašas -->
         <div class="card">
             <h2>Esamos užduotys</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr id="assignmentsTableHeader">
-                            <th>Dalykas</th>
+                            <th>Grupė</th>
                             <th>Užduotis</th>
                             <th>Atlikti iki</th>
                             <th>Mokytojas</th>
-                            <!-- 'Veiksmai' th pridedamas dinamiškai per JS tik ne mokinio rolei -->
                         </tr>
                     </thead>
-                    <tbody id="assignmentsTableBody">
-                        <!-- Duomenys kraunami dinamiškai -->
-                    </tbody>
+                    <tbody id="assignmentsTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -62,7 +57,7 @@
         }
 
         async function initPage() {
-            if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
+            if (currentUser.role === 'teacher') {
                 document.getElementById('addAssignmentCard').style.display = 'block';
                 loadTeacherGroups();
             }
@@ -81,7 +76,7 @@
                 groups.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = g.group_id;
-                    opt.textContent = `${g.subject} (${g.class} klasė)`;
+                    opt.textContent = `${g.group_name} (${g.class} klasė)`;
                     select.appendChild(opt);
                 });
             } catch (error) {
@@ -98,9 +93,9 @@
                 const tbody = document.getElementById('assignmentsTableBody');
                 tbody.innerHTML = '';
 
-                const isStudent = currentUser.role === 'student';
+                const showActions = currentUser.role === 'teacher';
 
-                if (!isStudent && !document.getElementById('actionsHeader')) {
+                if (showActions && !document.getElementById('actionsHeader')) {
                     const th = document.createElement('th');
                     th.id = 'actionsHeader';
                     th.textContent = 'Veiksmai';
@@ -108,7 +103,7 @@
                 }
 
                 if (assignments.length === 0) {
-                    const colSpan = isStudent ? 4 : 5;
+                    const colSpan = showActions ? 5 : 4;
                     tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Užduočių nėra.</td></tr>`;
                     return;
                 }
@@ -117,14 +112,14 @@
                     const tr = document.createElement('tr');
 
                     let rowHtml = `
-                        <td><strong>${assign.subject_display}</strong></td>
+                        <td><strong>${assign.group_display}</strong></td>
                         <td>${assign.task}</td>
                         <td>${assign.due_date}</td>
                         <td>${assign.teacher || '-'}</td>
                     `;
 
-                    if (!isStudent) {
-                        const isOwner = assign.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
+                    if (showActions) {
+                        const isOwner = assign.teacher_id == currentUser.user_id;
                         const actionsTd = isOwner 
                             ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="#" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
                             : '<span style="color: #bdc3c7;">Neturite teisių</span>';
@@ -140,34 +135,36 @@
             }
         }
 
-        document.getElementById('addAssignmentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        if (currentUser.role === 'teacher') {
+            document.getElementById('addAssignmentForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-            const formData = new FormData(this);
-            const payload = {
-                group_id: formData.get('group_id'),
-                task: formData.get('task'),
-                due_date: formData.get('due_date'),
-                teacher_id: currentUser.user_id
-            };
+                const formData = new FormData(this);
+                const payload = {
+                    group_id: formData.get('group_id'),
+                    task: formData.get('task'),
+                    due_date: formData.get('due_date'),
+                    teacher_id: currentUser.user_id
+                };
 
-            try {
-                const response = await fetch(`${API_URL}/api/assignments/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                try {
+                    const response = await fetch(`${API_URL}/api/assignments/add`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-                if (response.ok) {
-                    this.reset();
-                    loadAssignments();
-                } else {
-                    alert("Klaida pridedant užduotį.");
+                    if (response.ok) {
+                        this.reset();
+                        loadAssignments();
+                    } else {
+                        alert("Klaida pridedant užduotį.");
+                    }
+                } catch (error) {
+                    alert("Nepavyko prisijungti prie serverio.");
                 }
-            } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
-            }
-        });
+            });
+        }
 
         async function deleteAssignment(assignmentId) {
             if (!confirm('Ar tikrai norite ištrinti šią užduotį?')) return;

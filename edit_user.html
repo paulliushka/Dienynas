@@ -23,7 +23,7 @@
                 <input type="text" name="surname" id="surname" required>
 
                 <label>Slaptažodis (palikite tuščią, jei nekeičiate)</label>
-                <input type="password" name="password" id="password" placeholder="Naujas saugus slaptažodis">
+                <input type="password" name="password" id="password" placeholder="Naujas slaptažodis">
 
                 <label>Rolė</label>
                 <select name="role" id="role" required onchange="toggleClassField()">
@@ -35,7 +35,7 @@
                 <label>Klasė (tik mokiniams)</label>
                 <input type="text" name="class" id="class">
 
-                <button type="submit" class="btn btn-primary">Išsaugoti pakeitimus</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
             </form>
             <br>
             <a href="administration" class="btn-back">Atšaukti ir grįžti</a>
@@ -52,8 +52,8 @@
         }
 
         function toggleClassField() {
-            var role = document.getElementById('role').value;
-            var classField = document.getElementById('class');
+            const role = document.getElementById('role').value;
+            const classField = document.getElementById('class');
             if (role === 'student') {
                 classField.disabled = false;
                 classField.required = true;
@@ -64,7 +64,6 @@
             }
         }
 
-        // Užkrauname vartotojo duomenis
         async function loadUser() {
             try {
                 const response = await fetch(`${API_URL}/api/users/${userId}`);
@@ -88,7 +87,6 @@
             }
         }
 
-        // Išsaugome pakeitimus
         document.getElementById('editUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 

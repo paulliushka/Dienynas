@@ -19,9 +19,7 @@
             <hr>
 
             <h3>Meniu pasirinkimai:</h3>
-            <ul class="menu-list" id="menuList">
-                <!-- Meniu punktai bus sugeneruoti pagal vartotojo rolę -->
-            </ul>
+            <ul class="menu-list" id="menuList"></ul>
 
             <button onclick="logout()" class="btn btn-logout" style="border: none; cursor: pointer;">Atsijungti iš sistemos</button>
         </div>
@@ -34,18 +32,15 @@
         }
 
         const user = JSON.parse(userJson);
-
         document.getElementById('userName').textContent = `${user.name} ${user.surname}`;
 
         const menuList = document.getElementById('menuList');
         menuList.innerHTML = '';
 
-        if (user.role === 'teacher' || user.role === 'student') {
-            menuList.innerHTML += `
-                <li><a href="grades">📊 Pažymiai ir vertinimai</a></li>
-                <li><a href="assignments">📚 Užduotys</a></li>
-            `;
-        }
+        menuList.innerHTML += `
+            <li><a href="grades">📊 Pažymiai ir vertinimai</a></li>
+            <li><a href="assignments">📚 Užduotys</a></li>
+        `;
 
         if (user.role === 'teacher' || user.role === 'administrator') {
             menuList.innerHTML += `

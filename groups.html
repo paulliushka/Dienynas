@@ -14,8 +14,8 @@
         <div class="card">
             <h2>Sukurti naują grupę</h2>
             <form id="createGroupForm">
-                <label>Dalyko pavadinimas</label>
-                <input type="text" name="subject" placeholder="Dalyko pavadinimas" required>
+                <label>Grupės pavadinimas</label>
+                <input type="text" name="group_name" placeholder="Pvz., Matematika A lygis" required>
 
                 <label>Pasirinkite klasę</label>
                 <select name="class" id="class_select" onchange="fetchStudentsByClass()" required>
@@ -24,9 +24,7 @@
 
                 <div id="teacherSelectContainer" style="display: none;">
                     <label>Paskirti grupės mokytojus (galima pasirinkti kelis)</label>
-                    <div id="teachers_container" class="scroll-box" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
-                        <!-- Mokytojų checkbox sąrašas kraunamas dinamiškai -->
-                    </div>
+                    <div id="teachers_container" class="scroll-box" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-bottom: 12px;"></div>
                 </div>
 
                 <label>Pasirinkite mokinius</label>
@@ -47,16 +45,14 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Dalykas</th>
+                            <th>Grupė</th>
                             <th>Klasė</th>
                             <th>Mokytojai</th>
                             <th>Mokiniai</th>
                             <th>Veiksmai</th>
                         </tr>
                     </thead>
-                    <tbody id="groupsTableBody">
-                        <!-- Duomenys kraunami dinamiškai -->
-                    </tbody>
+                    <tbody id="groupsTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -142,7 +138,7 @@
                 const data = await response.json();
 
                 if (data.length === 0) {
-                    studentsContainer.innerHTML = "<p style='color: gray; font-style: italic;'>Šioje klasėje mokinių nėra.</p>";
+                    studentsContainer.innerHTML = "<p style='color: gray; font-style: italic; margin:0;'>Šioje klasėje mokinių nėra.</p>";
                     return;
                 }
 
@@ -166,8 +162,7 @@
         }
 
         function selectAllNewGroupStudents() {
-            const checkboxes = document.querySelectorAll('.student-checkbox');
-            checkboxes.forEach(cb => cb.checked = true);
+            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true);
         }
 
         async function loadGroups() {
@@ -200,7 +195,7 @@
                     }
 
                     tr.innerHTML = `
-                        <td><strong>${g.subject}</strong>${ownerBadge}</td>
+                        <td><strong>${g.group_name}</strong>${ownerBadge}</td>
                         <td>${g.class} klasė</td>
                         <td>${g.teacher || '-'}</td>
                         <td>${studentsText}</td>
@@ -227,7 +222,7 @@
             }
 
             const payload = {
-                subject: formData.get('subject'),
+                group_name: formData.get('group_name'),
                 class: formData.get('class'),
                 teachers: selectedTeachers,
                 students: selectedStudents

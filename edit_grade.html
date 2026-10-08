@@ -1,108 +1,105 @@
 <!DOCTYPE html>
 <html lang="lt">
-    <head>
-        <meta charset="UTF-8">
-        <title>Redaguoti pažymį</title>
-        <link rel="icon" href="favicon.svg">
-        <link rel="stylesheet" href="style.css">
-        <script src="config.js"></script>
-    </head>
-    <body>
-        <div class="container">
-            <div class="card">
-                <h2>Redaguoti pažymį</h2>
-                <form id="editGradeForm">
-                    <label>Grupė:</label>
-                    <input type="text" id="subject" disabled>
-                    
-                    <label>Mokinys:</label>
-                    <input type="text" id="student" disabled>
-                    
-                    <label>Pažymys:</label>
-                    <input type="number" name="grade" id="grade" min="1" max="10" required>
-                    
-                    <label>Tipas:</label>
-                    <select name="type" id="type" required>
-                        <option value="Savarankiškas darbas">Savarankiškas darbas</option>
-                        <option value="Kontrolinis darbas">Kontrolinis darbas</option>
-                        <option value="Projektinis darbas">Projektinis darbas</option>
-                        <option value="Klasės darbas">Klasės darbas</option>
-                        <option value="Namų darbas">Namų darbas</option>
-                        <option value="Kaupiamasis">Kaupiamasis</option>
-                    </select>
-                    
-                    <label>Data:</label>
-                    <input type="date" name="date" id="date" required>
-                    
-                    <label>Komentaras:</label>
-                    <input type="text" name="comment" id="comment">
-                    
-                    <button type="submit" class="btn btn-primary">Išsaugoti pakeitimus</button>
-                </form>
-                <br>
-                <a href="grades" class="btn-back">Grįžti atgal</a>
-            </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Redaguoti pažymį</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Redaguoti pažymį</h2>
+            <form id="editGradeForm">
+                <label>Grupė:</label>
+                <input type="text" id="group_name" disabled>
+                
+                <label>Mokinys:</label>
+                <input type="text" id="student" disabled>
+                
+                <label>Pažymys:</label>
+                <input type="text" name="grade" id="grade" required>
+                
+                <label>Tipas:</label>
+                <select name="type" id="type" required>
+                    <option value="Savarankiškas darbas">Savarankiškas darbas</option>
+                    <option value="Kontrolinis darbas">Kontrolinis darbas</option>
+                    <option value="Projektinis darbas">Projektinis darbas</option>
+                    <option value="Klasės darbas">Klasės darbas</option>
+                    <option value="Namų darbas">Namų darbas</option>
+                    <option value="Kaupiamasis">Kaupiamasis</option>
+                </select>
+                
+                <label>Data:</label>
+                <input type="date" name="date" id="date" required>
+                
+                <label>Komentaras:</label>
+                <input type="text" name="comment" id="comment">
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
+            </form>
+            <br>
+            <a href="grades" class="btn-back">Grįžti atgal</a>
         </div>
+    </div>
 
-        <script>
-            const urlParams = new URLSearchParams(window.location.search);
-            const gradeId = urlParams.get('id');
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const gradeId = urlParams.get('id');
 
-            if (!gradeId) {
-                alert("Nenurodytas pažymio ID.");
-                window.location.href = 'grades';
-            }
+        if (!gradeId) {
+            alert("Nenurodytas pažymio ID.");
+            window.location.href = 'grades';
+        }
 
-            // Užkrauname pažymio duomenis
-            async function loadGrade() {
-                try {
-                    const response = await fetch(`${API_URL}/api/grades`);
-                    const grades = await response.json();
-                    
-                    const item = grades.find(g => g.grade_id == gradeId);
-                    if (!item) {
-                        alert("Pažymys nerastas.");
-                        window.location.href = 'grades';
-                        return;
-                    }
-
-                    document.getElementById('subject').value = item.subject_display || '';
-                    document.getElementById('student').value = item.student || '';
-                    document.getElementById('grade').value = item.grade || '';
-                    document.getElementById('type').value = item.type || 'Savarankiškas darbas';
-                    document.getElementById('date').value = item.date || '';
-                    document.getElementById('comment').value = item.comment || '';
-                } catch (error) {
-                    console.error("Klaida užkraunant pažymį:", error);
+        async function loadGrade() {
+            try {
+                const response = await fetch(`${API_URL}/api/grades`);
+                const grades = await response.json();
+                
+                const item = grades.find(g => g.grade_id == gradeId);
+                if (!item) {
+                    alert("Pažymys nerastas.");
+                    window.location.href = 'grades';
+                    return;
                 }
+
+                document.getElementById('group_name').value = item.group_display || '';
+                document.getElementById('student').value = item.student || '';
+                document.getElementById('grade').value = item.grade || '';
+                document.getElementById('type').value = item.type || 'Savarankiškas darbas';
+                document.getElementById('date').value = item.date || '';
+                document.getElementById('comment').value = item.comment || '';
+            } catch (error) {
+                console.error("Klaida užkraunant pažymį:", error);
             }
+        }
 
-            // Išsaugome pakeitimus
-            document.getElementById('editGradeForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
+        document.getElementById('editGradeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
 
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
+            try {
+                const response = await fetch(`${API_URL}/api/grades/edit/${gradeId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-                try {
-                    const response = await fetch(`${API_URL}/api/grades/edit/${gradeId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-
-                    if (response.ok) {
-                        window.location.href = 'grades';
-                    } else {
-                        const result = await response.json();
-                        alert(result.message || "Klaida išsaugant pažymį.");
-                    }
-                } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
+                if (response.ok) {
+                    window.location.href = 'grades';
+                } else {
+                    const result = await response.json();
+                    alert(result.message || "Klaida išsaugant pažymį.");
                 }
-            });
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        });
 
-            window.onload = loadGrade;
-        </script>
-    </body>
+        window.onload = loadGrade;
+    </script>
+</body>
 </html>

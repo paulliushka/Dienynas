@@ -1,87 +1,87 @@
 <!DOCTYPE html>
 <html lang="lt">
-    <head>
-        <meta charset="UTF-8">
-        <title>Redaguoti užduotį</title>
-        <link rel="icon" href="favicon.svg">
-        <link rel="stylesheet" href="style.css">
-        <script src="config.js"></script>
-    </head>
-    <body>
-        <div class="container">
-            <div class="card">
-                <h2>Redaguoti užduotį</h2>
-                <form id="editAssignmentForm">
-                    <label>Grupė / Dalykas</label>
-                    <input type="text" id="subject" disabled>
-                    
-                    <label>Užduotis</label>
-                    <input type="text" name="task" id="task" required>
-                    
-                    <label>Atlikti iki</label>
-                    <input type="date" name="due_date" id="due_date" required>
-                    
-                    <button type="submit" class="btn btn-primary">Išsaugoti pakeitimus</button>
-                </form>
-                <br>
-                <a href="assignments" class="btn-back">Grįžti atgal</a>
-            </div>
+<head>
+    <meta charset="UTF-8">
+    <title>Redaguoti užduotį</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Redaguoti užduotį</h2>
+            <form id="editAssignmentForm">
+                <label>Grupė</label>
+                <input type="text" id="group_name" disabled>
+                
+                <label>Užduotis</label>
+                <input type="text" name="task" id="task" required>
+                
+                <label>Atlikti iki</label>
+                <input type="date" name="due_date" id="due_date" required>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
+            </form>
+            <br>
+            <a href="assignments" class="btn-back">Grįžti atgal</a>
         </div>
+    </div>
 
-        <script>
-            const urlParams = new URLSearchParams(window.location.search);
-            const assignmentId = urlParams.get('id');
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const assignmentId = urlParams.get('id');
 
-            if (!assignmentId) {
-                alert("Nenurodytas užduoties ID.");
-                window.location.href = 'assignments';
-            }
+        if (!assignmentId) {
+            alert("Nenurodytas užduoties ID.");
+            window.location.href = 'assignments';
+        }
 
-            async function loadAssignment() {
-                try {
-                    const response = await fetch(`${API_URL}/api/assignments`);
-                    const assignments = await response.json();
-                    
-                    const item = assignments.find(a => a.assignment_id == assignmentId);
-                    if (!item) {
-                        alert("Užduotis nerasta.");
-                        window.location.href = 'assignments';
-                        return;
-                    }
-
-                    document.getElementById('subject').value = item.subject_display || '';
-                    document.getElementById('task').value = item.task || '';
-                    document.getElementById('due_date').value = item.due_date || '';
-                } catch (error) {
-                    console.error("Klaida užkraunant užduotį:", error);
+        async function loadAssignment() {
+            try {
+                const response = await fetch(`${API_URL}/api/assignments`);
+                const assignments = await response.json();
+                
+                const item = assignments.find(a => a.assignment_id == assignmentId);
+                if (!item) {
+                    alert("Užduotis nerasta.");
+                    window.location.href = 'assignments';
+                    return;
                 }
+
+                document.getElementById('group_name').value = item.group_display || '';
+                document.getElementById('task').value = item.task || '';
+                document.getElementById('due_date').value = item.due_date || '';
+            } catch (error) {
+                console.error("Klaida užkraunant užduotį:", error);
             }
+        }
 
-            document.getElementById('editAssignmentForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
+        document.getElementById('editAssignmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
 
-                try {
-                    const response = await fetch(`${API_URL}/api/assignments/edit/${assignmentId}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
+            try {
+                const response = await fetch(`${API_URL}/api/assignments/edit/${assignmentId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-                    if (response.ok) {
-                        window.location.href = 'assignments';
-                    } else {
-                        const result = await response.json();
-                        alert(result.message || "Klaida išsaugant užduotį.");
-                    }
-                } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
+                if (response.ok) {
+                    window.location.href = 'assignments';
+                } else {
+                    const result = await response.json();
+                    alert(result.message || "Klaida išsaugant užduotį.");
                 }
-            });
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        });
 
-            window.onload = loadAssignment;
-        </script>
-    </body>
+        window.onload = loadAssignment;
+    </script>
+</body>
 </html>
