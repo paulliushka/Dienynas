@@ -11,11 +11,10 @@
     <div class="container">
         <h1>Pažymių valdymas</h1>
 
-        <!-- Sukūrimo forma (Mokytojui / Adminui) -->
         <div class="card" id="addGradeCard" style="display: none;">
             <h2>Įrašyti naują pažymį</h2>
             <form id="addGradeForm">
-                <label>Grupė / Dalykas</label>
+                <label>Grupė</label>
                 <select name="group_id" id="group_select" onchange="loadStudentsByGroup()" required>
                     <option value="">-- Pasirinkite grupę --</option>
                 </select>
@@ -29,7 +28,14 @@
                 <input type="text" name="grade" placeholder="Pvz., 10 arba N" required>
 
                 <label>Atsiskaitymo tipas</label>
-                <input type="text" name="type" placeholder="Pvz., Kontrolinis darbas" required>
+                <select name="type" required>
+                    <option value="Savarankiškas darbas">Savarankiškas darbas</option>
+                    <option value="Kontrolinis darbas">Kontrolinis darbas</option>
+                    <option value="Projektinis darbas">Projektinis darbas</option>
+                    <option value="Klasės darbas">Klasės darbas</option>
+                    <option value="Namų darbas">Namų darbas</option>
+                    <option value="Kaupiamasis">Kaupiamasis</option>
+                </select>
 
                 <label>Data</label>
                 <input type="date" name="date" id="grade_date" required>
@@ -41,7 +47,6 @@
             </form>
         </div>
 
-        <!-- Pažymių sąrašas -->
         <div class="card">
             <h2>Pažymių sąrašas</h2>
             <div class="table-responsive">
@@ -49,18 +54,15 @@
                     <thead>
                         <tr id="gradesTableHeader">
                             <th>Mokinys</th>
-                            <th>Dalykas</th>
+                            <th>Grupė</th>
                             <th>Pažymys</th>
                             <th>Tipas</th>
                             <th>Data</th>
                             <th>Komentaras</th>
                             <th>Mokytojas</th>
-                            <!-- 'Veiksmai' th pridedamas dinamiškai per JS tik ne mokinio rolei -->
                         </tr>
                     </thead>
-                    <tbody id="gradesTableBody">
-                        <!-- Duomenys kraunami dinamiškai -->
-                    </tbody>
+                    <tbody id="gradesTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -76,7 +78,7 @@
         }
 
         async function initPage() {
-            if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
+            if (currentUser.role === 'teacher') {
                 document.getElementById('addGradeCard').style.display = 'block';
                 document.getElementById('grade_date').valueAsDate = new Date();
                 loadTeacherGroups();
@@ -96,7 +98,7 @@
                 groups.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = g.group_id;
-                    opt.textContent = `${g.subject} (${g.class} klasė)`;
+                    opt.textContent = `${g.group_name} (${g.class} klasė)`;
                     select.appendChild(opt);
                 });
             } catch (error) {
@@ -140,9 +142,9 @@
                 const tbody = document.getElementById('gradesTableBody');
                 tbody.innerHTML = '';
 
-                const isStudent = currentUser.role === 'student';
+                const showActions = currentUser.role === 'teacher';
 
-                if (!isStudent && !document.getElementById('actionsHeader')) {
+                if (showActions && !document.getElementById('actionsHeader')) {
                     const th = document.createElement('th');
                     th.id = 'actionsHeader';
                     th.textContent = 'Veiksmai';
@@ -150,7 +152,7 @@
                 }
 
                 if (grades.length === 0) {
-                    const colSpan = isStudent ? 7 : 8;
+                    const colSpan = showActions ? 8 : 7;
                     tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Pažymių nėra.</td></tr>`;
                     return;
                 }
@@ -160,7 +162,7 @@
 
                     let rowHtml = `
                         <td><strong>${g.student}</strong></td>
-                        <td>${g.subject_display}</td>
+                        <td>${g.group_display}</td>
                         <td><span class="badge-grade">${g.grade}</span></td>
                         <td>${g.type}</td>
                         <td>${g.date}</td>
@@ -168,8 +170,8 @@
                         <td>${g.teacher || '-'}</td>
                     `;
 
-                    if (!isStudent) {
-                        const isOwner = g.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
+                    if (showActions) {
+                        const isOwner = g.teacher_id == currentUser.user_id;
                         const actionsTd = isOwner 
                             ? `<a href="edit_grade?id=${g.grade_id}">Redaguoti</a> | <a href="#" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>`
                             : '<span style="color: #bdc3c7;">Neturite teisių</span>';
@@ -185,39 +187,41 @@
             }
         }
 
-        document.getElementById('addGradeForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        if (currentUser.role === 'teacher') {
+            document.getElementById('addGradeForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-            const formData = new FormData(this);
-            const payload = {
-                student_id: formData.get('student_id'),
-                group_id: formData.get('group_id'),
-                grade: formData.get('grade'),
-                type: formData.get('type'),
-                date: formData.get('date'),
-                comment: formData.get('comment'),
-                teacher_id: currentUser.user_id
-            };
+                const formData = new FormData(this);
+                const payload = {
+                    student_id: formData.get('student_id'),
+                    group_id: formData.get('group_id'),
+                    grade: formData.get('grade'),
+                    type: formData.get('type'),
+                    date: formData.get('date'),
+                    comment: formData.get('comment'),
+                    teacher_id: currentUser.user_id
+                };
 
-            try {
-                const response = await fetch(`${API_URL}/api/grades/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                try {
+                    const response = await fetch(`${API_URL}/api/grades/add`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-                if (response.ok) {
-                    this.reset();
-                    document.getElementById('grade_date').valueAsDate = new Date();
-                    document.getElementById('student_select').disabled = true;
-                    loadGrades();
-                } else {
-                    alert("Klaida įrašant pažymį.");
+                    if (response.ok) {
+                        this.reset();
+                        document.getElementById('grade_date').valueAsDate = new Date();
+                        document.getElementById('student_select').disabled = true;
+                        loadGrades();
+                    } else {
+                        alert("Klaida įrašant pažymį.");
+                    }
+                } catch (error) {
+                    alert("Nepavyko prisijungti prie serverio.");
                 }
-            } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
-            }
-        });
+            });
+        }
 
         async function deleteGrade(gradeId) {
             if (!confirm('Ar tikrai norite ištrinti šį pažymį?')) return;
