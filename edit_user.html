@@ -48,7 +48,7 @@
 
         if (!userId) {
             alert("Nenurodytas vartotojo ID.");
-            window.location.href = 'administration.html';
+            window.location.href = 'administration';
         }
 
         function toggleClassField() {
@@ -70,7 +70,7 @@
                 const response = await fetch(`${API_URL}/api/users/${userId}`);
                 if (!response.ok) {
                     alert("Vartotojas nerastas.");
-                    window.location.href = 'administration.html';
+                    window.location.href = 'administration';
                     return;
                 }
 
@@ -103,7 +103,7 @@
                 });
 
                 if (response.ok) {
-                    window.location.href = 'administration.html';
+                    window.location.href = 'administration';
                 } else {
                     const result = await response.json();
                     alert(result.message || "Klaida išsaugant vartotoją.");

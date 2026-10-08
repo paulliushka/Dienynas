@@ -54,7 +54,7 @@
 
         if (!groupId) {
             alert("Nenurodytas grupės ID.");
-            window.location.href = 'groups.html';
+            window.location.href = 'groups';
         }
 
         async function initPage() {
@@ -70,7 +70,7 @@
 
                 if (!group) {
                     alert("Grupė nerasta.");
-                    window.location.href = 'groups.html';
+                    window.location.href = 'groups';
                     return;
                 }
 
@@ -180,7 +180,7 @@
                 });
 
                 if (response.ok) {
-                    window.location.href = 'groups.html';
+                    window.location.href = 'groups';
                 } else {
                     const result = await response.json();
                     alert(result.message || "Klaida išsaugant grupę.");

@@ -44,7 +44,7 @@
                     if (response.ok) {
                         // Įrašome prisijungusio vartotojo duomenis į local storage
                         localStorage.setItem('user', JSON.stringify(result.user));
-                        window.location.href = 'dashboard.html';
+                        window.location.href = 'dashboard';
                     } else {
                         alert(result.message || "Neteisingas vartotojo vardas arba slaptažodis.");
                     }
