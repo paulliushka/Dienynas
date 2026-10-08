@@ -59,14 +59,12 @@
 
         async function initPage() {
             try {
-                // Užkrauname vartotojus (klasėms, mokytojams ir mokiniams)
                 const usersResp = await fetch(`${API_URL}/api/users`);
                 const users = await usersResp.json();
 
-                // Užkrauname pačią grupę
                 const groupsResp = await fetch(`${API_URL}/api/groups`);
                 const groups = await groupsResp.json();
-                const group = groups.find(g => g.subject_id == groupId);
+                const group = groups.find(g => g.group_id == groupId);
 
                 if (!group) {
                     alert("Grupė nerasta.");
@@ -76,10 +74,8 @@
 
                 currentGroupStudents = group.students || [];
 
-                // Užpildome dalyko pavadinimą
                 document.getElementById('subject').value = group.subject;
 
-                // Užpildome klasių sąrašą
                 const classSelect = document.getElementById('class_select');
                 const classes = [...new Set(users.filter(u => u.role === 'student' && u.class).map(u => u.class))].sort();
                 
@@ -91,7 +87,6 @@
                     classSelect.appendChild(opt);
                 });
 
-                // Jei administratorius - leidžiame keisti mokytoją
                 if (currentUser.role === 'administrator') {
                     const teacherContainer = document.getElementById('teacher_select_container');
                     const teacherSelect = document.getElementById('teacher_select');
@@ -107,7 +102,6 @@
                     });
                 }
 
-                // Užkrauname klasės mokinius
                 fetchStudentsByClass();
 
             } catch (error) {
