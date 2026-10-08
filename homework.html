@@ -11,7 +11,7 @@
     <div class="container">
         <h1>Namų darbai</h1>
 
-        <!-- Kūrimo forma (Mokytojui / Adminui) -->
+        <!-- Sukūrimo forma (Mokytojui / Adminui) -->
         <div class="card" id="addHomeworkCard" style="display: none;">
             <h2>Paskirti naują namų darbą</h2>
             <form id="addHomeworkForm">
@@ -23,7 +23,7 @@
                 <label>Užduoties aprašymas</label>
                 <textarea name="task" rows="3" placeholder="Pvz., Atlikti 12-15 užduotis 45 puslapyje..." style="width: 100%; padding: 8px; box-sizing: border-box;" required></textarea>
 
-                <label>Atlikimo termiškas (Data)</label>
+                <label>Atlikimo terminas (Data)</label>
                 <input type="date" name="due_date" id="due_date" required>
 
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Paskirti namų darbą</button>
@@ -36,12 +36,12 @@
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
+                        <tr id="homeworkTableHeader">
                             <th>Dalykas</th>
                             <th>Užduotis</th>
                             <th>Atlikti iki</th>
                             <th>Mokytojas</th>
-                            <th>Veiksmai</th>
+                            <!-- 'Veiksmai' th pridedamas dinamiškai per JS tik ne mokinio rolei -->
                         </tr>
                     </thead>
                     <tbody id="homeworkTableBody">
@@ -58,11 +58,10 @@
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
         if (!currentUser.user_id) {
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }
 
         async function initPage() {
-            // Rodyti formą tik mokytojams arba adminams
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
                 document.getElementById('addHomeworkCard').style.display = 'block';
                 loadTeacherGroups();
@@ -71,7 +70,6 @@
             loadHomework();
         }
 
-        // Užkrauna mokytojo grupes pasirinkimui
         async function loadTeacherGroups() {
             try {
                 const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
@@ -91,43 +89,51 @@
             }
         }
 
-        // Užkrauna namų darbus
         async function loadHomework() {
             try {
                 const response = await fetch(`${API_URL}/api/homework?user_id=${currentUser.user_id}&role=${currentUser.role}`);
                 const homeworks = await response.json();
 
+                const theader = document.getElementById('homeworkTableHeader');
                 const tbody = document.getElementById('homeworkTableBody');
                 tbody.innerHTML = '';
 
+                const isStudent = currentUser.role === 'student';
+
+                // Jei ne mokinys ir „Veiksmai“ dar nepridėti – įtraukiame antraštę
+                if (!isStudent && !document.getElementById('actionsHeader')) {
+                    const th = document.createElement('th');
+                    th.id = 'actionsHeader';
+                    th.textContent = 'Veiksmai';
+                    theader.appendChild(th);
+                }
+
                 if (homeworks.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:gray;">Namų darbų nėra.</td></tr>';
+                    const colSpan = isStudent ? 4 : 5;
+                    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Namų darbų nėra.</td></tr>`;
                     return;
                 }
 
                 homeworks.forEach(hw => {
                     const tr = document.createElement('tr');
 
-                    // Saugumo / teisių patikra
-                    const isOwner = hw.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
-
-                    let actionsTd = '';
-                    if (isOwner) {
-                        actionsTd = `
-                            <a href="edit_homework.html?id=${hw.homework_id}">Redaguoti</a> | 
-                            <a href="#" onclick="deleteHomework(${hw.homework_id}); return false;">Ištrinti</a>
-                        `;
-                    } else {
-                        actionsTd = '<span style="color: #bdc3c7;">Neturite teisių</span>';
-                    }
-
-                    tr.innerHTML = `
+                    let rowHtml = `
                         <td><strong>${hw.subject_display}</strong></td>
                         <td>${hw.task}</td>
                         <td>${hw.due_date}</td>
                         <td>${hw.teacher || '-'}</td>
-                        <td>${actionsTd}</td>
                     `;
+
+                    if (!isStudent) {
+                        const isOwner = hw.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
+                        const actionsTd = isOwner 
+                            ? `<a href="edit_homework?id=${hw.homework_id}">Redaguoti</a> | <a href="#" onclick="deleteHomework(${hw.homework_id}); return false;">Ištrinti</a>`
+                            : '<span style="color: #bdc3c7;">Neturite teisių</span>';
+                        
+                        rowHtml += `<td>${actionsTd}</td>`;
+                    }
+
+                    tr.innerHTML = rowHtml;
                     tbody.appendChild(tr);
                 });
             } catch (error) {
@@ -135,7 +141,6 @@
             }
         }
 
-        // Naujo namų darbo paskyrimas
         document.getElementById('addHomeworkForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -165,7 +170,6 @@
             }
         });
 
-        // Namų darbo trynimas
         async function deleteHomework(homeworkId) {
             if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
 
