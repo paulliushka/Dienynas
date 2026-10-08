@@ -24,13 +24,13 @@
 
                 <div id="teacherSelectContainer" style="display: none;">
                     <label>Paskirti grupės mokytojus (galima pasirinkti kelis)</label>
-                    <div id="teachers_container" class="scroll-box" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-bottom: 12px;"></div>
+                    <div id="teachers_container" class="scroll-box"></div>
                 </div>
 
                 <label>Pasirinkite mokinius</label>
                 <div>
                     <button type="button" class="btn btn-secondary" onclick="selectAllNewGroupStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
-                    <div id="students_container" class="scroll-box" style="max-height: 180px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px;">
+                    <div id="students_container" class="scroll-box">
                         <p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>
                     </div>
                 </div>
@@ -106,7 +106,6 @@
 
                 teachers.forEach(t => {
                     const label = document.createElement("label");
-                    label.style.display = "block";
 
                     const checkbox = document.createElement("input");
                     checkbox.type = "checkbox";
@@ -115,7 +114,7 @@
                     checkbox.value = t.user_id;
 
                     label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(` ${t.name} ${t.surname}`));
+                    label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
                     container.appendChild(label);
                 });
             } catch (error) {
@@ -144,7 +143,6 @@
 
                 data.forEach(student => {
                     const label = document.createElement("label");
-                    label.style.display = "block";
 
                     const checkbox = document.createElement("input");
                     checkbox.type = "checkbox";
@@ -153,7 +151,7 @@
                     checkbox.value = student.user_id;
 
                     label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(` ${student.name} ${student.surname}`));
+                    label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
                     studentsContainer.appendChild(label);
                 });
             } catch (error) {
@@ -173,13 +171,18 @@
                 const tbody = document.getElementById('groupsTableBody');
                 tbody.innerHTML = '';
 
+                if (groups.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-row">Grupių nėra.</td></tr>';
+                    return;
+                }
+
                 groups.forEach(g => {
                     const tr = document.createElement('tr');
                     
                     const isTeacherMember = g.teachers && g.teachers.includes(currentUser.user_id);
                     const isOwner = isTeacherMember || currentUser.role === 'administrator';
 
-                    const ownerBadge = isTeacherMember ? ' <span class="badge-owner">Mano grupė</span>' : '';
+                    const ownerBadge = isTeacherMember ? '<span class="badge-owner">Mano grupė</span>' : '';
                     const studentsText = (g.student_names && g.student_names.length > 0) 
                         ? g.student_names.join(", ") 
                         : '<span style="color: gray; font-style: italic;">Grupėje mokinių nėra</span>';
@@ -195,7 +198,7 @@
                     }
 
                     tr.innerHTML = `
-                        <td><strong>${g.group_name}</strong>${ownerBadge}</td>
+                        <td><strong>${g.group_name}</strong> ${ownerBadge}</td>
                         <td>${g.class} klasė</td>
                         <td>${g.teacher || '-'}</td>
                         <td>${studentsText}</td>
