@@ -23,16 +23,16 @@
                 </select>
 
                 <div id="teacherSelectContainer" style="display: none;">
-                    <label>Paskirti grupės mokytoją</label>
-                    <select name="teacher_id" id="teacher_select">
-                        <option value="">-- Pasirinkite mokytoją --</option>
-                    </select>
+                    <label>Paskirti grupės mokytojus (galima pasirinkti kelis)</label>
+                    <div id="teachers_container" class="scroll-box" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
+                        <!-- Mokytojų checkbox sąrašas kraunamas dinamiškai -->
+                    </div>
                 </div>
 
                 <label>Pasirinkite mokinius</label>
                 <div>
-                    <button type="button" class="btn btn-secondary" onclick="selectAllNewGroupStudents()">Pasirinkti visus mokinius</button>
-                    <div id="students_container" class="scroll-box">
+                    <button type="button" class="btn btn-secondary" onclick="selectAllNewGroupStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
+                    <div id="students_container" class="scroll-box" style="max-height: 180px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px;">
                         <p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>
                     </div>
                 </div>
@@ -49,7 +49,7 @@
                         <tr>
                             <th>Dalykas</th>
                             <th>Klasė</th>
-                            <th>Mokytojas</th>
+                            <th>Mokytojai</th>
                             <th>Mokiniai</th>
                             <th>Veiksmai</th>
                         </tr>
@@ -74,7 +74,6 @@
         async function initPage() {
             if (currentUser.role === 'administrator') {
                 document.getElementById('teacherSelectContainer').style.display = 'block';
-                document.getElementById('teacher_select').required = true;
                 loadTeachers();
             }
 
@@ -82,7 +81,6 @@
             loadGroups();
         }
 
-        // Užkrauna galimas klases
         async function loadClasses() {
             try {
                 const response = await fetch(`${API_URL}/api/classes`);
@@ -102,27 +100,33 @@
             }
         }
 
-        // Užkrauna mokytojus (administratoriui)
         async function loadTeachers() {
             try {
                 const response = await fetch(`${API_URL}/api/teachers`);
                 const teachers = await response.json();
 
-                const select = document.getElementById('teacher_select');
-                select.innerHTML = '<option value="">-- Pasirinkite mokytoją --</option>';
+                const container = document.getElementById('teachers_container');
+                container.innerHTML = '';
 
                 teachers.forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.user_id;
-                    opt.textContent = `${t.name} ${t.surname}`;
-                    select.appendChild(opt);
+                    const label = document.createElement("label");
+                    label.style.display = "block";
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = "teachers";
+                    checkbox.className = "teacher-checkbox";
+                    checkbox.value = t.user_id;
+
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(` ${t.name} ${t.surname}`));
+                    container.appendChild(label);
                 });
             } catch (error) {
                 console.error("Klaida užkraunant mokytojus:", error);
             }
         }
 
-        // Užkrauna mokinius pagal pasirinktą klasę
         async function fetchStudentsByClass() {
             const className = document.getElementById("class_select").value;
             const studentsContainer = document.getElementById("students_container");
@@ -166,7 +170,6 @@
             checkboxes.forEach(cb => cb.checked = true);
         }
 
-        // Užkrauna esamas grupes
         async function loadGroups() {
             try {
                 const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
@@ -178,10 +181,10 @@
                 groups.forEach(g => {
                     const tr = document.createElement('tr');
                     
-                    const isOwner = g.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
-                    const isActualOwner = g.teacher_id == currentUser.user_id;
+                    const isTeacherMember = g.teachers && g.teachers.includes(currentUser.user_id);
+                    const isOwner = isTeacherMember || currentUser.role === 'administrator';
 
-                    const ownerBadge = isActualOwner ? ' <span class="badge-owner">Mano grupė</span>' : '';
+                    const ownerBadge = isTeacherMember ? ' <span class="badge-owner">Mano grupė</span>' : '';
                     const studentsText = (g.student_names && g.student_names.length > 0) 
                         ? g.student_names.join(", ") 
                         : '<span style="color: gray; font-style: italic;">Grupėje mokinių nėra</span>';
@@ -210,17 +213,23 @@
             }
         }
 
-        // Naujos grupės kūrimas
         document.getElementById('createGroupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
             const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+            
+            let selectedTeachers = [];
+            if (currentUser.role === 'administrator') {
+                selectedTeachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
+            } else {
+                selectedTeachers = [currentUser.user_id];
+            }
 
             const payload = {
                 subject: formData.get('subject'),
                 class: formData.get('class'),
-                teacher_id: currentUser.role === 'administrator' ? formData.get('teacher_id') : currentUser.user_id,
+                teachers: selectedTeachers,
                 students: selectedStudents
             };
 
@@ -244,7 +253,6 @@
             }
         });
 
-        // Grupės ištrynimas
         async function deleteGroup(subjectId) {
             if (!confirm('Ar tikrai norite ištrinti šią grupę?')) return;
 
