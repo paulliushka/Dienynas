@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Pažymių valdymas</h1>
+        <h1>Pažymiai</h1>
 
         <div class="card" id="addGradeCard" style="display: none;">
             <h2>Įrašyti naują pažymį</h2>
@@ -153,7 +153,7 @@
 
                 if (grades.length === 0) {
                     const colSpan = showActions ? 8 : 7;
-                    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Pažymių nėra.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Pažymių nėra.</td></tr>`;
                     return;
                 }
 
@@ -173,8 +173,8 @@
                     if (showActions) {
                         const isOwner = g.teacher_id == currentUser.user_id;
                         const actionsTd = isOwner 
-                            ? `<a href="edit_grade?id=${g.grade_id}">Redaguoti</a> | <a href="#" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>`
-                            : '<span style="color: #bdc3c7;">Neturite teisių</span>';
+                            ? `<a href="edit_grade?id=${g.grade_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>`
+                            : '<span style="color: #64748b;">Neturite teisių</span>';
                         
                         rowHtml += `<td>${actionsTd}</td>`;
                     }
