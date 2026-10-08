@@ -1,186 +1,61 @@
-/* ==========================================================================
-   1. KINTAMIEJI (TAMSŪS / ŠVIESŪS FUTURISTINIAI TONAI)
-   ========================================================================== */
-:root {
-    /* Šviesios temos kintamieji (Futuristinis šviesus dizainas) */
-    --bg-main: #f3f4f6;
-    --bg-card: rgba(255, 255, 255, 0.75);
-    --border-color: rgba(226, 232, 240, 0.8);
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    
-    --primary: #3b82f6;
-    --primary-hover: #2563eb;
-    --primary-glow: rgba(59, 130, 246, 0.35);
-    
-    --success: #10b981;
-    --success-glow: rgba(16, 185, 129, 0.3);
-    --danger: #ef4444;
-    --danger-glow: rgba(239, 68, 68, 0.3);
-    
-    --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
-    --glass-blur: blur(12px);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        /* Tamsios temos kintamieji (Cyberpunk / Sci-Fi tamsus dizainas) */
-        --bg-main: #0b0f19;
-        --bg-card: rgba(17, 24, 39, 0.7);
-        --border-color: rgba(255, 255, 255, 0.08);
-        --text-primary: #f8fafc;
-        --text-secondary: #94a3b8;
-        
-        --primary: #00f2fe; /* Švytinti neoninė žydra */
-        --primary-hover: #4facfe;
-        --primary-glow: rgba(0, 242, 254, 0.4);
-        
-        --success: #00e676; /* Neoninė žalia */
-        --success-glow: rgba(0, 230, 118, 0.35);
-        --danger: #ff1744; /* Neoninė raudona */
-        --danger-glow: rgba(255, 23, 68, 0.35);
-        
-        --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    }
-}
-
-/* ==========================================================================
-   2. PAGRINDINIAI NUSTATYMAI IR CENTRAVIMAS
-   ========================================================================== */
-body {
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    line-height: 1.6;
+* {
+    box-sizing: border-box;
     margin: 0;
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    -webkit-font-smoothing: antialiased;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f4f6f9;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
 }
 
 .container {
-    width: 100%;
-    max-width: 950px;
+    max-width: 1200px;
     margin: 0 auto;
-}
-
-h1, h2, h3 {
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    padding: 10px;
 }
 
 h1 {
-    font-size: 2.2rem;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 16px;
-    margin-bottom: 35px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 26px;
+    font-weight: 600;
 }
 
 h2 {
-    font-size: 1.45rem;
-    margin-top: 0;
-    margin-bottom: 25px;
-}
-
-/* ==========================================================================
-   3. KORTELĖS / LANGAI (GLASSMORPHISM EFFECT)
-   ========================================================================== */
-.card {
-    background: var(--bg-card);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    padding: 35px;
-    border-radius: 16px;
-    box-shadow: var(--card-shadow);
-    margin-bottom: 30px;
-    border: 1px solid var(--border-color);
-    box-sizing: border-box;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-    box-shadow: var(--card-shadow), 0 0 20px 0 rgba(0, 242, 254, 0.03);
-}
-
-/* ==========================================================================
-   4. NAVIGACIJA IR NUORODOS
-   ========================================================================== */
-.user-info {
-    font-size: 0.85em;
-    color: var(--text-secondary);
-    background: var(--border-color);
-    padding: 8px 18px;
-    border-radius: 30px;
-    display: inline-block;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-}
-
-.menu-list {
-    list-style: none;
-    padding: 0;
-    margin: 25px 0;
-}
-
-.menu-list li {
+    color: #34495e;
     margin-bottom: 15px;
-}
-
-.menu-list a {
-    display: block;
-    padding: 16px 24px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    color: var(--text-primary);
-    text-decoration: none;
+    font-size: 18px;
     font-weight: 600;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 8px;
 }
 
-.menu-list a:hover {
-    background: var(--primary);
-    color: #ffffff !important;
-    border-color: var(--primary);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px var(--primary-glow);
+h3 {
+    font-size: 15px;
+    color: #2c3e50;
+    margin: 15px 0 10px 0;
 }
 
-.btn-back {
-    display: inline-block;
-    margin-top: 15px;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-}
-
-.btn-back:hover {
-    color: var(--primary-hover);
-    transform: translateX(-4px);
-}
-
-/* ==========================================================================
-   5. FORMAS IR ĮVESTIES LAUKELIAI (FUTURE DESIGN)
-   ========================================================================== */
-form {
-    display: grid;
-    gap: 20px;
-    max-width: 100%;
+.card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e1e8ed;
 }
 
 label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 6px;
     font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-    margin-bottom: -5px;
-    letter-spacing: 0.02em;
+    font-size: 14px;
+    color: #4a5568;
 }
 
 input[type="text"],
@@ -190,335 +65,150 @@ input[type="date"],
 select,
 textarea {
     width: 100%;
-    padding: 14px 18px;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    font-size: 15px;
-    color: var(--text-primary);
-    background-color: var(--bg-card);
-    box-sizing: border-box;
-    transition: all 0.2s ease;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #2d3748;
+    background-color: #fff;
+    transition: border-color 0.2s;
 }
 
 input:focus, select:focus, textarea:focus {
-    border-color: var(--primary);
     outline: none;
-    box-shadow: 0 0 0 4px var(--primary-glow);
-    background-color: var(--bg-card);
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
 }
 
-input:disabled, select:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* ==========================================================================
-   6. MYGTUKAI (NEON GLOW EFFECTS)
-   ========================================================================== */
 .btn {
-    padding: 14px 32px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 15px;
+    display: inline-block;
+    padding: 10px 18px;
+    font-size: 14px;
     font-weight: 600;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
     text-decoration: none;
-    box-sizing: border-box;
-    width: max-content;
+    transition: background-color 0.2s;
 }
 
-.btn-primary, .btn-success {
-    background: var(--primary);
-    color: #ffffff;
+.btn-primary {
+    background-color: #3182ce;
+    color: white;
 }
 
-.btn-primary:hover, .btn-success:hover {
-    background: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px var(--primary-glow);
+.btn-primary:hover {
+    background-color: #2b6cb0;
 }
 
 .btn-secondary {
-    background-color: var(--border-color);
-    color: var(--text-primary);
+    background-color: #edf2f7;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
 }
 
 .btn-secondary:hover {
-    background-color: var(--text-secondary);
-    color: #ffffff;
+    background-color: #e2e8f0;
 }
 
-.btn-logout {
-    background-color: var(--danger);
-    color: white;
-    margin-top: 20px;
-}
-
-.btn-logout:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px var(--danger-glow);
-}
-
-/* ==========================================================================
-   7. MODERNALUS LENTELĖS DIZAINAS
-   ========================================================================== */
-.table-responsive {
-    overflow-x: auto;
-    width: 100%;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: transparent;
-    margin: 0;
-}
-
-th, td {
-    padding: 18px 20px;
-    text-align: left;
-    vertical-align: middle;
-}
-
-th {
-    background-color: var(--border-color);
-    color: var(--text-primary);
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-}
-
-td {
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
-    font-size: 0.95rem;
-}
-
-tr:last-child td {
-    border-bottom: none;
-}
-
-tr:hover td {
-    background-color: var(--border-color);
-}
-
-table a {
-    color: var(--primary);
+.btn-back {
+    display: inline-block;
+    margin-top: 15px;
+    color: #4a5568;
     text-decoration: none;
     font-weight: 600;
-    transition: color 0.2s ease;
+    font-size: 14px;
 }
 
-table a:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
+.btn-back:hover {
+    color: #2b6cb0;
 }
 
-/* ==========================================================================
-   8. ŽENKLIUKAI IR KONTROLĖ
-   ========================================================================== */
 .scroll-box {
-    max-height: 220px;
+    max-height: 180px;
     overflow-y: auto;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 15px;
-    background: var(--bg-card);
-    max-width: 400px;
+    border: 1px solid #cbd5e0;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #f8fafc;
 }
 
 .scroll-box label {
     display: flex;
     align-items: center;
-    padding: 8px 0;
+    gap: 8px;
+    margin: 6px 0;
+    font-weight: 400;
+    font-size: 14px;
+    color: #2d3748;
     cursor: pointer;
 }
 
 .scroll-box input[type="checkbox"] {
-    margin-right: 12px;
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
 
-.badge-owner {
-    display: block;
-    width: max-content;
-    background-color: var(--primary);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-top: 6px;
-    box-shadow: 0 4px 10px var(--primary-glow);
-}
-
-.date-badge {
-    white-space: nowrap;
-    color: var(--danger);
-    font-weight: 600;
-    background: var(--danger-glow);
-    padding: 5px 10px;
-    border-radius: 6px;
-    display: inline-block;
-}
-
-hr {
-    border: 0;
-    height: 1px;
-    background: var(--border-color);
-    margin: 30px 0;
-}
-
-/* ==========================================================================
-   9. AKTYVAUS DATEPICKER KALENDORIAUS DIZAINAS
-   ========================================================================== */
-.custom-datepicker-container {
-    position: relative;
+.table-responsive {
     width: 100%;
+    overflow-x: auto;
 }
 
-.custom-calendar {
-    display: none;
-    position: absolute;
-    z-index: 9999;
-    top: calc(100% + 8px);
-    left: 0;
-    background: var(--bg-card);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    box-shadow: var(--card-shadow), 0 10px 30px rgba(0,0,0,0.15);
-    padding: 20px;
-    width: 330px;
-    box-sizing: border-box;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
     font-size: 14px;
 }
 
-.custom-calendar.active {
-    display: block;
-    animation: fadeInCalendar 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-@keyframes fadeInCalendar {
-    from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-    font-weight: 700;
-    font-size: 15px;
-}
-
-.calendar-btn {
-    background: var(--border-color);
-    border: 1px solid transparent;
-    color: var(--text-primary);
-    padding: 6px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 13px;
-    transition: all 0.2s ease;
-}
-
-.calendar-btn:hover {
-    border-color: var(--primary);
-    box-shadow: 0 0 10px var(--primary-glow);
-}
-
-.calendar-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-    font-weight: 700;
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-bottom: 10px;
+th {
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 12px;
+    letter-spacing: 0.5px;
 }
 
-.calendar-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+tr:hover {
+    background-color: #f8fafc;
 }
 
-.calendar-day {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 38px;
-    border-radius: 8px;
-    cursor: pointer;
+.badge-owner {
+    background-color: #ebf8ff;
+    color: #2b6cb0;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 12px;
     font-weight: 600;
-    transition: all 0.15s ease;
+    margin-left: 6px;
+    border: 1px solid #bee3f8;
 }
 
-.calendar-day:hover:not(.empty):not(.selected) {
-    background: var(--border-color);
-}
-
-.calendar-day.empty {
-    cursor: default;
-    background: transparent !important;
-}
-
-.calendar-day.today {
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    text-shadow: 0 0 8px var(--primary-glow);
-}
-
-.calendar-day.selected {
-    background: var(--primary) !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 15px var(--primary-glow);
-}
-
-.calendar-time-picker {
-    margin-top: 18px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-.calendar-time-picker span {
-    font-size: 13px;
+.badge-grade {
     font-weight: 700;
-    color: var(--text-secondary);
+    color: #2d3748;
 }
 
-.calendar-time-picker select {
-    padding: 6px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    cursor: pointer;
-    background: var(--bg-card);
-    outline: none;
+a {
+    color: #3182ce;
+    text-decoration: none;
 }
 
-.calendar-time-picker select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 8px var(--primary-glow);
+a:hover {
+    text-decoration: underline;
+}
+
+.empty-row {
+    text-align: center;
+    color: #a0aec0;
+    font-style: italic;
+    padding: 20px;
 }

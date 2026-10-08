@@ -22,14 +22,14 @@
                 </select>
 
                 <div id="teacher_select_container" style="display: none;">
-                    <label>Paskirti grupės mokytojus (galima pasirinkti kelis)</label>
-                    <div id="teachers_container" class="scroll-box" style="max-height: 120px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px; margin-bottom: 12px;"></div>
+                    <label>Grupės mokytojai (Pavadavimo funkcija)</label>
+                    <div id="teachers_container" class="scroll-box"></div>
                 </div>
 
                 <h3>Pasirinkite grupės mokinius</h3>
                 <div>
                     <button type="button" class="btn btn-secondary" onclick="selectAllStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
-                    <div id="students_container" class="scroll-box" style="max-height: 180px; overflow-y: auto; border: 1px solid #ccc; padding: 8px; border-radius: 4px;">
+                    <div id="students_container" class="scroll-box">
                         <p style="color: gray; font-style: italic; margin: 0;">Kraunami mokiniai...</p>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                     classSelect.appendChild(opt);
                 });
 
-                if (currentUser.role === 'administrator') {
+                if (currentUser.role === 'administrator' || currentUser.role === 'teacher') {
                     document.getElementById('teacher_select_container').style.display = 'block';
                     await loadTeachers();
                 }
@@ -101,7 +101,6 @@
 
                 teachers.forEach(t => {
                     const label = document.createElement("label");
-                    label.style.display = "block";
 
                     const checkbox = document.createElement("input");
                     checkbox.type = "checkbox";
@@ -113,7 +112,7 @@
                     }
 
                     label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(` ${t.name} ${t.surname}`));
+                    label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
                     container.appendChild(label);
                 });
             } catch (error) {
@@ -139,7 +138,6 @@
 
                 data.forEach(student => {
                     const label = document.createElement("label");
-                    label.style.display = "block";
 
                     const checkbox = document.createElement("input");
                     checkbox.type = "checkbox";
@@ -152,7 +150,7 @@
                     }
 
                     label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(` ${student.name} ${student.surname}`));
+                    label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
                     studentsContainer.appendChild(label);
                 });
             } catch (error) {
@@ -175,7 +173,7 @@
                 students: selectedStudents
             };
 
-            if (currentUser.role === 'administrator') {
+            if (currentUser.role === 'administrator' || currentUser.role === 'teacher') {
                 payload.teachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
             }
 
