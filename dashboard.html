@@ -28,7 +28,6 @@
     </div>
 
     <script>
-        // Tikriname, ar vartotojas prisijungęs
         const userJson = localStorage.getItem('user');
         if (!userJson) {
             window.location.href = '/';
@@ -36,35 +35,30 @@
 
         const user = JSON.parse(userJson);
 
-        // Atvaizduojame vartotojo vardą ir pavardę
         document.getElementById('userName').textContent = `${user.name} ${user.surname}`;
 
         const menuList = document.getElementById('menuList');
         menuList.innerHTML = '';
 
-        // Pažymiai ir namų darbai (mokytojui ir mokiniui)
         if (user.role === 'teacher' || user.role === 'student') {
             menuList.innerHTML += `
                 <li><a href="grades">📊 Pažymiai ir vertinimai</a></li>
-                <li><a href="homework">📚 Namų darbų užduotys</a></li>
+                <li><a href="assignments">📚 Užduotys</a></li>
             `;
         }
 
-        // Grupių valdymas (mokytojui ir administratoriui)
         if (user.role === 'teacher' || user.role === 'administrator') {
             menuList.innerHTML += `
-                <li><a href="groups">👥 Grupių ir akademinių dalykų valdymas</a></li>
+                <li><a href="groups">👥 Grupių valdymas</a></li>
             `;
         }
 
-        // Vartotojų valdymas (tik administratoriui)
         if (user.role === 'administrator') {
             menuList.innerHTML += `
                 <li><a href="administration">⚙️ Vartotojų kūrimas ir valdymas</a></li>
             `;
         }
 
-        // Atsijungimo funkcija
         function logout() {
             localStorage.removeItem('user');
             window.location.href = '/';
