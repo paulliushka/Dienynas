@@ -142,7 +142,6 @@
 
                 const isStudent = currentUser.role === 'student';
 
-                // Jei ne mokinys ir „Veiksmai“ dar nepridėti – įtraukiame antraštę
                 if (!isStudent && !document.getElementById('actionsHeader')) {
                     const th = document.createElement('th');
                     th.id = 'actionsHeader';

@@ -2,19 +2,19 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Namų darbai</title>
+    <title>Užduotys</title>
     <link rel="icon" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <script src="config.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Namų darbai</h1>
+        <h1>Užduotys</h1>
 
         <!-- Sukūrimo forma (Mokytojui / Adminui) -->
-        <div class="card" id="addHomeworkCard" style="display: none;">
-            <h2>Paskirti naują namų darbą</h2>
-            <form id="addHomeworkForm">
+        <div class="card" id="addAssignmentCard" style="display: none;">
+            <h2>Paskirti naują užduotį</h2>
+            <form id="addAssignmentForm">
                 <label>Grupė / Dalykas</label>
                 <select name="subject_id" id="subject_select" required>
                     <option value="">-- Pasirinkite grupę --</option>
@@ -26,17 +26,17 @@
                 <label>Atlikimo terminas (Data)</label>
                 <input type="date" name="due_date" id="due_date" required>
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Paskirti namų darbą</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Paskirti užduotį</button>
             </form>
         </div>
 
-        <!-- Namų darbų sąrašas -->
+        <!-- Užduočių sąrašas -->
         <div class="card">
-            <h2>Esami namų darbai</h2>
+            <h2>Esamos užduotys</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr id="homeworkTableHeader">
+                        <tr id="assignmentsTableHeader">
                             <th>Dalykas</th>
                             <th>Užduotis</th>
                             <th>Atlikti iki</th>
@@ -44,7 +44,7 @@
                             <!-- 'Veiksmai' th pridedamas dinamiškai per JS tik ne mokinio rolei -->
                         </tr>
                     </thead>
-                    <tbody id="homeworkTableBody">
+                    <tbody id="assignmentsTableBody">
                         <!-- Duomenys kraunami dinamiškai -->
                     </tbody>
                 </table>
@@ -63,11 +63,11 @@
 
         async function initPage() {
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
-                document.getElementById('addHomeworkCard').style.display = 'block';
+                document.getElementById('addAssignmentCard').style.display = 'block';
                 loadTeacherGroups();
             }
 
-            loadHomework();
+            loadAssignments();
         }
 
         async function loadTeacherGroups() {
@@ -89,18 +89,17 @@
             }
         }
 
-        async function loadHomework() {
+        async function loadAssignments() {
             try {
-                const response = await fetch(`${API_URL}/api/homework?user_id=${currentUser.user_id}&role=${currentUser.role}`);
-                const homeworks = await response.json();
+                const response = await fetch(`${API_URL}/api/assignments?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const assignments = await response.json();
 
-                const theader = document.getElementById('homeworkTableHeader');
-                const tbody = document.getElementById('homeworkTableBody');
+                const theader = document.getElementById('assignmentsTableHeader');
+                const tbody = document.getElementById('assignmentsTableBody');
                 tbody.innerHTML = '';
 
                 const isStudent = currentUser.role === 'student';
 
-                // Jei ne mokinys ir „Veiksmai“ dar nepridėti – įtraukiame antraštę
                 if (!isStudent && !document.getElementById('actionsHeader')) {
                     const th = document.createElement('th');
                     th.id = 'actionsHeader';
@@ -108,26 +107,26 @@
                     theader.appendChild(th);
                 }
 
-                if (homeworks.length === 0) {
+                if (assignments.length === 0) {
                     const colSpan = isStudent ? 4 : 5;
-                    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Namų darbų nėra.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Užduočių nėra.</td></tr>`;
                     return;
                 }
 
-                homeworks.forEach(hw => {
+                assignments.forEach(assign => {
                     const tr = document.createElement('tr');
 
                     let rowHtml = `
-                        <td><strong>${hw.subject_display}</strong></td>
-                        <td>${hw.task}</td>
-                        <td>${hw.due_date}</td>
-                        <td>${hw.teacher || '-'}</td>
+                        <td><strong>${assign.subject_display}</strong></td>
+                        <td>${assign.task}</td>
+                        <td>${assign.due_date}</td>
+                        <td>${assign.teacher || '-'}</td>
                     `;
 
                     if (!isStudent) {
-                        const isOwner = hw.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
+                        const isOwner = assign.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
                         const actionsTd = isOwner 
-                            ? `<a href="edit_homework?id=${hw.homework_id}">Redaguoti</a> | <a href="#" onclick="deleteHomework(${hw.homework_id}); return false;">Ištrinti</a>`
+                            ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="#" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
                             : '<span style="color: #bdc3c7;">Neturite teisių</span>';
                         
                         rowHtml += `<td>${actionsTd}</td>`;
@@ -137,11 +136,11 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                console.error("Klaida užkraunant namų darbus:", error);
+                console.error("Klaida užkraunant užduotis:", error);
             }
         }
 
-        document.getElementById('addHomeworkForm').addEventListener('submit', async function(e) {
+        document.getElementById('addAssignmentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
@@ -153,7 +152,7 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}/api/homework/add`, {
+                const response = await fetch(`${API_URL}/api/assignments/add`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -161,27 +160,27 @@
 
                 if (response.ok) {
                     this.reset();
-                    loadHomework();
+                    loadAssignments();
                 } else {
-                    alert("Klaida pridedant namų darbą.");
+                    alert("Klaida pridedant užduotį.");
                 }
             } catch (error) {
                 alert("Nepavyko prisijungti prie serverio.");
             }
         });
 
-        async function deleteHomework(homeworkId) {
-            if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
+        async function deleteAssignment(assignmentId) {
+            if (!confirm('Ar tikrai norite ištrinti šią užduotį?')) return;
 
             try {
-                const response = await fetch(`${API_URL}/api/homework/delete/${homeworkId}`, {
+                const response = await fetch(`${API_URL}/api/assignments/delete/${assignmentId}`, {
                     method: 'DELETE'
                 });
 
                 if (response.ok) {
-                    loadHomework();
+                    loadAssignments();
                 } else {
-                    alert("Klaida trinant namų darbą.");
+                    alert("Klaida trinant užduotį.");
                 }
             } catch (error) {
                 alert("Nepavyko prisijungti prie serverio.");
