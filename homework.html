@@ -1,186 +1,190 @@
 <!DOCTYPE html>
 <html lang="lt">
-    <head>
-        <meta charset="UTF-8">
-        <title>Namų darbai</title>
-        <link rel="icon" href="favicon.svg">
-        <link rel="stylesheet" href="style.css">
-        <script src="config.js"></script>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Namų darbai</h1>
+<head>
+    <meta charset="UTF-8">
+    <title>Namų darbai</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Namų darbai</h1>
 
-            <!-- Užduoties forma (rodoma tik mokytojams) -->
-            <div class="card" id="addHomeworkCard" style="display: none;">
-                <h2>Užduoti naują namų darbą</h2>
-                <form id="addHomeworkForm">
-                    <label>Pasirinkite grupę</label>
-                    <select name="subject" id="subject-select" required>
-                        <option value="">-- Pasirinkite grupę --</option>
-                    </select>
+        <!-- Kūrimo forma (Mokytojui / Adminui) -->
+        <div class="card" id="addHomeworkCard" style="display: none;">
+            <h2>Paskirti naują namų darbą</h2>
+            <form id="addHomeworkForm">
+                <label>Grupė / Dalykas</label>
+                <select name="subject_id" id="subject_select" required>
+                    <option value="">-- Pasirinkite grupę --</option>
+                </select>
 
-                    <label>Užduoties tekstas</label>
-                    <textarea name="task" rows="4" placeholder="Įrašykite užduotį mokiniams..." required></textarea>
+                <label>Užduoties aprašymas</label>
+                <textarea name="task" rows="3" placeholder="Pvz., Atlikti 12-15 užduotis 45 puslapyje..." style="width: 100%; padding: 8px; box-sizing: border-box;" required></textarea>
 
-                    <label>Atlikimo terminas</label>
-                    <input type="date" name="due_date" required>
+                <label>Atlikimo termiškas (Data)</label>
+                <input type="date" name="due_date" id="due_date" required>
 
-                    <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Užduoti</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Namų darbų užduotys</h2>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr id="tableHeader">
-                                <th>Dalykas</th>
-                                <th>Užduotis</th>
-                                <th>Atlikti iki</th>
-                                <th>Mokytojas</th>
-                                <!-- Veiksmai bus pridedami dinamiškai mokytojams -->
-                            </tr>
-                        </thead>
-                        <tbody id="homeworkTableBody">
-                            <!-- Duomenys kraunami dinamiškai -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <a href="dashboard.html" class="btn-back">← Grįžti į pagrindinį</a>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Paskirti namų darbą</button>
+            </form>
         </div>
 
-        <script>
-            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        <!-- Namų darbų sąrašas -->
+        <div class="card">
+            <h2>Esami namų darbai</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dalykas</th>
+                            <th>Užduotis</th>
+                            <th>Atlikti iki</th>
+                            <th>Mokytojas</th>
+                            <th>Veiksmai</th>
+                        </tr>
+                    </thead>
+                    <tbody id="homeworkTableBody">
+                        <!-- Duomenys kraunami dinamiškai -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            if (!currentUser.user_id) {
-                window.location.href = 'index.html';
+        <a href="dashboard.html" class="btn-back">← Grįžti į pagrindinį</a>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!currentUser.user_id) {
+            window.location.href = 'index.html';
+        }
+
+        async function initPage() {
+            // Rodyti formą tik mokytojams arba adminams
+            if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
+                document.getElementById('addHomeworkCard').style.display = 'block';
+                loadTeacherGroups();
             }
 
-            async function initPage() {
-                // Jei mokytojas – rodom forma ir veiksmų stulpelį lentelėje
-                if (currentUser.role === 'teacher') {
-                    document.getElementById('addHomeworkCard').style.display = 'block';
-                    
-                    const th = document.createElement('th');
-                    th.textContent = 'Veiksmai';
-                    th.id = 'actionsHeader';
-                    document.getElementById('tableHeader').appendChild(th);
+            loadHomework();
+        }
 
-                    loadTeacherGroups();
+        // Užkrauna mokytojo grupes pasirinkimui
+        async function loadTeacherGroups() {
+            try {
+                const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const groups = await response.json();
+
+                const select = document.getElementById('subject_select');
+                select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
+
+                groups.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.subject_id;
+                    opt.textContent = `${g.subject} (${g.class} klasė)`;
+                    select.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant grupes:", error);
+            }
+        }
+
+        // Užkrauna namų darbus
+        async function loadHomework() {
+            try {
+                const response = await fetch(`${API_URL}/api/homework?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const homeworks = await response.json();
+
+                const tbody = document.getElementById('homeworkTableBody');
+                tbody.innerHTML = '';
+
+                if (homeworks.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:gray;">Namų darbų nėra.</td></tr>';
+                    return;
                 }
 
-                loadHomeworks();
-            }
+                homeworks.forEach(hw => {
+                    const tr = document.createElement('tr');
 
-            // Užkrauna mokytojo grupes į pasirinkimo sąrašą
-            async function loadTeacherGroups() {
-                try {
-                    const response = await fetch(`${API_URL}/api/groups`);
-                    const groups = await response.json();
-                    
-                    const subjectSelect = document.getElementById('subject-select');
-                    subjectSelect.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
+                    // Saugumo / teisių patikra
+                    const isOwner = hw.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
 
-                    groups.forEach(g => {
-                        if (g.teacher_id == currentUser.user_id || currentUser.role === 'administrator') {
-                            const opt = document.createElement('option');
-                            opt.value = g.subject_id;
-                            opt.textContent = `${g.subject} (${g.class})`;
-                            subjectSelect.appendChild(opt);
-                        }
-                    });
-                } catch (error) {
-                    console.error("Klaida užkraunant grupes:", error);
-                }
-            }
-
-            // Užkrauna namų darbų sąrašą
-            async function loadHomeworks() {
-                try {
-                    const response = await fetch(`${API_URL}/api/homework?user_id=${currentUser.user_id}&role=${currentUser.role}`);
-                    const homeworks = await response.json();
-
-                    const tbody = document.getElementById('homeworkTableBody');
-                    tbody.innerHTML = '';
-
-                    homeworks.forEach(hw => {
-                        const tr = document.createElement('tr');
-                        
-                        let actionsTd = '';
-                        if (currentUser.role === 'teacher') {
-                            actionsTd = `
-                                <td>
-                                    <a href="edit_homework.html?id=${hw.homework_id}">Redaguoti</a> | 
-                                    <a href="#" onclick="deleteHomework(${hw.homework_id}); return false;">Ištrinti</a>
-                                </td>
-                            `;
-                        }
-
-                        tr.innerHTML = `
-                            <td><strong>${hw.subject_display || '-'}</strong></td>
-                            <td>${hw.task}</td>
-                            <td><span class="date-badge">${hw.due_date}</span></td>
-                            <td>${hw.teacher || '-'}</td>
-                            ${actionsTd}
+                    let actionsTd = '';
+                    if (isOwner) {
+                        actionsTd = `
+                            <a href="edit_homework.html?id=${hw.homework_id}">Redaguoti</a> | 
+                            <a href="#" onclick="deleteHomework(${hw.homework_id}); return false;">Ištrinti</a>
                         `;
-                        tbody.appendChild(tr);
-                    });
-                } catch (error) {
-                    console.error("Klaida užkraunant namų darbus:", error);
-                }
-            }
-
-            // Naujo namų darbo pridėjimas
-            document.getElementById('addHomeworkForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
-                data.teacher_id = currentUser.user_id;
-
-                try {
-                    const response = await fetch(`${API_URL}/api/homework/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-
-                    if (response.ok) {
-                        this.reset();
-                        loadHomeworks();
                     } else {
-                        const result = await response.json();
-                        alert(result.message || "Klaida užduodant namų darbą.");
+                        actionsTd = '<span style="color: #bdc3c7;">Neturite teisių</span>';
                     }
-                } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
-                }
-            });
 
-            // Namų darbo ištrynimas
-            async function deleteHomework(homeworkId) {
-                if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
-
-                try {
-                    const response = await fetch(`${API_URL}/api/homework/delete/${homeworkId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        loadHomeworks();
-                    } else {
-                        alert("Klaida trinant namų darbą.");
-                    }
-                } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
-                }
+                    tr.innerHTML = `
+                        <td><strong>${hw.subject_display}</strong></td>
+                        <td>${hw.task}</td>
+                        <td>${hw.due_date}</td>
+                        <td>${hw.teacher || '-'}</td>
+                        <td>${actionsTd}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant namų darbus:", error);
             }
+        }
 
-            window.onload = initPage;
-        </script>
-    </body>
+        // Naujo namų darbo paskyrimas
+        document.getElementById('addHomeworkForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const payload = {
+                subject_id: formData.get('subject_id'),
+                task: formData.get('task'),
+                due_date: formData.get('due_date'),
+                teacher_id: currentUser.user_id
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/homework/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    this.reset();
+                    loadHomework();
+                } else {
+                    alert("Klaida pridedant namų darbą.");
+                }
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        });
+
+        // Namų darbo trynimas
+        async function deleteHomework(homeworkId) {
+            if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/homework/delete/${homeworkId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadHomework();
+                } else {
+                    alert("Klaida trinant namų darbą.");
+                }
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        }
+
+        window.onload = initPage;
+    </script>
+</body>
 </html>
