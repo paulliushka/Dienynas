@@ -1,244 +1,241 @@
 <!DOCTYPE html>
 <html lang="lt">
-    <head>
-        <meta charset="UTF-8">
-        <title>Pažymiai</title>
-        <link rel="icon" href="favicon.svg">
-        <link rel="stylesheet" href="style.css">
-        <script src="config.js"></script>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Pažymiai</h1>
+<head>
+    <meta charset="UTF-8">
+    <title>Pažymių valdymas</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Pažymių valdymas</h1>
 
-            <!-- Rašymo forma (rodoma tik mokytojams) -->
-            <div class="card" id="addGradeCard" style="display: none;">
-                <h2>Rašyti pažymį</h2>
-                <form id="addGradeForm">
-                    <label>Dalykas ir Grupė</label>
-                    <select name="subject" id="subject-select" onchange="updateStudents()" required>
-                        <option value="">-- Pasirinkite grupę --</option>
-                    </select>
+        <!-- Sukūrimo forma (Mokytojui / Adminui) -->
+        <div class="card" id="addGradeCard" style="display: none;">
+            <h2>Įrašyti naują pažymį</h2>
+            <form id="addGradeForm">
+                <label>Grupė / Dalykas</label>
+                <select name="subject_id" id="subject_select" onchange="loadStudentsBySubject()" required>
+                    <option value="">-- Pasirinkite grupę --</option>
+                </select>
 
-                    <label>Mokinys</label>
-                    <select name="student" id="student-select" required>
-                        <option value="">-- Pirmiausia pasirinkite grupę --</option>
-                    </select>
+                <label>Mokinys</label>
+                <select name="student_id" id="student_select" required disabled>
+                    <option value="">-- Pirmiausia pasirinkite grupę --</option>
+                </select>
 
-                    <label>Pažymys</label>
-                    <input type="text" name="grade" placeholder="Pvz: 10, p, n" required>
+                <label>Pažymys</label>
+                <input type="text" name="grade" placeholder="Pvz., 10 arba N" required>
 
-                    <label>Atsiskaitymo tipas</label>
-                    <select name="type" required>
-                        <option value="Savarankiškas darbas">Savarankiškas darbas</option>
-                        <option value="Kontrolinis darbas">Kontrolinis darbas</option>
-                        <option value="Projektinis darbas">Projektinis darbas</option>
-                        <option value="Klasės darbas">Klasės darbas</option>
-                        <option value="Namų darbas">Namų darbas</option>
-                        <option value="Kaupiamasis">Kaupiamasis</option>
-                    </select>
+                <label>Atsiskaitymo tipas</label>
+                <input type="text" name="type" placeholder="Pvz., Kontrolinis darbas" required>
 
-                    <label>Data</label>
-                    <input type="text" name="date" id="grades-datepicker" placeholder="Pasirinkite datą..." readonly required>
+                <label>Data</label>
+                <input type="date" name="date" id="grade_date" required>
 
-                    <label>Komentaras (neprivaloma)</label>
-                    <input type="text" name="comment" placeholder="Komentaras mokinio tėvams...">
+                <label>Komentaras (neprivalomas)</label>
+                <input type="text" name="comment" placeholder="Komentaras...">
 
-                    <button type="submit" class="btn btn-primary">Įrašyti pažymį</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h2>Pažymių suvestinė</h2>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr id="tableHeader">
-                                <th>Dalykas</th>
-                                <th>Mokinys</th>
-                                <th>Pažymys</th>
-                                <th>Tipas</th>
-                                <th>Data</th>
-                                <th>Komentaras</th>
-                                <th>Mokytojas</th>
-                                <!-- Veiksmai bus pridedami dinamiskai mokytojams -->
-                            </tr>
-                        </thead>
-                        <tbody id="gradesTableBody">
-                            <!-- Duomenys kraunami dinamiškai -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <a href="dashboard.html" class="btn-back">← Grįžti į pagrindinį</a>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Įrašyti pažymį</button>
+            </form>
         </div>
 
-        <script src="calendar.js"></script>
-        <script>
-            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        <!-- Pažymių sąrašas -->
+        <div class="card">
+            <h2>Pažymių sąrašas</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mokinys</th>
+                            <th>Dalykas</th>
+                            <th>Pažymys</th>
+                            <th>Tipas</th>
+                            <th>Data</th>
+                            <th>Komentaras</th>
+                            <th>Mokytojas</th>
+                            <th>Veiksmai</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gradesTableBody">
+                        <!-- Duomenys kraunami dinamiškai -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            if (!currentUser.user_id) {
-                window.location.href = 'index.html';
+        <a href="dashboard.html" class="btn-back">← Grįžti į pagrindinį</a>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!currentUser.user_id) {
+            window.location.href = 'index.html';
+        }
+
+        async function initPage() {
+            // Rodyti kūrimo formą tik mokytojams arba adminams
+            if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
+                document.getElementById('addGradeCard').style.display = 'block';
+                document.getElementById('grade_date').valueAsDate = new Date();
+                loadTeacherGroups();
             }
 
-            async function initPage() {
-                // Jei mokytojas – rodom forma ir veiksmų stulpelį lentelėje
-                if (currentUser.role === 'teacher') {
-                    document.getElementById('addGradeCard').style.display = 'block';
-                    
-                    const th = document.createElement('th');
-                    th.textContent = 'Veiksmai';
-                    th.id = 'actionsHeader';
-                    document.getElementById('tableHeader').appendChild(th);
+            loadGrades();
+        }
 
-                    loadTeacherGroups();
-                    if (typeof initCalendar === 'function') {
-                        initCalendar("grades-datepicker", false);
-                    }
+        // Užkrauna mokytojo dėstomas grupes
+        async function loadTeacherGroups() {
+            try {
+                const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const groups = await response.json();
+
+                const select = document.getElementById('subject_select');
+                select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
+
+                groups.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.subject_id;
+                    opt.textContent = `${g.subject} (${g.class} klasė)`;
+                    select.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant grupes:", error);
+            }
+        }
+
+        // Užkrauna mokinius pagal pasirinktą grupę
+        async function loadStudentsBySubject() {
+            const subjectId = document.getElementById('subject_select').value;
+            const select = document.getElementById('student_select');
+
+            if (!subjectId) {
+                select.innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
+                select.disabled = true;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/get_students_by_subject/${subjectId}`);
+                const students = await response.json();
+
+                select.innerHTML = '<option value="">-- Pasirinkite mokinį --</option>';
+                students.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.user_id;
+                    opt.textContent = `${s.name} ${s.surname}`;
+                    select.appendChild(opt);
+                });
+                select.disabled = false;
+            } catch (error) {
+                console.error("Klaida užkraunant mokinius:", error);
+            }
+        }
+
+        // Užkrauna pažymius
+        async function loadGrades() {
+            try {
+                const response = await fetch(`${API_URL}/api/grades?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const grades = await response.json();
+
+                const tbody = document.getElementById('gradesTableBody');
+                tbody.innerHTML = '';
+
+                if (grades.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:gray;">Pažymių nėra.</td></tr>';
+                    return;
                 }
 
-                loadGrades();
-            }
+                grades.forEach(g => {
+                    const tr = document.createElement('tr');
 
-            // Užkrauna mokytojo grupes į išskleidžiamąjį sąrašą
-            async function loadTeacherGroups() {
-                try {
-                    const response = await fetch(`${API_URL}/api/groups`);
-                    const groups = await response.json();
-                    
-                    const subjectSelect = document.getElementById('subject-select');
-                    subjectSelect.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
+                    // Saugumo / teisių patikra
+                    const isOwner = g.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
 
-                    groups.forEach(g => {
-                        if (g.teacher_id == currentUser.user_id || currentUser.role === 'administrator') {
-                            const opt = document.createElement('option');
-                            opt.value = g.subject_id;
-                            opt.textContent = `${g.subject} (${g.class})`;
-                            subjectSelect.appendChild(opt);
-                        }
-                    });
-                } catch (error) {
-                    console.error("Klaida užkraunant grupes:", error);
-                }
-            }
-
-            // Užkrauna pasirinktos grupės mokinius
-            async function updateStudents() {
-                const subjectId = document.getElementById("subject-select").value;
-                const studentSelect = document.getElementById("student-select");
-
-                studentSelect.innerHTML = '<option value="">-- Pasirinkite mokinį --</option>';
-
-                if (!subjectId) return;
-
-                try {
-                    const response = await fetch(`${API_URL}/get_students_by_subject/${subjectId}`);
-                    const data = await response.json();
-
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
-
-                    data.forEach(student => {
-                        const option = document.createElement("option");
-                        option.value = student.user_id;
-                        option.textContent = `${student.name} ${student.surname}`;
-                        studentSelect.appendChild(option);
-                    });
-                } catch (error) {
-                    console.error('Klaida kraunant mokinius:', error);
-                }
-            }
-
-            // Užkrauna pažymius
-            async function loadGrades() {
-                try {
-                    const response = await fetch(`${API_URL}/api/grades?user_id=${currentUser.user_id}&role=${currentUser.role}`);
-                    const grades = await response.json();
-
-                    const tbody = document.getElementById('gradesTableBody');
-                    tbody.innerHTML = '';
-
-                    grades.forEach(g => {
-                        const tr = document.createElement('tr');
-                        
-                        let actionsTd = '';
-                        if (currentUser.role === 'teacher') {
-                            actionsTd = `
-                                <td>
-                                    <a href="edit_grade.html?id=${g.grade_id}">Redaguoti</a> | 
-                                    <a href="#" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>
-                                </td>
-                            `;
-                        }
-
-                        tr.innerHTML = `
-                            <td>${g.subject_display || '-'}</td>
-                            <td><strong>${g.student || '-'}</strong></td>
-                            <td>${g.grade}</td>
-                            <td>${g.type}</td>
-                            <td>${g.date}</td>
-                            <td>${g.comment ? g.comment : '-'}</td>
-                            <td>${g.teacher || '-'}</td>
-                            ${actionsTd}
+                    let actionsTd = '';
+                    if (isOwner) {
+                        actionsTd = `
+                            <a href="edit_grade.html?id=${g.grade_id}">Redaguoti</a> | 
+                            <a href="#" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>
                         `;
-                        tbody.appendChild(tr);
-                    });
-                } catch (error) {
-                    console.error("Klaida užkraunant pažymius:", error);
-                }
-            }
-
-            // Naujo pažymio įrašymas
-            document.getElementById('addGradeForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const formData = new FormData(this);
-                const data = Object.fromEntries(formData.entries());
-                data.teacher_id = currentUser.user_id;
-
-                try {
-                    const response = await fetch(`${API_URL}/api/grades/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-
-                    if (response.ok) {
-                        this.reset();
-                        document.getElementById('student-select').innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
-                        loadGrades();
                     } else {
-                        const result = await response.json();
-                        alert(result.message || "Klaida įrašant pažymį.");
+                        actionsTd = '<span style="color: #bdc3c7;">Neturite teisių</span>';
                     }
-                } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
-                }
-            });
 
-            // Pažymio ištrynimas
-            async function deleteGrade(gradeId) {
-                if (!confirm('Ar tikrai norite ištrinti šį pažymį?')) return;
-
-                try {
-                    const response = await fetch(`${API_URL}/api/grades/delete/${gradeId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        loadGrades();
-                    } else {
-                        alert("Klaida trinant pažymį.");
-                    }
-                } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
-                }
+                    tr.innerHTML = `
+                        <td><strong>${g.student}</strong></td>
+                        <td>${g.subject_display}</td>
+                        <td><span class="badge-grade">${g.grade}</span></td>
+                        <td>${g.type}</td>
+                        <td>${g.date}</td>
+                        <td>${g.comment || '-'}</td>
+                        <td>${g.teacher || '-'}</td>
+                        <td>${actionsTd}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant pažymius:", error);
             }
+        }
 
-            window.onload = initPage;
-        </script>
-    </body>
+        // Naujo pažymio pridėjimas
+        document.getElementById('addGradeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const payload = {
+                student_id: formData.get('student_id'),
+                subject_id: formData.get('subject_id'),
+                grade: formData.get('grade'),
+                type: formData.get('type'),
+                date: formData.get('date'),
+                comment: formData.get('comment'),
+                teacher_id: currentUser.user_id
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/grades/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    this.reset();
+                    document.getElementById('grade_date').valueAsDate = new Date();
+                    document.getElementById('student_select').disabled = true;
+                    loadGrades();
+                } else {
+                    alert("Klaida įrašant pažymį.");
+                }
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        });
+
+        // Pažymio trynimas
+        async function deleteGrade(gradeId) {
+            if (!confirm('Ar tikrai norite ištrinti šį pažymį?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/grades/delete/${gradeId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadGrades();
+                } else {
+                    alert("Klaida trinant pažymį.");
+                }
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        }
+
+        window.onload = initPage;
+    </script>
+</body>
 </html>
