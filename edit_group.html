@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Redaguoti grupės duomenis</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>Redaguoti grupės duomenis</h2>
+
+            <form id="editGroupForm">
+                <label>Dalyko pavadinimas</label>
+                <input type="text" name="subject" id="subject" required>
+
+                <label>Pasirinkite klasę</label>
+                <select name="class" id="class_select" onchange="fetchStudentsByClass()" required>
+                    <option value="">-- Pasirinkite klasę --</option>
+                </select>
+
+                <div id="teacher_select_container" style="display: none;">
+                    <label>Grupės mokytojas</label>
+                    <select name="teacher_id" id="teacher_select">
+                        <option value="">-- Pasirinkite mokytoją --</option>
+                    </select>
+                </div>
+
+                <h3>Pasirinkite grupės mokinius</h3>
+                <div>
+                    <button type="button" class="btn btn-secondary" onclick="selectAllStudents()">Pasirinkti visus mokinius</button>
+                    <div id="students_container" class="scroll-box">
+                        <p style="color: gray; font-style: italic;">Kraunami mokiniai...</p>
+                    </div>
+                </div>
+                
+                <br>
+                <button type="submit" class="btn btn-primary">Išsaugoti pakeitimus</button>
+            </form>
+
+            <br>
+            <a href="groups.html" class="btn-back">Atšaukti ir grįžti</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get('id');
+
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        let currentGroupStudents = [];
+
+        if (!groupId) {
+            alert("Nenurodytas grupės ID.");
+            window.location.href = 'groups.html';
+        }
+
+        async function initPage() {
+            try {
+                // Užkrauname vartotojus (klasėms, mokytojams ir mokiniams)
+                const usersResp = await fetch(`${API_URL}/api/users`);
+                const users = await usersResp.json();
+
+                // Užkrauname pačią grupę
+                const groupsResp = await fetch(`${API_URL}/api/groups`);
+                const groups = await groupsResp.json();
+                const group = groups.find(g => g.subject_id == groupId);
+
+                if (!group) {
+                    alert("Grupė nerasta.");
+                    window.location.href = 'groups.html';
+                    return;
+                }
+
+                currentGroupStudents = group.students || [];
+
+                // Užpildome dalyko pavadinimą
+                document.getElementById('subject').value = group.subject;
+
+                // Užpildome klasių sąrašą
+                const classSelect = document.getElementById('class_select');
+                const classes = [...new Set(users.filter(u => u.role === 'student' && u.class).map(u => u.class))].sort();
+                
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = `${c} klasė`;
+                    if (c === group.class) opt.selected = true;
+                    classSelect.appendChild(opt);
+                });
+
+                // Jei administratorius - leidžiame keisti mokytoją
+                if (currentUser.role === 'administrator') {
+                    const teacherContainer = document.getElementById('teacher_select_container');
+                    const teacherSelect = document.getElementById('teacher_select');
+                    teacherContainer.style.display = 'block';
+
+                    const teachers = users.filter(u => u.role === 'teacher');
+                    teachers.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t.user_id;
+                        opt.textContent = `${t.name} ${t.surname}`;
+                        if (t.user_id == group.teacher_id) opt.selected = true;
+                        teacherSelect.appendChild(opt);
+                    });
+                }
+
+                // Užkrauname klasės mokinius
+                fetchStudentsByClass();
+
+            } catch (error) {
+                console.error("Klaida inicijuojant puslapį:", error);
+            }
+        }
+
+        async function fetchStudentsByClass() {
+            const className = document.getElementById("class_select").value;
+            const studentsContainer = document.getElementById("students_container");
+            studentsContainer.innerHTML = "";
+
+            if (!className) return;
+
+            try {
+                const response = await fetch(`${API_URL}/get_students/${className}`);
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    studentsContainer.innerHTML = "<p style='color: gray; font-style: italic;'>Šioje klasėje mokinių nėra.</p>";
+                    return;
+                }
+
+                data.forEach(student => {
+                    const label = document.createElement("label");
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = "students";
+                    checkbox.className = "student-checkbox";
+                    checkbox.value = student.user_id;
+                    
+                    if (currentGroupStudents.includes(student.user_id)) {
+                        checkbox.checked = true;
+                    }
+
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(" " + student.name + " " + student.surname));
+                    studentsContainer.appendChild(label);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant mokinius:", error);
+            }
+        }
+
+        function selectAllStudents() {
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(cb => cb.checked = true);
+        }
+
+        document.getElementById('editGroupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+
+            const payload = {
+                subject: document.getElementById('subject').value,
+                class: document.getElementById('class_select').value,
+                students: selectedStudents
+            };
+
+            if (currentUser.role === 'administrator') {
+                payload.teacher_id = document.getElementById('teacher_select').value;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/groups/edit/${groupId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    window.location.href = 'groups.html';
+                } else {
+                    const result = await response.json();
+                    alert(result.message || "Klaida išsaugant grupę.");
+                }
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        });
+
+        window.onload = initPage;
+    </script>
+</body>
+</html>

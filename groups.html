@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Grupių valdymas</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Grupių valdymas</h1>
+
+        <div class="card">
+            <h2>Sukurti naują grupę</h2>
+            <form id="createGroupForm">
+                <label>Dalyko pavadinimas</label>
+                <input type="text" name="subject" placeholder="Dalyko pavadinimas" required>
+
+                <label>Pasirinkite klasę</label>
+                <select name="class" id="class_select" onchange="fetchStudentsByClass()" required>
+                    <option value="">-- Pasirinkite klasę --</option>
+                </select>
+
+                <div id="teacherSelectContainer" style="display: none;">
+                    <label>Paskirti grupės mokytoją</label>
+                    <select name="teacher_id" id="teacher_select">
+                        <option value="">-- Pasirinkite mokytoją --</option>
+                    </select>
+                </div>
+
+                <label>Pasirinkite mokinius</label>
+                <div>
+                    <button type="button" class="btn btn-secondary" onclick="selectAllNewGroupStudents()">Pasirinkti visus mokinius</button>
+                    <div id="students_container" class="scroll-box">
+                        <p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Sukurti grupę</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Esamos grupės</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Dalykas</th>
+                            <th>Klasė</th>
+                            <th>Mokytojas</th>
+                            <th>Mokiniai</th>
+                            <th>Veiksmai</th>
+                        </tr>
+                    </thead>
+                    <tbody id="groupsTableBody">
+                        <!-- Duomenys kraunami dinamiškai -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <a href="dashboard.html" class="btn-back">← Grįžti į pagrindinį</a>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!currentUser.user_id) {
+            window.location.href = 'index.html';
+        }
+
+        async function initPage() {
+            if (currentUser.role === 'administrator') {
+                document.getElementById('teacherSelectContainer').style.display = 'block';
+                document.getElementById('teacher_select').required = true;
+                loadTeachers();
+            }
+
+            loadClasses();
+            loadGroups();
+        }
+
+        // Užkrauna galimas klases
+        async function loadClasses() {
+            try {
+                const response = await fetch(`${API_URL}/api/classes`);
+                const classes = await response.json();
+
+                const select = document.getElementById('class_select');
+                select.innerHTML = '<option value="">-- Pasirinkite klasę --</option>';
+
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = `${c} klasė`;
+                    select.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant klases:", error);
+            }
+        }
+
+        // Užkrauna mokytojus (administratoriui)
+        async function loadTeachers() {
+            try {
+                const response = await fetch(`${API_URL}/api/teachers`);
+                const teachers = await response.json();
+
+                const select = document.getElementById('teacher_select');
+                select.innerHTML = '<option value="">-- Pasirinkite mokytoją --</option>';
+
+                teachers.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.user_id;
+                    opt.textContent = `${t.name} ${t.surname}`;
+                    select.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant mokytojus:", error);
+            }
+        }
+
+        // Užkrauna mokinius pagal pasirinktą klasę
+        async function fetchStudentsByClass() {
+            const className = document.getElementById("class_select").value;
+            const studentsContainer = document.getElementById("students_container");
+            studentsContainer.innerHTML = "";
+
+            if (!className) {
+                studentsContainer.innerHTML = '<p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/get_students/${className}`);
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    studentsContainer.innerHTML = "<p style='color: gray; font-style: italic;'>Šioje klasėje mokinių nėra.</p>";
+                    return;
+                }
+
+                data.forEach(student => {
+                    const label = document.createElement("label");
+                    label.style.display = "block";
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.name = "students";
+                    checkbox.className = "student-checkbox";
+                    checkbox.value = student.user_id;
+
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(` ${student.name} ${student.surname}`));
+                    studentsContainer.appendChild(label);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant mokinius:", error);
+            }
+        }
+
+        function selectAllNewGroupStudents() {
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(cb => cb.checked = true);
+        }
+
+        // Užkrauna esamas grupes
+        async function loadGroups() {
+            try {
+                const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const groups = await response.json();
+
+                const tbody = document.getElementById('groupsTableBody');
+                tbody.innerHTML = '';
+
+                groups.forEach(g => {
+                    const tr = document.createElement('tr');
+                    
+                    const isOwner = g.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
+                    const isActualOwner = g.teacher_id == currentUser.user_id;
+
+                    const ownerBadge = isActualOwner ? ' <span class="badge-owner">Mano grupė</span>' : '';
+                    const studentsText = (g.students && g.students.length > 0) 
+                        ? g.students.join(", ") 
+                        : '<span style="color: gray; font-style: italic;">Grupėje mokinių nėra</span>';
+
+                    let actionsTd = '';
+                    if (isOwner) {
+                        actionsTd = `
+                            <a href="edit_group.html?id=${g.subject_id}">Redaguoti</a> | 
+                            <a href="#" onclick="deleteGroup(${g.subject_id}); return false;">Ištrinti</a>
+                        `;
+                    } else {
+                        actionsTd = '<span style="color: #bdc3c7;">Neturite teisių</span>';
+                    }
+
+                    tr.innerHTML = `
+                        <td><strong>${g.subject}</strong>${ownerBadge}</td>
+                        <td>${g.class} klasė</td>
+                        <td>${g.teacher || '-'}</td>
+                        <td>${studentsText}</td>
+                        <td>${actionsTd}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Klaida užkraunant grupes:", error);
+            }
+        }
+
+        // Naujos grupės kūrimas
+        document.getElementById('createGroupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
+
+            const payload = {
+                subject: formData.get('subject'),
+                class: formData.get('class'),
+                teacher_id: currentUser.role === 'administrator' ? formData.get('teacher_id') : currentUser.user_id,
+                students: selectedStudents
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/api/groups/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    this.reset();
+                    document.getElementById("students_container").innerHTML = '<p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
+                    loadGroups();
+                } else {
+                    const result = await response.json();
+                    alert(result.message || "Klaida kuriant grupę.");
+                }
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        });
+
+        // Grupės ištrynimas
+        async function deleteGroup(subjectId) {
+            if (!confirm('Ar tikrai norite ištrinti šią grupę?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/groups/delete/${subjectId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadGroups();
+                } else {
+                    alert("Klaida trinant grupę.");
+                }
+            } catch (error) {
+                alert("Nepavyko prisijungti prie serverio.");
+            }
+        }
+
+        window.onload = initPage;
+    </script>
+</body>
+</html>
