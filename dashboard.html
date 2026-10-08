@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Elektroninis dienynas</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Elektroninis dienynas</h1>
+            
+            <span class="user-info">
+                Prisijungęs vartotojas: <strong id="userName">Kraunama...</strong>
+            </span>
+
+            <hr>
+
+            <h3>Meniu pasirinkimai:</h3>
+            <ul class="menu-list" id="menuList">
+                <!-- Meniu punktai bus sugeneruoti pagal vartotojo rolę -->
+            </ul>
+
+            <button onclick="logout()" class="btn btn-logout" style="border: none; cursor: pointer;">Atsijungti iš sistemos</button>
+        </div>
+    </div>
+
+    <script>
+        // Tikriname, ar vartotojas prisijungęs
+        const userJson = localStorage.getItem('user');
+        if (!userJson) {
+            window.location.href = 'index.html';
+        }
+
+        const user = JSON.parse(userJson);
+
+        // Atvaizduojame vartotojo vardą ir pavardę
+        document.getElementById('userName').textContent = `${user.name} ${user.surname}`;
+
+        const menuList = document.getElementById('menuList');
+        menuList.innerHTML = '';
+
+        // Pažymiai ir namų darbai (mokytojui ir mokiniui)
+        if (user.role === 'teacher' || user.role === 'student') {
+            menuList.innerHTML += `
+                <li><a href="grades.html">📊 Pažymiai ir vertinimai</a></li>
+                <li><a href="homework.html">📚 Namų darbų užduotys</a></li>
+            `;
+        }
+
+        // Grupių valdymas (mokytojui ir administratoriui)
+        if (user.role === 'teacher' || user.role === 'administrator') {
+            menuList.innerHTML += `
+                <li><a href="groups.html">👥 Grupių ir akademinių dalykų valdymas</a></li>
+            `;
+        }
+
+        // Vartotojų valdymas (tik administratoriui)
+        if (user.role === 'administrator') {
+            menuList.innerHTML += `
+                <li><a href="administration.html">⚙️ Vartotojų kūrimas ir valdymas</a></li>
+            `;
+        }
+
+        // Atsijungimo funkcija
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

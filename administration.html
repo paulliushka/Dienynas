@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="lt">
+    <head>
+        <meta charset="UTF-8">
+        <title>Vartotojų kūrimas ir valdymas</title>
+        <link rel="icon" href="favicon.svg">
+        <link rel="stylesheet" href="style.css">
+        <script src="config.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Vartotojų kūrimas ir valdymas</h1>
+            
+            <div class="card">
+                <h2>Sukurti naują vartotoją</h2>
+                <form id="addUserForm">
+                    <label>Prisijungimo vardas</label>
+                    <input type="text" name="username" placeholder="Prisijungimo vardas" required>
+                    
+                    <label>Vardas</label>
+                    <input type="text" name="name" placeholder="Vardas" required>
+                    
+                    <label>Pavardė</label>
+                    <input type="text" name="surname" placeholder="Pavardė" required>
+
+                    <label>Slaptažodis</label>
+                    <input type="password" name="password" placeholder="Slaptažodis" required>
+                    
+                    <label>Rolė</label>
+                    <select name="role" required onchange="toggleClassField()">
+                        <option value="student">Mokinys</option>
+                        <option value="teacher">Mokytojas</option>
+                        <option value="administrator">Administratorius</option>
+                    </select>
+                    
+                    <label>Klasė (tik mokiniams)</label>
+                    <input type="text" name="class" placeholder="Klasė" id="class" required>
+                    
+                    <button type="submit" class="btn btn-primary">Sukurti</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Esami vartotojai</h2>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Vartotojo vardas</th>
+                                <th>Vardas Pavardė</th>
+                                <th>Rolė</th>
+                                <th>Klasė</th>
+                                <th>Veiksmai</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- Duomenys bus užkrauti dinamiškai -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <a href="dashboard.html" class="btn-back">← Grįžti į pagrindinį</a>
+        </div>
+
+        <script>
+            function toggleClassField() {
+                var role = document.querySelector('select[name="role"]').value;
+                var classField = document.getElementById('class');
+                if (role === 'student') {
+                    classField.disabled = false;
+                    classField.required = true;
+                } else {
+                    classField.disabled = true;
+                    classField.required = false;
+                    classField.value = "";
+                }
+            }
+
+            // Užkrauna vartotojų sąrašą iš API
+            async function loadUsers() {
+                try {
+                    const response = await fetch(`${API_URL}/api/users`);
+                    const users = await response.json();
+
+                    const tbody = document.getElementById('usersTableBody');
+                    tbody.innerHTML = '';
+
+                    const roleTranslations = {
+                        'student': 'Mokinys',
+                        'teacher': 'Mokytojas',
+                        'administrator': 'Administratorius'
+                    };
+
+                    users.forEach(u => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${u.user_id}</td>
+                            <td>${u.username}</td>
+                            <td><strong>${u.name} ${u.surname}</strong></td>
+                            <td>${roleTranslations[u.role] || u.role}</td>
+                            <td>${u.class ? u.class : '-'}</td>
+                            <td>
+                                <a href="edit_user.html?id=${u.user_id}">Redaguoti</a> | 
+                                <a href="#" onclick="deleteUser(${u.user_id}); return false;">Ištrinti</a>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (error) {
+                    console.error("Klaida užkraunant vartotojus:", error);
+                }
+            }
+
+            // Naujo vartotojo pridėjimas
+            document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch(`${API_URL}/api/users/add`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        this.reset();
+                        toggleClassField();
+                        loadUsers();
+                    } else {
+                        alert(result.message || "Klaida pridedant vartotoją.");
+                    }
+                } catch (error) {
+                    alert("Nepavyko prisijungti prie serverio.");
+                }
+            });
+
+            // Vartotojo trynimas
+            async function deleteUser(userId) {
+                if (!confirm('Ar tikrai norite ištrinti šį vartotoją ir visus jo prisijungimus?')) return;
+
+                try {
+                    const response = await fetch(`${API_URL}/api/users/delete/${userId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        loadUsers();
+                    } else {
+                        alert("Klaida trinant vartotoją.");
+                    }
+                } catch (error) {
+                    alert("Nepavyko prisijungti prie serverio.");
+                }
+            }
+
+            window.onload = function() {
+                toggleClassField();
+                loadUsers();
+            };
+        </script>
+    </body>
+</html>

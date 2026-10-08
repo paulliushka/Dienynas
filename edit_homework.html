@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="lt">
+    <head>
+        <meta charset="UTF-8">
+        <title>Redaguoti namų darbą</title>
+        <link rel="icon" href="favicon.svg">
+        <link rel="stylesheet" href="style.css">
+        <script src="config.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card">
+                <h2>Redaguoti namų darbą</h2>
+                <form id="editHomeworkForm">
+                    <label>Dalykas</label>
+                    <input type="text" id="subject" disabled>
+                    
+                    <label>Užduotis</label>
+                    <input type="text" name="task" id="task" required>
+                    
+                    <label>Atlikti iki</label>
+                    <input type="date" name="due_date" id="due_date" required>
+                    
+                    <button type="submit" class="btn btn-primary">Išsaugoti pakeitimus</button>
+                </form>
+                <br>
+                <a href="homework.html" class="btn-back">Grįžti atgal</a>
+            </div>
+        </div>
+
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const homeworkId = urlParams.get('id');
+
+            if (!homeworkId) {
+                alert("Nenurodytas namų darbo ID.");
+                window.location.href = 'homework.html';
+            }
+
+            // Užkrauname namų darbo duomenis
+            async function loadHomework() {
+                try {
+                    const response = await fetch(`${API_URL}/api/homework`);
+                    const homeworks = await response.json();
+                    
+                    const item = homeworks.find(h => h.homework_id == homeworkId);
+                    if (!item) {
+                        alert("Namų darbas nerastas.");
+                        window.location.href = 'homework.html';
+                        return;
+                    }
+
+                    document.getElementById('subject').value = item.subject_display || '';
+                    document.getElementById('task').value = item.task || '';
+                    document.getElementById('due_date').value = item.due_date || '';
+                } catch (error) {
+                    console.error("Klaida užkraunant namų darbą:", error);
+                }
+            }
+
+            // Išsaugome pakeitimus
+            document.getElementById('editHomeworkForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch(`${API_URL}/api/homework/edit/${homeworkId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        window.location.href = 'homework.html';
+                    } else {
+                        const result = await response.json();
+                        alert(result.message || "Klaida išsaugant namų darbą.");
+                    }
+                } catch (error) {
+                    alert("Nepavyko prisijungti prie serverio.");
+                }
+            });
+
+            window.onload = loadHomework;
+        </script>
+    </body>
+</html>
