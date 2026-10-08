@@ -47,7 +47,7 @@
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
+                        <tr id="gradesTableHeader">
                             <th>Mokinys</th>
                             <th>Dalykas</th>
                             <th>Pažymys</th>
@@ -55,7 +55,7 @@
                             <th>Data</th>
                             <th>Komentaras</th>
                             <th>Mokytojas</th>
-                            <th>Veiksmai</th>
+                            <!-- 'Veiksmai' th pridedamas dinamiškai per JS tik ne mokinio rolei -->
                         </tr>
                     </thead>
                     <tbody id="gradesTableBody">
@@ -72,11 +72,10 @@
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
         if (!currentUser.user_id) {
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }
 
         async function initPage() {
-            // Rodyti kūrimo formą tik mokytojams arba adminams
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
                 document.getElementById('addGradeCard').style.display = 'block';
                 document.getElementById('grade_date').valueAsDate = new Date();
@@ -86,7 +85,6 @@
             loadGrades();
         }
 
-        // Užkrauna mokytojo dėstomas grupes
         async function loadTeacherGroups() {
             try {
                 const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=${currentUser.role}`);
@@ -106,7 +104,6 @@
             }
         }
 
-        // Užkrauna mokinius pagal pasirinktą grupę
         async function loadStudentsBySubject() {
             const subjectId = document.getElementById('subject_select').value;
             const select = document.getElementById('student_select');
@@ -134,37 +131,35 @@
             }
         }
 
-        // Užkrauna pažymius
         async function loadGrades() {
             try {
                 const response = await fetch(`${API_URL}/api/grades?user_id=${currentUser.user_id}&role=${currentUser.role}`);
                 const grades = await response.json();
 
+                const theader = document.getElementById('gradesTableHeader');
                 const tbody = document.getElementById('gradesTableBody');
                 tbody.innerHTML = '';
 
+                const isStudent = currentUser.role === 'student';
+
+                // Jei ne mokinys ir „Veiksmai“ dar nepridėti – įtraukiame antraštę
+                if (!isStudent && !document.getElementById('actionsHeader')) {
+                    const th = document.createElement('th');
+                    th.id = 'actionsHeader';
+                    th.textContent = 'Veiksmai';
+                    theader.appendChild(th);
+                }
+
                 if (grades.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:gray;">Pažymių nėra.</td></tr>';
+                    const colSpan = isStudent ? 7 : 8;
+                    tbody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:gray;">Pažymių nėra.</td></tr>`;
                     return;
                 }
 
                 grades.forEach(g => {
                     const tr = document.createElement('tr');
 
-                    // Saugumo / teisių patikra
-                    const isOwner = g.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
-
-                    let actionsTd = '';
-                    if (isOwner) {
-                        actionsTd = `
-                            <a href="edit_grade.html?id=${g.grade_id}">Redaguoti</a> | 
-                            <a href="#" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>
-                        `;
-                    } else {
-                        actionsTd = '<span style="color: #bdc3c7;">Neturite teisių</span>';
-                    }
-
-                    tr.innerHTML = `
+                    let rowHtml = `
                         <td><strong>${g.student}</strong></td>
                         <td>${g.subject_display}</td>
                         <td><span class="badge-grade">${g.grade}</span></td>
@@ -172,8 +167,18 @@
                         <td>${g.date}</td>
                         <td>${g.comment || '-'}</td>
                         <td>${g.teacher || '-'}</td>
-                        <td>${actionsTd}</td>
                     `;
+
+                    if (!isStudent) {
+                        const isOwner = g.teacher_id == currentUser.user_id || currentUser.role === 'administrator';
+                        const actionsTd = isOwner 
+                            ? `<a href="edit_grade?id=${g.grade_id}">Redaguoti</a> | <a href="#" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>`
+                            : '<span style="color: #bdc3c7;">Neturite teisių</span>';
+                        
+                        rowHtml += `<td>${actionsTd}</td>`;
+                    }
+
+                    tr.innerHTML = rowHtml;
                     tbody.appendChild(tr);
                 });
             } catch (error) {
@@ -181,7 +186,6 @@
             }
         }
 
-        // Naujo pažymio pridėjimas
         document.getElementById('addGradeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -216,7 +220,6 @@
             }
         });
 
-        // Pažymio trynimas
         async function deleteGrade(gradeId) {
             if (!confirm('Ar tikrai norite ištrinti šį pažymį?')) return;
 
