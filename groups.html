@@ -88,11 +88,9 @@
         async function initPage() {
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
                 document.getElementById('addGroupCard').style.display = 'block';
+                document.getElementById('teacherSelectContainer').style.display = 'block';
 
-                if (currentUser.role === 'administrator') {
-                    document.getElementById('teacherSelectContainer').style.display = 'block';
-                    await loadTeachers();
-                }
+                await loadTeachers();
                 await loadClasses();
             }
 
@@ -136,6 +134,11 @@
                     checkbox.name = "teachers";
                     checkbox.className = "teacher-checkbox";
                     checkbox.value = t.user_id;
+
+                    // Jei prisijungęs vartotojas yra mokytojas, jį užžymime automatiškai
+                    if (currentUser.role === 'teacher' && Number(t.user_id) === Number(currentUser.user_id)) {
+                        checkbox.checked = true;
+                    }
 
                     label.appendChild(checkbox);
                     label.appendChild(document.createTextNode(` ${t.name} ${t.surname}`));
@@ -237,16 +240,11 @@
 
             const formData = new FormData(this);
             const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
-            
-            let selectedTeachers = [];
-            if (currentUser.role === 'administrator') {
-                selectedTeachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
-                if (selectedTeachers.length === 0) {
-                    showError('formErrorBox', "Pasirinkite bent vieną mokytoją!");
-                    return;
-                }
-            } else {
-                selectedTeachers = [currentUser.user_id];
+            const selectedTeachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
+
+            if (selectedTeachers.length === 0 && currentUser.role === 'administrator') {
+                showError('formErrorBox', "Pasirinkite bent vieną mokytoją!");
+                return;
             }
 
             const payload = {
@@ -271,6 +269,7 @@
                     classSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
                     document.getElementById("students_container").innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
+                    await loadTeachers();
                     loadGroups();
                 } else {
                     const result = await response.json();
