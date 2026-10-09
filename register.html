@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Paskyros registracija</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+</head>
+<body class="centered-page-body">
+    <div class="card register-card">
+        <h1 style="font-size: 18px; margin-bottom: 6px; color: #3b5998;">Mokinio registracija</h1>
+        <p style="color: #666; font-size: 11px; margin-bottom: 16px;">Įveskite mokyklos suteiktą vienkartinį registracijos kodą.</p>
+
+        <div id="errorBox" class="error-message"></div>
+        <div id="successBox" class="success-message"></div>
+
+        <!-- 1 ŽINGSNIS: Registracijos kodo įvedimas -->
+        <form id="codeForm" onsubmit="handleVerifyCode(event)">
+            <div class="form-group">
+                <label for="regCode">Registracijos kodas</label>
+                <input type="text" id="regCode" placeholder="pvz. REG-8F32A9" required style="text-transform: uppercase;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Tikrinti kodą</button>
+            <a href="/" class="btn-back" style="display: block; text-align: center; margin-top: 10px;">Atgal į prisijungimą</a>
+        </form>
+
+        <!-- 2 ŽINGSNIS: Vartotojo duomenų užpildymas -->
+        <form id="registerForm" class="step-2" onsubmit="handleCompleteRegistration(event)">
+            <div class="form-group">
+                <label>Vardas ir Pavardė</label>
+                <input type="text" id="dispFullName" class="readonly-input" readonly>
+            </div>
+            <div class="form-group">
+                <label>Klasė</label>
+                <input type="text" id="dispClass" class="readonly-input" readonly>
+            </div>
+            <div class="form-group">
+                <label for="regEmail">El. paštas</label>
+                <input type="text" id="regEmail" placeholder="vardas@pavyzdys.lt" required>
+            </div>
+            <div class="form-group">
+                <label for="regUsername">Vartotojo vardas (tik Lotyniškos raidės ir skaičiai)</label>
+                <input type="text" id="regUsername" placeholder="pvz. jonas123" required>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Slaptažodis</label>
+                <input type="password" id="regPassword" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Užbaigti registraciją</button>
+        </form>
+    </div>
+
+    <script>
+        let currentRegCode = '';
+
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+            document.getElementById('successBox').style.display = 'none';
+        }
+
+        function showSuccess(msg) {
+            const box = document.getElementById('successBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+            document.getElementById('errorBox').style.display = 'none';
+        }
+
+        async function handleVerifyCode(e) {
+            e.preventDefault();
+            const code = document.getElementById('regCode').value.trim().toUpperCase();
+
+            try {
+                const res = await fetch(`${API_URL}/api/register/verify-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reg_code: code })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    currentRegCode = code;
+                    document.getElementById('codeForm').style.display = 'none';
+                    document.getElementById('dispFullName').value = `${data.user.name} ${data.user.surname}`;
+                    document.getElementById('dispClass').value = data.user.class || 'Nenurodyta';
+                    document.getElementById('registerForm').style.display = 'block';
+                    document.getElementById('errorBox').style.display = 'none';
+                } else {
+                    showError(data.message || 'Neteisingas arba panaudotas kodas!');
+                }
+            } catch (err) {
+                showError('Tinklo klaida. Bandykite vėliau.');
+            }
+        }
+
+        async function handleCompleteRegistration(e) {
+            e.preventDefault();
+            const email = document.getElementById('regEmail').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const res = await fetch(`${API_URL}/api/register/complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        reg_code: currentRegCode,
+                        email: email,
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    showSuccess('Registracija sėkminga! Peradresuojama į prisijungimą...');
+                    setTimeout(() => { window.location.href = '/'; }, 2000);
+                } else {
+                    showError(data.message || 'Klaida registruojantis.');
+                }
+            } catch (err) {
+                showError('Tinklo klaida. Bandykite vėliau.');
+            }
+        }
+    </script>
+</body>
+</html>

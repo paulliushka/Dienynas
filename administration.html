@@ -12,11 +12,20 @@
 <body>
     <div class="container">
         <h1>Vartotojų kūrimas ir valdymas</h1>
+        
         <div class="card">
             <h2>Sukurti naują vartotoją</h2>
+            <div class="info-box">
+                <strong>Pastaba:</strong> Jei kuriate mokinį ir norite, kad jis pats užsiregistruotų (įvestų savo el. paštą, vartotojo vardą ir slaptažodį), <b>palikite vartotojo vardo ir slaptažodžio laukus tuščius</b>. Sistema automatiškai sugeneruos vienkartinį registracijos kodą!
+            </div>
+            
+            <div id="regCodeResult" class="info-box info-box-success" style="display: none;">
+                <strong>Vartotojas sėkmingai sukurtas!</strong> Mokinio registracijos kodas: <span id="generatedCode" class="code-display"></span>
+            </div>
+
             <form id="addUserForm">
-                <label>Prisijungimo vardas</label>
-                <input type="text" name="username" placeholder="Prisijungimo vardas" required>
+                <label>Prisijungimo vardas (neprivaloma mokiniams)</label>
+                <input type="text" name="username" placeholder="Palikite tuščią kviestinei registracijai">
                 
                 <label>Vardas</label>
                 <input type="text" name="name" placeholder="Vardas" required>
@@ -24,8 +33,11 @@
                 <label>Pavardė</label>
                 <input type="text" name="surname" placeholder="Pavardė" required>
 
-                <label>Slaptažodis</label>
-                <input type="password" name="password" placeholder="Slaptažodis" required>
+                <label>Slaptažodis (neprivaloma mokiniams)</label>
+                <input type="password" name="password" placeholder="Palikite tuščią kviestinei registracijai">
+
+                <label>El. paštas (neprivaloma)</label>
+                <input type="text" name="email" placeholder="el.pastas@pavyzdys.lt">
                 
                 <label>Rolė</label>
                 <select name="role" required onchange="toggleClassField()">
@@ -52,6 +64,7 @@
                             <th>Vardas Pavardė</th>
                             <th>Rolė</th>
                             <th>Klasė</th>
+                            <th>Būsena</th>
                             <th>Veiksmai</th>
                         </tr>
                     </thead>
@@ -93,13 +106,15 @@
                 };
 
                 users.forEach(u => {
+                    const statusText = u.status === 'pending' ? '<span style="color: #d9534f; font-weight: bold;">Laukia registracijos</span>' : 'Aktyvus';
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${u.user_id}</td>
-                        <td>${u.username}</td>
+                        <td>${u.username ? u.username : '- (Kvietimas)'}</td>
                         <td><strong>${u.name} ${u.surname}</strong></td>
                         <td>${roleTranslations[u.role] || u.role}</td>
                         <td>${u.class ? u.class : '-'}</td>
+                        <td>${statusText}</td>
                         <td>
                             <a href="edit_user?id=${u.user_id}">Redaguoti</a> | 
                             <a href="javascript:void(0);" onclick="deleteUser(${u.user_id}); return false;">Ištrinti</a>
@@ -131,6 +146,14 @@
                     this.reset();
                     toggleClassField();
                     loadUsers();
+
+                    const resultBox = document.getElementById('regCodeResult');
+                    if (result.reg_code) {
+                        document.getElementById('generatedCode').textContent = result.reg_code;
+                        resultBox.style.display = 'block';
+                    } else {
+                        resultBox.style.display = 'none';
+                    }
                 } else {
                     alert(result.message || "Klaida pridedant vartotoją.");
                 }
