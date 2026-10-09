@@ -65,8 +65,10 @@
 
         function showError(msg) {
             const box = document.getElementById('errorBox');
-            box.textContent = msg;
-            box.style.display = 'block';
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
         }
 
         function toggleClassField() {
@@ -92,7 +94,11 @@
                 document.getElementById('email').value = user.email || '';
                 document.getElementById('name').value = user.name || '';
                 document.getElementById('surname').value = user.surname || '';
-                document.getElementById('role').value = user.role || 'student';
+                
+                const roleSelect = document.getElementById('role');
+                roleSelect.value = user.role || 'student';
+                roleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
                 document.getElementById('class').value = user.class || '';
                 
                 toggleClassField();

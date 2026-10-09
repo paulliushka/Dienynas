@@ -21,6 +21,8 @@
         
         <div class="card">
             <h2>Sukurti naują vartotoją</h2>
+            <div id="formErrorBox" class="error-message"></div>
+
             <div class="info-box">
                 <strong>Pastaba:</strong> Visiems naujiems vartotojams automatiškai sugeneruojamas registracijos kodas.
             </div>
@@ -37,7 +39,7 @@
                 <input type="text" name="surname" placeholder="Pavardė" required>
                 
                 <label>Rolė</label>
-                <select name="role" required onchange="toggleClassField()">
+                <select name="role" id="roleSelect" required onchange="toggleClassField()">
                     <option value="student">Mokinys</option>
                     <option value="teacher">Mokytojas</option>
                     <option value="administrator">Administratorius</option>
@@ -52,6 +54,7 @@
 
         <div class="card">
             <h2>Esami vartotojai</h2>
+            <div id="tableErrorBox" class="error-message"></div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -74,8 +77,20 @@
 
     <script src="select.js"></script>
     <script>
+        function showError(boxId, msg) {
+            const box = document.getElementById(boxId);
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
+        }
+
         function toggleClassField() {
-            const role = document.querySelector('select[name="role"]').value;
+            const role = document.getElementById('roleSelect').value;
             const classField = document.getElementById('class');
             if (role === 'student') {
                 classField.disabled = false;
@@ -127,12 +142,13 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                console.error("Klaida užkraunant vartotojus:", error);
+                showError('tableErrorBox', "Klaida užkraunant vartotojus.");
             }
         }
 
         document.getElementById('addUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            clearErrors();
             
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
@@ -148,6 +164,11 @@
                 const result = await response.json();
                 if (response.ok) {
                     this.reset();
+                    
+                    // Sinchronizuojame custom select lauką su pradinėmis reikšmėmis
+                    const roleSelect = document.getElementById('roleSelect');
+                    roleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
                     toggleClassField();
                     loadUsers();
 
@@ -159,15 +180,16 @@
                         resultBox.style.display = 'none';
                     }
                 } else {
-                    alert(result.message || "Klaida pridedant vartotoją.");
+                    showError('formErrorBox', result.message || "Klaida pridedant vartotoją.");
                 }
             } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
+                showError('formErrorBox', "Nepavyko prisijungti prie serverio.");
             }
         });
 
         async function deleteUser(userId) {
             if (!confirm('Ar tikrai norite ištrinti šį vartotoją?')) return;
+            clearErrors();
 
             try {
                 const response = await fetch(`${API_URL}/api/users/delete/${userId}`, {
@@ -178,10 +200,10 @@
                 if (response.ok) {
                     loadUsers();
                 } else {
-                    alert("Klaida trinant vartotoją.");
+                    showError('tableErrorBox', "Klaida trinant vartotoją.");
                 }
             } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
+                showError('tableErrorBox', "Nepavyko prisijungti prie serverio.");
             }
         }
 

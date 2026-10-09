@@ -21,6 +21,8 @@
 
         <div class="card" id="addGroupCard" style="display: none;">
             <h2>Sukurti naują grupę</h2>
+            <div id="formErrorBox" class="error-message"></div>
+
             <form id="createGroupForm">
                 <label>Grupės pavadinimas</label>
                 <input type="text" name="group_name" placeholder="Pvz., Matematika A lygis" required>
@@ -49,6 +51,7 @@
 
         <div class="card">
             <h2>Esamos grupės</h2>
+            <div id="tableErrorBox" class="error-message"></div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -70,6 +73,18 @@
 
     <script src="select.js"></script>
     <script>
+        function showError(boxId, msg) {
+            const box = document.getElementById(boxId);
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
+        }
+
         async function initPage() {
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
                 document.getElementById('addGroupCard').style.display = 'block';
@@ -99,8 +114,10 @@
                     opt.textContent = `${c} klasė`;
                     select.appendChild(opt);
                 });
+                
+                select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                console.error("Klaida užkraunant klases:", error);
+                showError('formErrorBox', "Klaida užkraunant klases.");
             }
         }
 
@@ -125,7 +142,7 @@
                     container.appendChild(label);
                 });
             } catch (error) {
-                console.error("Klaida užkraunant mokytojus:", error);
+                showError('formErrorBox', "Klaida užkraunant mokytojus.");
             }
         }
 
@@ -161,7 +178,7 @@
                     studentsContainer.appendChild(label);
                 });
             } catch (error) {
-                console.error("Klaida užkraunant mokinius:", error);
+                showError('formErrorBox', "Klaida užkraunant mokinius.");
             }
         }
 
@@ -212,12 +229,13 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                console.error("Klaida užkraunant grupes:", error);
+                showError('tableErrorBox', "Klaida užkraunant grupes.");
             }
         }
 
         document.getElementById('createGroupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            clearErrors();
 
             const formData = new FormData(this);
             const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
@@ -246,19 +264,24 @@
 
                 if (response.ok) {
                     this.reset();
+                    
+                    const classSelect = document.getElementById('class_select');
+                    classSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
                     document.getElementById("students_container").innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
                     loadGroups();
                 } else {
                     const result = await response.json();
-                    alert(result.message || "Klaida kuriant grupę.");
+                    showError('formErrorBox', result.message || "Klaida kuriant grupę.");
                 }
             } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
+                showError('formErrorBox', "Nepavyko prisijungti prie serverio.");
             }
         });
 
         async function deleteGroup(groupId) {
             if (!confirm('Ar tikrai norite ištrinti šią grupę?')) return;
+            clearErrors();
 
             try {
                 const response = await fetch(`${API_URL}/api/groups/delete/${groupId}`, {
@@ -269,10 +292,10 @@
                 if (response.ok) {
                     loadGroups();
                 } else {
-                    alert("Klaida trinant grupę.");
+                    showError('tableErrorBox', "Klaida trinant grupę.");
                 }
             } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
+                showError('tableErrorBox', "Nepavyko prisijungti prie serverio.");
             }
         }
 

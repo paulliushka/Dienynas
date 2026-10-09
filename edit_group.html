@@ -62,8 +62,10 @@
 
         function showError(msg) {
             const box = document.getElementById('errorBox');
-            box.textContent = msg;
-            box.style.display = 'block';
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
         }
 
         async function initPage() {
@@ -88,6 +90,8 @@
                     classSelect.appendChild(opt);
                 });
 
+                classSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
                 if (currentUser.role === 'administrator' || currentUser.role === 'teacher') {
                     document.getElementById('teacher_select_container').style.display = 'block';
                     await loadTeachers();
@@ -100,24 +104,28 @@
         }
 
         async function loadTeachers() {
-            const response = await fetch(`${API_URL}/api/teachers`, { credentials: 'include' });
-            const teachers = await response.json();
-            const container = document.getElementById('teachers_container');
-            container.innerHTML = '';
+            try {
+                const response = await fetch(`${API_URL}/api/teachers`, { credentials: 'include' });
+                const teachers = await response.json();
+                const container = document.getElementById('teachers_container');
+                container.innerHTML = '';
 
-            teachers.forEach(t => {
-                const label = document.createElement("label");
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox"; 
-                checkbox.name = "teachers"; 
-                checkbox.className = "teacher-checkbox"; 
-                checkbox.value = t.user_id;
-                
-                if (currentGroupTeachers.includes(t.user_id)) checkbox.checked = true;
-                label.appendChild(checkbox); 
-                label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
-                container.appendChild(label);
-            });
+                teachers.forEach(t => {
+                    const label = document.createElement("label");
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox"; 
+                    checkbox.name = "teachers"; 
+                    checkbox.className = "teacher-checkbox"; 
+                    checkbox.value = t.user_id;
+                    
+                    if (currentGroupTeachers.includes(t.user_id)) checkbox.checked = true;
+                    label.appendChild(checkbox); 
+                    label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
+                    container.appendChild(label);
+                });
+            } catch (err) {
+                showError("Klaida kraunant mokytojų sąrašą.");
+            }
         }
 
         async function fetchStudentsByClass() {
@@ -126,22 +134,26 @@
             studentsContainer.innerHTML = "";
             if (!className) return;
 
-            const response = await fetch(`${API_URL}/get_students/${className}`, { credentials: 'include' });
-            const data = await response.json();
+            try {
+                const response = await fetch(`${API_URL}/get_students/${className}`, { credentials: 'include' });
+                const data = await response.json();
 
-            data.forEach(student => {
-                const label = document.createElement("label");
-                const checkbox = document.createElement("input");
-                checkbox.type = "checkbox"; 
-                checkbox.name = "students"; 
-                checkbox.className = "student-checkbox"; 
-                checkbox.value = student.user_id;
+                data.forEach(student => {
+                    const label = document.createElement("label");
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox"; 
+                    checkbox.name = "students"; 
+                    checkbox.className = "student-checkbox"; 
+                    checkbox.value = student.user_id;
 
-                if (currentGroupStudents.includes(student.user_id)) checkbox.checked = true;
-                label.appendChild(checkbox); 
-                label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
-                studentsContainer.appendChild(label);
-            });
+                    if (currentGroupStudents.includes(student.user_id)) checkbox.checked = true;
+                    label.appendChild(checkbox); 
+                    label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
+                    studentsContainer.appendChild(label);
+                });
+            } catch (err) {
+                showError("Klaida kraunant mokinių sąrašą.");
+            }
         }
 
         function selectAllStudents() { 
