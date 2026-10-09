@@ -1,14 +1,17 @@
 class CustomCalendarPicker {
     constructor(inputElement) {
         this.input = inputElement;
+
+        // Pakeičiame tipą į text, kad iOS/Android neatidarytų natūralaus kalendoriaus
+        this.input.type = 'text';
         this.input.readOnly = true;
+        this.input.setAttribute('autocomplete', 'off');
+        this.input.setAttribute('inputmode', 'none');
         
-        // Užtikriname, kad laukas gautų piktogramos ir atstumų CSS klasę
         this.input.classList.add('custom-calendar-input');
 
         this.today = new Date();
         
-        // Jeigu laukas jau turi reikšmę (YYYY-MM-DD), naudojame ją
         if (this.input.value) {
             const parts = this.input.value.split('-');
             if (parts.length === 3) {
@@ -25,20 +28,17 @@ class CustomCalendarPicker {
     }
 
     init() {
-        // Wrapper elementas
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-calendar-wrapper';
         this.input.parentNode.insertBefore(wrapper, this.input);
         wrapper.appendChild(this.input);
 
-        // Pop-up konteineris
         this.popup = document.createElement('div');
         this.popup.className = 'custom-calendar-popup';
         wrapper.appendChild(this.popup);
 
         this.render();
 
-        // Atidarymas / uždarymas
         this.input.addEventListener('click', (e) => {
             e.stopPropagation();
             document.querySelectorAll('.custom-calendar-popup').forEach(p => {
@@ -64,7 +64,6 @@ class CustomCalendarPicker {
         const firstDay = new Date(this.currentYear, this.currentMonth, 1);
         const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
 
-        // Pirmadienis = 0, Sekmadienis = 6
         let startingDay = firstDay.getDay() - 1;
         if (startingDay === -1) startingDay = 6;
 
@@ -84,12 +83,10 @@ class CustomCalendarPicker {
                 <div class="calendar-day-head">Sek</div>
         `;
 
-        // Tuščios dienos mėnesio pradžioje
         for (let i = 0; i < startingDay; i++) {
             html += `<div class="calendar-day empty"></div>`;
         }
 
-        // Mėnesio dienos
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const formattedMonth = String(this.currentMonth + 1).padStart(2, '0');
             const formattedDay = String(day).padStart(2, '0');
@@ -108,7 +105,6 @@ class CustomCalendarPicker {
         html += `</div>`;
         this.popup.innerHTML = html;
 
-        // Navigacija tarp mėnesių
         this.popup.querySelector('#prevMonth').onclick = (e) => {
             e.stopPropagation();
             this.currentMonth--;
@@ -129,14 +125,11 @@ class CustomCalendarPicker {
             this.render();
         };
 
-        // Dienos pasirinkimas
         this.popup.querySelectorAll('.calendar-day:not(.empty)').forEach(dayEl => {
             dayEl.onclick = (e) => {
                 e.stopPropagation();
                 this.input.value = dayEl.dataset.date;
                 this.popup.classList.remove('show');
-                
-                // Iššaukiame change įvykį formų valdymui
                 this.input.dispatchEvent(new Event('change'));
                 this.render();
             };
@@ -144,7 +137,6 @@ class CustomCalendarPicker {
     }
 }
 
-// Funkcija automatiškai pakeisti visus <input type="date">
 function initCalendarPickers() {
     document.querySelectorAll('input[type="date"]').forEach(input => {
         if (!input.classList.contains('custom-calendar-initialized')) {
