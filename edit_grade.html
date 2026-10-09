@@ -10,6 +10,10 @@
     <script src="config.js"></script>
 </head>
 <body>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id || currentUser.role !== 'teacher') { window.location.href = 'dashboard'; }
+    </script>
     <div class="container">
         <div class="card">
             <h2>Redaguoti pažymį</h2>
@@ -45,68 +49,38 @@
             <a href="grades" class="btn-back">Grįžti atgal</a>
         </div>
     </div>
-
     <script src="calendar.js"></script>
     <script src="select.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const gradeId = urlParams.get('id');
-
-        if (!gradeId) {
-            alert("Nenurodytas pažymio ID.");
-            window.location.href = 'grades';
-        }
+        if (!gradeId) { window.location.href = 'grades'; }
 
         async function loadGrade() {
             try {
                 const response = await fetch(`${API_URL}/api/grades`, { credentials: 'include' });
                 const grades = await response.json();
-                
                 const item = grades.find(g => g.grade_id == gradeId);
-                if (!item) {
-                    alert("Pažymys nerastas.");
-                    window.location.href = 'grades';
-                    return;
-                }
-
+                if (!item) { window.location.href = 'grades'; return; }
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('student').value = item.student || '';
                 document.getElementById('grade').value = item.grade || '';
                 document.getElementById('type').value = item.type || 'Savarankiškas darbas';
                 document.getElementById('date').value = item.date || '';
                 document.getElementById('comment').value = item.comment || '';
-
                 initCalendarPickers();
                 initCustomSelects();
-            } catch (error) {
-                console.error("Klaida užkraunant pažymį:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
         document.getElementById('editGradeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
-
-            try {
-                const response = await fetch(`${API_URL}/api/grades/edit/${gradeId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    window.location.href = 'grades';
-                } else {
-                    const result = await response.json();
-                    alert(result.message || "Klaida išsaugant pažymį.");
-                }
-            } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
-            }
+            const data = Object.fromEntries(new FormData(this).entries());
+            const res = await fetch(`${API_URL}/api/grades/edit/${gradeId}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
+            });
+            if (res.ok) { window.location.href = 'grades'; } else { alert("Klaida."); }
         });
-
         window.onload = loadGrade;
     </script>
 </body>

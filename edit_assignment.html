@@ -10,6 +10,10 @@
     <script src="config.js"></script>
 </head>
 <body>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id || currentUser.role !== 'teacher') { window.location.href = 'dashboard'; }
+    </script>
     <div class="container">
         <div class="card">
             <h2>Redaguoti namų darbą</h2>
@@ -29,64 +33,33 @@
             <a href="assignments" class="btn-back">Grįžti atgal</a>
         </div>
     </div>
-
     <script src="calendar.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const assignmentId = urlParams.get('id');
-
-        if (!assignmentId) {
-            alert("Nenurodytas namų darbo ID.");
-            window.location.href = 'assignments';
-        }
+        if (!assignmentId) { window.location.href = 'assignments'; }
 
         async function loadAssignment() {
             try {
                 const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
                 const assignments = await response.json();
-                
                 const item = assignments.find(a => a.assignment_id == assignmentId);
-                if (!item) {
-                    alert("Užduotis nerasta.");
-                    window.location.href = 'assignments';
-                    return;
-                }
-
+                if (!item) { window.location.href = 'assignments'; return; }
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('task').value = item.task || '';
                 document.getElementById('due_date').value = item.due_date || '';
-                
                 initCalendarPickers();
-            } catch (error) {
-                console.error("Klaida užkraunant namų darbą:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
         document.getElementById('editAssignmentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
-
-            try {
-                const response = await fetch(`${API_URL}/api/assignments/edit/${assignmentId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    window.location.href = 'assignments';
-                } else {
-                    const result = await response.json();
-                    alert(result.message || "Klaida išsaugant namų darbą.");
-                }
-            } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
-            }
+            const data = Object.fromEntries(new FormData(this).entries());
+            const res = await fetch(`${API_URL}/api/assignments/edit/${assignmentId}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
+            });
+            if (res.ok) { window.location.href = 'assignments'; } else { alert("Klaida."); }
         });
-
         window.onload = loadAssignment;
     </script>
 </body>

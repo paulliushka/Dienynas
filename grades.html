@@ -144,6 +144,7 @@
         async function loadGrades() {
             try {
                 const response = await fetch(`${API_URL}/api/grades`, { credentials: 'include' });
+                if (response.status === 401) { window.location.href = '/'; return; }
                 const grades = await response.json();
 
                 const theader = document.getElementById('gradesTableHeader');
@@ -159,7 +160,7 @@
                     theader.appendChild(th);
                 }
 
-                if (grades.length === 0) {
+                if (!Array.isArray(grades) || grades.length === 0) {
                     const colSpan = showActions ? 8 : 7;
                     tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Pažymių nėra.</td></tr>`;
                     return;
