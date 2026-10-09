@@ -83,7 +83,7 @@ p {
 }
 
 /* ==========================================================================
-   3. KORTELĖS IR KONTEINERIAI (FLAT 2015 STYLE)
+   3. KORTELĖS IR KONTEINERIAI
    ========================================================================== */
 .card {
     background: var(--bg-card);
@@ -128,7 +128,9 @@ textarea {
 
 textarea {
     height: auto;
+    min-height: 60px;
     padding: 8px;
+    resize: vertical;
 }
 
 input:focus, 
@@ -140,7 +142,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   5. MYGTUKAI (FLAT 2015 FACEBOOK STYLE)
+   5. MYGTUKAI
    ========================================================================== */
 .btn {
     display: inline-flex;
@@ -196,7 +198,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   6. DASHBOARD (FLAT MĖLYNA FB BAR IR PROFILIS)
+   6. DASHBOARD (PANELĖ IR PROFILIS)
    ========================================================================== */
 .dashboard-header {
     display: flex;
@@ -353,7 +355,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   8. LENTELĖS (2015 FLAT DARK TABLES)
+   8. LENTELĖS
    ========================================================================== */
 .table-responsive {
     width: 100%;
@@ -506,13 +508,12 @@ a:hover {
 }
 
 /* ==========================================================================
-   12. CUSTOM DROPDOWN IR KALENDORIUS
+   12. CUSTOM DROPDOWN IR KALENDORIUS (100% PLOTIS)
    ========================================================================== */
 .custom-calendar-wrapper,
 .custom-select-wrapper {
     position: relative;
-    width: 240px;
-    max-width: 100%;
+    width: 100%;
     box-sizing: border-box;
 }
 
@@ -569,7 +570,7 @@ input[type="date"]::-webkit-inner-spin-button {
     top: calc(100% + 2px);
     left: 0;
     z-index: 1000;
-    width: 240px;
+    width: 100%;
     background-color: var(--bg-card);
     border: 1px solid var(--fb-blue);
     border-radius: 2px;
@@ -578,6 +579,8 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .custom-calendar-popup {
     padding: 10px;
+    width: 280px;
+    max-width: 100%;
 }
 
 .custom-select-options {
@@ -751,131 +754,4 @@ input[type="date"]::-webkit-inner-spin-button {
     border: 1px solid var(--border-color);
     display: inline-block;
     margin-top: 4px;
-}
-
-/* ==========================================================================
-   14. MOBILUS REŽIMAS (PWA PROGRAMĖLĖS PATIRTIS)
-   ========================================================================== */
-@media (max-width: 768px) {
-    body {
-        padding: 0;
-        background-color: var(--bg-main);
-        font-size: 13px;
-    }
-
-    .container {
-        width: 100%;
-        margin: 0;
-        padding: 8px 8px 24px 8px;
-    }
-
-    /* Programėlės antraštės išdėstymas */
-    .dashboard-header {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px;
-        padding: 16px;
-        border-radius: 6px;
-    }
-
-    .dashboard-header > div:last-child {
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    /* Valdymo kortelių išdėstymas */
-    .grid-container {
-        grid-template-columns: 1fr !important;
-        gap: 12px;
-    }
-
-    .nav-card {
-        border-radius: 6px;
-        padding: 16px;
-    }
-
-    .card {
-        border-radius: 6px;
-        padding: 14px;
-        margin-bottom: 12px;
-    }
-
-    /* Patogesni įvesties laukai ir mygtukai lietimui */
-    input[type="text"],
-    input[type="password"],
-    input[type="number"],
-    input[type="date"],
-    select,
-    textarea,
-    .custom-select-trigger {
-        height: 42px !important;
-        font-size: 14px !important;
-        border-radius: 6px !important;
-        padding: 8px 12px !important;
-    }
-
-    .btn, .logout-btn {
-        height: 44px !important;
-        font-size: 13px !important;
-        width: 100% !important;
-        border-radius: 6px !important;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .custom-calendar-wrapper,
-    .custom-select-wrapper {
-        width: 100% !important;
-    }
-
-    /* Mobilioji lentelių transformacija į korteles (PWA Style) */
-    .table-responsive {
-        border: none !important;
-        margin-top: 12px;
-    }
-
-    table, thead, tbody, th, td, tr {
-        display: block !important;
-        width: 100% !important;
-    }
-
-    thead {
-        display: none !important;
-    }
-
-    tr {
-        background-color: var(--bg-card) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 6px !important;
-        margin-bottom: 12px !important;
-        padding: 12px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    td {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 8px 0 !important;
-        border-bottom: 1px solid #2a2b2c !important;
-        font-size: 12px !important;
-        white-space: normal !important;
-        text-align: right !important;
-    }
-
-    td:last-child {
-        border-bottom: none !important;
-    }
-
-    /* Sugeneruojami kortelių laukų pavadinimai mobiliesiems */
-    td::before {
-        content: attr(data-label);
-        float: left;
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
 }
