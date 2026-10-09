@@ -2,6 +2,8 @@ class CustomCalendarPicker {
     constructor(inputElement) {
         this.input = inputElement;
         this.input.readOnly = true;
+        
+        // Užtikriname, kad laukas gautų piktogramos ir atstumų CSS klasę
         this.input.classList.add('custom-calendar-input');
 
         this.today = new Date();
