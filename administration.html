@@ -16,25 +16,14 @@
         <div class="card">
             <h2>Sukurti naują vartotoją</h2>
             <div class="info-box">
-                <strong>Pastaba:</strong> Kuriant <b>mokinį</b>, jam automatiškai sugeneruojamas vienkartinis registracijos kodas (vardą, el. paštą ir slaptažodį mokinys įves pats registracijos lange). Mokytojams ir administratoriams privaloma nurodyti prisijungimo vardą bei slaptažodį.
+                <strong>Pastaba:</strong> Visiems naujiems vartotojams (mokiniams, mokytojams, administratoriams) automatiškai sugeneruojamas vienkartinis registracijos kodas. Vartotojas pats įves savo prisijungimo vardą, el. paštą ir slaptažodį registracijos lange.
             </div>
             
             <div id="regCodeResult" class="info-box info-box-success" style="display: none;">
-                <strong>Vartotojas sėkmingally sukurtas!</strong> Mokinio registracijos kodas: <span id="generatedCode" class="code-display"></span>
+                <strong>Vartotojas sėkmingai sukurtas!</strong> Registracijos kodas: <span id="generatedCode" class="code-display"></span>
             </div>
 
             <form id="addUserForm">
-                <div id="teacherAdminFields">
-                    <label>Prisijungimo vardas</label>
-                    <input type="text" name="username" placeholder="Prisijungimo vardas">
-                    
-                    <label>Slaptažodis</label>
-                    <input type="password" name="password" placeholder="Slaptažodis">
-
-                    <label>El. paštas (neprivaloma)</label>
-                    <input type="text" name="email" placeholder="el.pastas@pavyzdys.lt">
-                </div>
-                
                 <label>Vardas</label>
                 <input type="text" name="name" placeholder="Vardas" required>
                 
@@ -42,7 +31,7 @@
                 <input type="text" name="surname" placeholder="Pavardė" required>
                 
                 <label>Rolė</label>
-                <select name="role" required onchange="handleRoleChange()">
+                <select name="role" required onchange="toggleClassField()">
                     <option value="student">Mokinys</option>
                     <option value="teacher">Mokytojas</option>
                     <option value="administrator">Administratorius</option>
@@ -80,24 +69,16 @@
 
     <script src="select.js"></script>
     <script>
-        function handleRoleChange() {
+        function toggleClassField() {
             const role = document.querySelector('select[name="role"]').value;
             const classField = document.getElementById('class');
-            const teacherAdminFields = document.getElementById('teacherAdminFields');
-
             if (role === 'student') {
                 classField.disabled = false;
                 classField.required = true;
-                teacherAdminFields.style.display = 'none';
-                // Pašaliname required iš paslėptų laukų, kad formos nesustabdytų patikra
-                teacherAdminFields.querySelectorAll('input').forEach(input => input.required = false);
             } else {
                 classField.disabled = true;
                 classField.required = false;
                 classField.value = "";
-                teacherAdminFields.style.display = 'block';
-                teacherAdminFields.querySelector('input[name="username"]').required = true;
-                teacherAdminFields.querySelector('input[name="password"]').required = true;
             }
         }
 
@@ -119,7 +100,6 @@
                     const isPending = u.status === 'pending';
                     const statusText = isPending ? '<span style="color: #d9534f; font-weight: bold;">Laukia registracijos</span>' : 'Aktyvus';
                     
-                    // Jei būsena pending ir yra reg_code, rodom jį vietoj username
                     let identityDisplay = u.username;
                     if (isPending && u.reg_code) {
                         identityDisplay = `<span class="code-display" style="font-size: 10px;">${u.reg_code} (Kodas)</span>`;
@@ -164,7 +144,7 @@
                 const result = await response.json();
                 if (response.ok) {
                     this.reset();
-                    handleRoleChange();
+                    toggleClassField();
                     loadUsers();
 
                     const resultBox = document.getElementById('regCodeResult');
@@ -183,7 +163,7 @@
         });
 
         async function deleteUser(userId) {
-            if (!confirm('Ar tikrai norite ištrinti šį vartotoją ir visus jo prisijungimus?')) return;
+            if (!confirm('Ar tikrai norite ištrinti šį vartotoją ir visus jo duomenis?')) return;
 
             try {
                 const response = await fetch(`${API_URL}/api/users/delete/${userId}`, {
@@ -202,7 +182,7 @@
         }
 
         window.onload = async function() {
-            handleRoleChange();
+            toggleClassField();
             await loadUsers();
             initCustomSelects();
         };

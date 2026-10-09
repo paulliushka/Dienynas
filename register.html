@@ -11,7 +11,7 @@
 </head>
 <body class="centered-page-body">
     <div class="card register-card">
-        <h1 style="font-size: 18px; margin-bottom: 6px; color: #3b5998;">Mokinio registracija</h1>
+        <h1 style="font-size: 18px; margin-bottom: 6px; color: #3b5998;">Paskyros registracija</h1>
         <p style="color: #666; font-size: 11px; margin-bottom: 16px;">Įveskite mokyklos suteiktą vienkartinį registracijos kodą.</p>
 
         <div id="errorBox" class="error-message"></div>
@@ -33,7 +33,7 @@
                 <label>Vardas ir Pavardė</label>
                 <input type="text" id="dispFullName" class="readonly-input" readonly>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="classGroupWrapper">
                 <label>Klasė</label>
                 <input type="text" id="dispClass" class="readonly-input" readonly>
             </div>
@@ -42,7 +42,7 @@
                 <input type="text" id="regEmail" placeholder="vardas@pavyzdys.lt" required>
             </div>
             <div class="form-group">
-                <label for="regUsername">Vartotojo vardas (tik Lotyniškos raidės ir skaičiai)</label>
+                <label for="regUsername">Vartotojo vardas</label>
                 <input type="text" id="regUsername" placeholder="pvz. jonas123" required>
             </div>
             <div class="form-group">
@@ -86,7 +86,15 @@
                     currentRegCode = code;
                     document.getElementById('codeForm').style.display = 'none';
                     document.getElementById('dispFullName').value = `${data.user.name} ${data.user.surname}`;
-                    document.getElementById('dispClass').value = data.user.class || 'Nenurodyta';
+                    
+                    const classWrapper = document.getElementById('classGroupWrapper');
+                    if (data.user.class) {
+                        document.getElementById('dispClass').value = data.user.class;
+                        classWrapper.style.display = 'block';
+                    } else {
+                        classWrapper.style.display = 'none';
+                    }
+
                     document.getElementById('registerForm').style.display = 'block';
                     document.getElementById('errorBox').style.display = 'none';
                 } else {
