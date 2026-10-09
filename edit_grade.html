@@ -66,8 +66,10 @@
 
         function showError(msg) {
             const box = document.getElementById('errorBox');
-            box.textContent = msg;
-            box.style.display = 'block';
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
         }
 
         async function loadGrade() {
@@ -81,8 +83,15 @@
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('student').value = item.student || '';
                 document.getElementById('grade').value = item.grade || '';
-                document.getElementById('type').value = item.type || 'Savarankiškas darbas';
-                document.getElementById('date').value = item.date || '';
+                
+                const typeSelect = document.getElementById('type');
+                typeSelect.value = item.type || 'Savarankiškas darbas';
+                typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+                const dateInput = document.getElementById('date');
+                dateInput.value = item.date || '';
+                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+
                 document.getElementById('comment').value = item.comment || '';
 
                 initCalendarPickers();

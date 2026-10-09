@@ -49,8 +49,10 @@
 
         function showError(msg) {
             const box = document.getElementById('errorBox');
-            box.textContent = msg;
-            box.style.display = 'block';
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
         }
 
         async function loadAssignment() {
@@ -63,7 +65,10 @@
 
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('task').value = item.task || '';
-                document.getElementById('due_date').value = item.due_date || '';
+
+                const dueDateInput = document.getElementById('due_date');
+                dueDateInput.value = item.due_date || '';
+                dueDateInput.dispatchEvent(new Event('change', { bubbles: true }));
                 
                 initCalendarPickers();
             } catch (error) { 

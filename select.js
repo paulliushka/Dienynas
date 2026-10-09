@@ -1,3 +1,9 @@
+/* ==========================================================================
+   CUSTOM SELECT KOMPONENTAS
+   Pakeičia standartinį HTML <select> į pritaikytą dizainą ir palaiko
+   automatinį sinchronizavimą su formos reset / kaita.
+   ========================================================================== */
+
 class CustomSelect {
     constructor(selectElement) {
         this.select = selectElement;
@@ -5,21 +11,21 @@ class CustomSelect {
     }
 
     init() {
-        // Slėpti originalų select
+        // Slėpti originalų HTML select
         this.select.style.display = 'none';
 
-        // Kurti wrapper
+        // Kurti pagrindinį wrapper konteinerį
         this.wrapper = document.createElement('div');
         this.wrapper.className = 'custom-select-wrapper';
         this.select.parentNode.insertBefore(this.wrapper, this.select);
         this.wrapper.appendChild(this.select);
 
-        // Mygtuko elementas
+        // Sukurti matomą mygtuką/lauką
         this.trigger = document.createElement('div');
         this.trigger.className = 'custom-select-trigger';
         this.wrapper.appendChild(this.trigger);
 
-        // Parinkčių sąrašas
+        // Sukurti pasirinkimų sąrašo konteinerį
         this.optionsContainer = document.createElement('div');
         this.optionsContainer.className = 'custom-select-options';
         this.wrapper.appendChild(this.optionsContainer);
@@ -27,9 +33,16 @@ class CustomSelect {
         this.render();
         this.bindEvents();
 
-        // Stebėti originalaus select pokyčius (pvz. kai JS įkelia grupių ar mokinių sąrašą)
+        // Stebėti originalaus select vaikus (optgroup/option) ir neįgalumo būseną
         const observer = new MutationObserver(() => this.render());
-        observer.observe(this.select, { childList: true, attributes: true });
+        observer.observe(this.select, { childList: true, attributes: true, attributeFilter: ['disabled'] });
+
+        // Stebėti formos reset įvykį, kad neliktų senų "ghost" reikšmių
+        if (this.select.form) {
+            this.select.form.addEventListener('reset', () => {
+                setTimeout(() => this.render(), 0);
+            });
+        }
     }
 
     render() {
@@ -44,9 +57,11 @@ class CustomSelect {
         `;
 
         if (this.select.disabled) {
+            this.wrapper.classList.add('disabled');
             this.wrapper.style.opacity = '0.6';
             this.wrapper.style.pointerEvents = 'none';
         } else {
+            this.wrapper.classList.remove('disabled');
             this.wrapper.style.opacity = '1';
             this.wrapper.style.pointerEvents = 'auto';
         }
@@ -65,7 +80,7 @@ class CustomSelect {
                 if (opt.disabled) return;
 
                 this.select.selectedIndex = index;
-                this.select.dispatchEvent(new Event('change'));
+                this.select.dispatchEvent(new Event('change', { bubbles: true }));
                 this.wrapper.classList.remove('open');
                 this.render();
             });
@@ -77,20 +92,27 @@ class CustomSelect {
     bindEvents() {
         this.trigger.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (this.select.disabled) return;
+
             document.querySelectorAll('.custom-select-wrapper').forEach(w => {
                 if (w !== this.wrapper) w.classList.remove('open');
             });
             this.wrapper.classList.toggle('open');
         });
 
+        // Uždaryti meniu paspaudus už jo ribų
         document.addEventListener('click', (e) => {
             if (!this.wrapper.contains(e.target)) {
                 this.wrapper.classList.remove('open');
             }
         });
+
+        // Užfiksuoti programinius `change` įvykius
+        this.select.addEventListener('change', () => this.render());
     }
 }
 
+// Inicializacijos funkcija visiems neaktyvuotiems select elementams
 function initCustomSelects() {
     document.querySelectorAll('select').forEach(select => {
         if (!select.classList.contains('custom-select-initialized')) {
