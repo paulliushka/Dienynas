@@ -6,135 +6,9 @@
     <link rel="icon" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <script src="config.js"></script>
-    <style>
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #131b2e;
-            padding: 24px 32px;
-            border-radius: 12px;
-            border: 1px solid #1e293b;
-            margin-bottom: 32px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-        }
-
-        .user-welcome h2 {
-            color: #f8fafc;
-            font-size: 22px;
-            margin-bottom: 4px;
-            border: none;
-            padding: 0;
-        }
-
-        .user-welcome p {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .badge-role {
-            background-color: #0c4a6e;
-            color: #38bdf8;
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-            border: 1px solid #0284c7;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .nav-card {
-            background: #131b2e;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            padding: 28px;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        }
-
-        .nav-card:hover {
-            transform: translateY(-5px);
-            border-color: #0284c7;
-            background: #172138;
-            box-shadow: 0 12px 20px -3px rgba(2, 132, 199, 0.15);
-        }
-
-        .nav-card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-            background: rgba(2, 132, 199, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #38bdf8;
-            margin-bottom: 20px;
-            font-size: 24px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-        }
-
-        .nav-card h3 {
-            color: #f8fafc;
-            font-size: 18px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .nav-card p {
-            color: #94a3b8;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .nav-card-arrow {
-            margin-top: 20px;
-            color: #38bdf8;
-            font-weight: 600;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .logout-btn {
-            background-color: #ef4444;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logout-btn:hover {
-            background-color: #dc2626;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Viršutinė juosta su pasveikinimu -->
         <div class="dashboard-header">
             <div class="user-welcome">
                 <h2 id="welcomeText">Sveiki sugrįžę!</h2>
@@ -146,10 +20,7 @@
             </div>
         </div>
 
-        <!-- Pagrindinių meniu kortelių tinklelis -->
-        <div class="grid-container" id="menuGrid">
-            <!-- Dinamiškai užpildoma per JavaScript priklausomai nuo rolės -->
-        </div>
+        <div class="grid-container" id="menuGrid"></div>
     </div>
 
     <script>
@@ -160,7 +31,6 @@
         }
 
         function initDashboard() {
-            // Pasveikinimo tekstas
             document.getElementById('welcomeText').textContent = `Sveiki, ${currentUser.name} ${currentUser.surname}!`;
             
             let roleNameLT = 'Vartotojas';
@@ -176,33 +46,29 @@
                 classP.style.display = 'block';
             }
 
-            // Meniu kortelių generavimas pagal rolę
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = '';
 
-            const cards = [];
-
-            // Visiems prieinami arba specifiniai moduliai
-            cards.push({
-                title: 'Pažymiai',
-                desc: currentUser.role === 'student' ? 'Peržiūrėkite savo gaunamus įvertinimus ir vidurkius.' : 'Valdykite ir rašykite mokinių pažymius grupėse.',
-                url: 'grades',
-                icon: '📊'
-            });
-
-            cards.push({
-                title: 'Užduotys',
-                desc: currentUser.role === 'student' ? 'Sekite namų darbus ir atlikimo terminus.' : 'Paskirkite bei peržiūrėkite užduotis savo grupėms.',
-                url: 'assignments',
-                icon: '📝'
-            });
-
-            cards.push({
-                title: 'Grupės',
-                desc: currentUser.role === 'student' ? 'Peržiūrėkite savo klasės ir dalykų grupes.' : 'Kurkite, redaguokite grupes ir priskirkite mokinius.',
-                url: 'groups',
-                icon: '👥'
-            });
+            const cards = [
+                {
+                    title: 'Pažymiai',
+                    desc: currentUser.role === 'student' ? 'Peržiūrėkite savo gaunamus įvertinimus ir vidurkius.' : 'Valdykite ir rašykite mokinių pažymius grupėse.',
+                    url: 'grades',
+                    icon: '📊'
+                },
+                {
+                    title: 'Užduotys',
+                    desc: currentUser.role === 'student' ? 'Sekite namų darbus ir atlikimo terminus.' : 'Paskirkite bei peržiūrėkite užduotis savo grupėms.',
+                    url: 'assignments',
+                    icon: '📝'
+                },
+                {
+                    title: 'Grupės',
+                    desc: currentUser.role === 'student' ? 'Peržiūrėkite savo klasės ir dalykų grupes.' : 'Kurkite, redaguokite grupes ir priskirkite mokinius.',
+                    url: 'groups',
+                    icon: '👥'
+                }
+            ];
 
             if (currentUser.role === 'administrator') {
                 cards.push({
@@ -229,7 +95,10 @@
             });
         }
 
-        function logout() {
+        async function logout() {
+            try {
+                await fetch(`${API_URL}/api/logout`, { method: 'POST', credentials: 'include' });
+            } catch (e) {}
             localStorage.removeItem('user');
             window.location.href = '/';
         }

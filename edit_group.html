@@ -56,7 +56,7 @@
 
         async function initPage() {
             try {
-                const groupsResp = await fetch(`${API_URL}/api/groups/${groupId}`);
+                const groupsResp = await fetch(`${API_URL}/api/groups/${groupId}`, { credentials: 'include' });
                 if (!groupsResp.ok) {
                     alert("Grupė nerasta.");
                     window.location.href = 'groups';
@@ -69,7 +69,7 @@
 
                 document.getElementById('group_name').value = group.group_name || group.subject || '';
 
-                const classesResp = await fetch(`${API_URL}/api/classes`);
+                const classesResp = await fetch(`${API_URL}/api/classes`, { credentials: 'include' });
                 const classes = await classesResp.json();
                 
                 const classSelect = document.getElementById('class_select');
@@ -95,7 +95,7 @@
 
         async function loadTeachers() {
             try {
-                const response = await fetch(`${API_URL}/api/teachers`);
+                const response = await fetch(`${API_URL}/api/teachers`, { credentials: 'include' });
                 const teachers = await response.json();
                 const container = document.getElementById('teachers_container');
                 container.innerHTML = '';
@@ -129,7 +129,7 @@
             if (!className) return;
 
             try {
-                const response = await fetch(`${API_URL}/get_students/${className}`);
+                const response = await fetch(`${API_URL}/get_students/${className}`, { credentials: 'include' });
                 const data = await response.json();
 
                 if (data.length === 0) {
@@ -182,6 +182,7 @@
                 const response = await fetch(`${API_URL}/api/groups/edit/${groupId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(payload)
                 });
 

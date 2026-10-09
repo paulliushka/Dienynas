@@ -57,7 +57,7 @@
 
         async function loadGrade() {
             try {
-                const response = await fetch(`${API_URL}/api/grades`);
+                const response = await fetch(`${API_URL}/api/grades`, { credentials: 'include' });
                 const grades = await response.json();
                 
                 const item = grades.find(g => g.grade_id == gradeId);
@@ -90,6 +90,7 @@
                 const response = await fetch(`${API_URL}/api/grades/edit/${gradeId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(data)
                 });
 
