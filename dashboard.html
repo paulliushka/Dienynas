@@ -63,14 +63,18 @@
                     desc: currentUser.role === 'student' ? 'Sekite namų darbus ir atlikimo terminus.' : 'Paskirkite bei peržiūrėkite užduotis savo grupėms.',
                     url: 'assignments',
                     icon: '📝'
-                },
-                {
-                    title: 'Grupės',
-                    desc: currentUser.role === 'student' ? 'Peržiūrėkite savo klasės ir dalykų grupes.' : 'Kurkite, redaguokite grupes ir priskirkite mokinius.',
-                    url: 'groups',
-                    icon: '👥'
                 }
             ];
+
+            // Grupių kortelė rodoma tik TIEK mokytojams ir administratoriams
+            if (currentUser.role !== 'student') {
+                cards.push({
+                    title: 'Grupės',
+                    desc: 'Kurkite, redaguokite grupes ir priskirkite mokinius.',
+                    url: 'groups',
+                    icon: '👥'
+                });
+            }
 
             if (currentUser.role === 'administrator') {
                 cards.push({
