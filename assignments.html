@@ -71,7 +71,7 @@
 
         async function loadTeacherGroups() {
             try {
-                const response = await fetch(`${API_URL}/api/groups?user_id=${currentUser.user_id}&role=teacher&only_mine=true`);
+                const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
                 const groups = await response.json();
 
                 const select = document.getElementById('group_select');
@@ -90,7 +90,12 @@
 
         async function loadAssignments() {
             try {
-                const response = await fetch(`${API_URL}/api/assignments?user_id=${currentUser.user_id}&role=${currentUser.role}`);
+                const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
+                if (response.status === 401) {
+                    window.location.href = '/';
+                    return;
+                }
+
                 const assignments = await response.json();
 
                 const theader = document.getElementById('assignmentsTableHeader');
@@ -147,14 +152,14 @@
                 const payload = {
                     group_id: formData.get('group_id'),
                     task: formData.get('task'),
-                    due_date: formData.get('due_date'),
-                    teacher_id: currentUser.user_id
+                    due_date: formData.get('due_date')
                 };
 
                 try {
                     const response = await fetch(`${API_URL}/api/assignments/add`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
                         body: JSON.stringify(payload)
                     });
 
@@ -176,7 +181,8 @@
 
             try {
                 const response = await fetch(`${API_URL}/api/assignments/delete/${assignmentId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
 
                 if (response.ok) {

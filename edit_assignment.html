@@ -40,7 +40,7 @@
 
         async function loadAssignment() {
             try {
-                const response = await fetch(`${API_URL}/api/assignments`);
+                const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
                 const assignments = await response.json();
                 
                 const item = assignments.find(a => a.assignment_id == assignmentId);
@@ -70,6 +70,7 @@
                 const response = await fetch(`${API_URL}/api/assignments/edit/${assignmentId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(data)
                 });
 

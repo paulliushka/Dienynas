@@ -78,7 +78,7 @@
 
         async function loadUsers() {
             try {
-                const response = await fetch(`${API_URL}/api/users`);
+                const response = await fetch(`${API_URL}/api/users`, { credentials: 'include' });
                 const users = await response.json();
 
                 const tbody = document.getElementById('usersTableBody');
@@ -120,6 +120,7 @@
                 const response = await fetch(`${API_URL}/api/users/add`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(data)
                 });
 
@@ -141,7 +142,8 @@
 
             try {
                 const response = await fetch(`${API_URL}/api/users/delete/${userId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
