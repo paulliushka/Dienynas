@@ -250,7 +250,7 @@ textarea:focus {
     border: 1px solid var(--border-color);
     border-radius: 3px;
     padding: 16px;
-    text-decoration: none;
+    text-decoration: none !important;
     color: inherit;
     display: flex;
     flex-direction: column;
@@ -261,6 +261,7 @@ textarea:focus {
 .nav-card:hover {
     background-color: #2a2b2c;
     border-color: var(--fb-blue);
+    text-decoration: none !important;
 }
 
 .nav-card-icon {
@@ -301,7 +302,7 @@ textarea:focus {
 }
 
 .nav-card:hover .nav-card-arrow {
-    text-decoration: underline;
+    text-decoration: underline !important;
     color: var(--text-primary);
 }
 
