@@ -1,18 +1,18 @@
 /* ==========================================================================
-   1. BAZINIAI STILIAI IR KINTAMIEJI (2010s FACEBOOK DARK THEME)
+   1. BAZINIAI STILIAI IR KINTAMIEJI (2015s FACEBOOK FLAT DARK THEME)
    ========================================================================== */
 :root {
     --bg-main: #18191a;
     --bg-card: #242526;
-    --bg-header: #3a3b3c;
+    --bg-header: #242526;
     --bg-input: #3a3b3c;
     --border-color: #3e4042;
     --border-light: #4e5052;
     
-    --fb-blue: #3b5998;
-    --fb-blue-hover: #4c66a4;
-    --fb-header-grad-top: #3b5998;
-    --fb-header-grad-bottom: #2d4373;
+    /* 2015 Flat Facebook Blue */
+    --fb-blue: #4267b2;
+    --fb-blue-hover: #365899;
+    --fb-header-bg: #4267b2;
     
     --text-primary: #e4e6eb;
     --text-secondary: #b0b3b8;
@@ -31,16 +31,16 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Lucida Grande", Tahoma, Verdana, Arial, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
     -webkit-tap-highlight-color: transparent;
 }
 
 body {
     background-color: var(--bg-main);
     color: var(--text-primary);
-    line-height: 1.3;
+    line-height: 1.34;
     padding: 0;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .container {
@@ -54,28 +54,28 @@ body {
    ========================================================================== */
 h1 {
     color: var(--text-primary);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     font-size: 20px;
-    font-weight: bold;
-    letter-spacing: -0.5px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
 }
 
 h2 {
     color: var(--text-primary);
     margin-bottom: 12px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
     background-color: #2a2b2c;
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    padding: 6px 10px;
+    padding: 8px 12px;
 }
 
 h3 {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-primary);
     margin: 10px 0 6px 0;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 p {
@@ -83,22 +83,22 @@ p {
 }
 
 /* ==========================================================================
-   3. KORTELĖS IR KONTEINERIAI
+   3. KORTELĖS IR KONTEINERIAI (FLAT 2015 STYLE)
    ========================================================================== */
 .card {
     background: var(--bg-card);
     padding: 16px;
     margin-bottom: 16px;
     border: 1px solid var(--border-color);
-    border-radius: 0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 label {
     display: block;
     margin-top: 10px;
     margin-bottom: 4px;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 11px;
     color: var(--text-secondary);
     text-transform: none;
@@ -115,76 +115,78 @@ input[type="date"],
 select,
 textarea {
     width: 100%;
-    height: 28px;
-    padding: 3px 6px;
+    height: 30px;
+    padding: 4px 8px;
     border: 1px solid var(--border-color);
-    border-radius: 0;
+    border-radius: 2px;
     font-size: 12px;
     color: var(--text-primary);
     background-color: var(--bg-input);
     box-sizing: border-box;
+    transition: border-color 0.15s ease;
 }
 
 textarea {
     height: auto;
-    padding: 6px;
+    padding: 8px;
 }
 
 input:focus, 
 select:focus, 
 textarea:focus {
     outline: none;
-    border-color: var(--fb-blue-hover) !important;
-    box-shadow: none !important;
+    border-color: var(--fb-blue) !important;
+    box-shadow: 0 0 0 1px var(--fb-blue) !important;
 }
 
 /* ==========================================================================
-   5. MYGTUKAI (GLOSSY 2010 FACEBOOK DARK STYLE)
+   5. MYGTUKAI (FLAT 2015 FACEBOOK STYLE)
    ========================================================================== */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 26px;
+    height: 28px;
     padding: 0 12px;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 600;
     border-radius: 2px;
     cursor: pointer;
     text-decoration: none;
     white-space: nowrap;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .btn-primary {
-    background: linear-gradient(to bottom, #4c66a4 0%, #3b5998 100%);
+    background-color: var(--fb-blue);
     color: #ffffff;
-    border: 1px solid #2d4373;
+    border-color: #385898;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(to bottom, #506898 0%, #2d4373 100%);
-    border-color: #1a356d;
+    background-color: var(--fb-blue-hover);
+    border-color: #29447e;
 }
 
 .btn-secondary {
-    background: linear-gradient(to bottom, #3a3b3c 0%, #2a2b2c 100%);
+    background-color: #3a3b3c;
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    border-color: var(--border-color);
 }
 
 .btn-secondary:hover {
-    background: linear-gradient(to bottom, #4a4b4c 0%, #3a3b3c 100%);
+    background-color: #4e5052;
     border-color: var(--border-light);
 }
 
 .btn-back {
     display: inline-block;
-    margin-top: 10px;
-    color: #6d84b4;
+    margin-top: 12px;
+    color: #7997d6;
     text-decoration: none;
-    font-weight: bold;
-    font-size: 11px;
+    font-weight: 600;
+    font-size: 12px;
     padding: 4px 0;
 }
 
@@ -194,18 +196,19 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   6. DASHBOARD (MĖLYNA FB BAR IR PROFILIS)
+   6. DASHBOARD (FLAT MĖLYNA FB BAR IR PROFILIS)
    ========================================================================== */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(to bottom, var(--fb-header-grad-top) 0%, var(--fb-header-grad-bottom) 100%);
+    background-color: var(--fb-header-bg);
     padding: 12px 16px;
-    border-bottom: 1px solid #1f2d4d;
+    border-bottom: 1px solid #2d4373;
     margin-bottom: 20px;
     color: #ffffff;
-    border-radius: 2px;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .user-welcome h2 {
@@ -219,17 +222,17 @@ textarea:focus {
 
 .user-welcome p {
     color: #d8dfea;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .badge-role {
-    background-color: #2a2b2c;
-    color: #6d84b4;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #ffffff;
     font-size: 10px;
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 2px;
-    font-weight: bold;
-    border: 1px solid var(--border-color);
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     text-transform: uppercase;
 }
 
@@ -243,56 +246,56 @@ textarea:focus {
 .nav-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
+    border-radius: 3px;
     padding: 16px;
     text-decoration: none;
     color: inherit;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: background 0.1s ease, border-color 0.1s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .nav-card:hover {
-    background: #2a2b2c;
-    border-color: var(--fb-blue-hover);
+    background-color: #2a2b2c;
+    border-color: var(--fb-blue);
 }
 
 .nav-card-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 2px;
+    width: 38px;
+    height: 38px;
+    border-radius: 3px;
     background: #3a3b3c;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6d84b4;
+    color: #7997d6;
     margin-bottom: 12px;
     font-size: 18px;
     border: 1px solid var(--border-color);
 }
 
 .nav-card h3 {
-    color: #6d84b4;
-    font-size: 13px;
+    color: #7997d6;
+    font-size: 14px;
     margin-bottom: 4px;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .nav-card p {
     color: var(--text-secondary);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.4;
 }
 
 .nav-card-arrow {
     margin-top: 12px;
-    color: #6d84b4;
-    font-weight: bold;
+    color: #7997d6;
+    font-weight: 600;
     font-size: 11px;
     display: flex;
     align-items: center;
     gap: 4px;
-    transition: color 0.1s ease;
 }
 
 .nav-card:hover .nav-card-arrow {
@@ -301,22 +304,23 @@ textarea:focus {
 }
 
 .logout-btn {
-    background: linear-gradient(to bottom, #d9534f 0%, #a94442 100%);
+    background-color: #fa3e3e;
     color: white;
     padding: 6px 12px;
     border-radius: 2px;
-    font-weight: bold;
+    font-weight: 600;
     font-size: 11px;
-    border: 1px solid #843534;
+    border: 1px solid #d02e2e;
     cursor: pointer;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    transition: background-color 0.15s ease;
 }
 
 .logout-btn:hover {
-    background: #c9302c;
+    background-color: #e02828;
 }
 
 /* ==========================================================================
@@ -327,7 +331,7 @@ textarea:focus {
     overflow-y: auto;
     border: 1px solid var(--border-color);
     padding: 6px;
-    border-radius: 0;
+    border-radius: 2px;
     background-color: var(--bg-input);
 }
 
@@ -337,7 +341,7 @@ textarea:focus {
     gap: 6px;
     margin: 4px 0;
     font-weight: normal;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-primary);
     cursor: pointer;
 }
@@ -349,34 +353,35 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   8. LENTELĖS (OLD-SCHOOL DARK BLUE STRIPED TABLES)
+   8. LENTELĖS (2015 FLAT DARK TABLES)
    ========================================================================== */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
     margin-top: 8px;
     border: 1px solid var(--border-color);
+    border-radius: 2px;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
 }
 
 th, td {
-    padding: 8px 10px;
+    padding: 8px 12px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
 }
 
 th {
     background-color: #2a2b2c;
-    color: #6d84b4;
-    font-weight: bold;
+    color: #7997d6;
+    font-weight: 600;
     text-transform: none;
-    font-size: 11px;
+    font-size: 12px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -413,13 +418,14 @@ tr:hover {
     padding: 32px 20px;
     border: 1px solid var(--border-color);
     background-color: var(--bg-card);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .error-code {
     font-size: 64px;
     font-weight: bold;
-    color: #6d84b4;
+    color: var(--fb-blue);
     line-height: 1;
     margin-bottom: 8px;
     letter-spacing: -1px;
@@ -429,12 +435,12 @@ tr:hover {
     font-size: 16px;
     color: var(--text-primary);
     margin-bottom: 10px;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .error-desc {
     color: var(--text-secondary);
-    font-size: 11px;
+    font-size: 12px;
     margin-bottom: 20px;
     line-height: 1.5;
 }
@@ -449,22 +455,22 @@ tr:hover {
    ========================================================================== */
 .badge-owner {
     background-color: #2a2b2c;
-    color: #6d84b4;
+    color: #7997d6;
     font-size: 10px;
-    padding: 1px 4px;
+    padding: 2px 5px;
     border-radius: 2px;
-    font-weight: bold;
-    margin-left: 4px;
+    font-weight: 600;
+    margin-left: 6px;
     border: 1px solid var(--border-color);
 }
 
 .badge-grade {
     font-weight: bold;
-    color: #6d84b4;
+    color: #7997d6;
 }
 
 a {
-    color: #6d84b4;
+    color: #7997d6;
     text-decoration: none;
 }
 
@@ -481,9 +487,9 @@ a:hover {
     border: 1px solid var(--success-border);
     padding: 2px 6px;
     border-radius: 2px;
-    font-weight: bold;
+    font-weight: 600;
     font-family: monospace;
-    font-size: 10px;
+    font-size: 11px;
     display: inline-block;
 }
 
@@ -493,9 +499,9 @@ a:hover {
     border: 1px solid var(--danger-border);
     padding: 2px 6px;
     border-radius: 2px;
-    font-weight: bold;
+    font-weight: 600;
     font-family: monospace;
-    font-size: 10px;
+    font-size: 11px;
     display: inline-block;
 }
 
@@ -518,7 +524,7 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .custom-calendar-input {
     cursor: pointer !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%236d84b4' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z'/%3E%3C/svg%3E") !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%237997d6' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: right 8px center !important;
     background-size: 14px 14px !important;
@@ -527,11 +533,11 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .custom-select-trigger {
     width: 100%;
-    height: 28px;
+    height: 30px;
     padding: 0 28px 0 8px;
     border: 1px solid var(--border-color);
-    border-radius: 0;
-    font-size: 11px;
+    border-radius: 2px;
+    font-size: 12px;
     color: var(--text-primary);
     background-color: var(--bg-input);
     cursor: pointer;
@@ -541,7 +547,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 .custom-select-trigger:hover {
-    border-color: var(--fb-blue-hover);
+    border-color: var(--fb-blue);
 }
 
 .custom-select-arrow {
@@ -553,7 +559,7 @@ input[type="date"]::-webkit-inner-spin-button {
     height: 0;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-top: 5px solid #6d84b4;
+    border-top: 5px solid #7997d6;
 }
 
 .custom-calendar-popup,
@@ -566,6 +572,7 @@ input[type="date"]::-webkit-inner-spin-button {
     width: 240px;
     background-color: var(--bg-card);
     border: 1px solid var(--fb-blue);
+    border-radius: 2px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
@@ -586,7 +593,7 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .custom-select-option {
     padding: 6px 10px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-primary);
     cursor: pointer;
 }
@@ -599,7 +606,7 @@ input[type="date"]::-webkit-inner-spin-button {
 .custom-select-option.selected {
     background-color: var(--fb-blue-hover);
     color: #ffffff;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .calendar-header {
@@ -613,15 +620,15 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 .calendar-title {
-    font-weight: bold;
-    color: #6d84b4;
-    font-size: 11px;
+    font-weight: 600;
+    color: #7997d6;
+    font-size: 12px;
 }
 
 .calendar-nav-btn {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
-    color: #6d84b4;
+    color: #7997d6;
     border-radius: 2px;
     width: 22px;
     height: 22px;
@@ -629,8 +636,8 @@ input[type="date"]::-webkit-inner-spin-button {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 11px;
+    font-weight: 600;
+    font-size: 12px;
 }
 
 .calendar-grid {
@@ -642,13 +649,13 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .calendar-day-head {
     font-size: 10px;
-    font-weight: bold;
+    font-weight: 600;
     color: var(--text-secondary);
     padding-bottom: 2px;
 }
 
 .calendar-day {
-    padding: 4px 0;
+    padding: 5px 0;
     font-size: 11px;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
@@ -657,7 +664,7 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .calendar-day.hover:not(.empty) {
     background-color: #2a2b2c;
-    color: #6d84b4;
+    color: #7997d6;
 }
 
 .calendar-day.today {
@@ -687,7 +694,8 @@ input[type="date"]::-webkit-inner-spin-button {
     padding: 24px 20px;
     border: 1px solid var(--border-color);
     background-color: var(--bg-card);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .form-group {
@@ -696,16 +704,16 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .error-message {
     color: var(--danger-text);
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 600;
     margin-bottom: 12px;
     display: none;
 }
 
 .success-message {
     color: var(--success-text);
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 600;
     margin-bottom: 12px;
     display: none;
 }
@@ -723,9 +731,10 @@ input[type="date"]::-webkit-inner-spin-button {
 .info-box {
     background-color: #2a2b2c;
     border: 1px solid var(--border-color);
+    border-radius: 2px;
     padding: 10px;
     margin-bottom: 12px;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-primary);
 }
 
@@ -736,7 +745,7 @@ input[type="date"]::-webkit-inner-spin-button {
 
 .code-display {
     font-weight: bold;
-    color: #6d84b4;
+    color: #7997d6;
     background: var(--bg-input);
     padding: 2px 6px;
     border: 1px solid var(--border-color);
@@ -766,7 +775,7 @@ input[type="date"]::-webkit-inner-spin-button {
         align-items: stretch !important;
         gap: 12px;
         padding: 16px;
-        border-radius: 8px;
+        border-radius: 6px;
     }
 
     .dashboard-header > div:last-child {
@@ -781,12 +790,12 @@ input[type="date"]::-webkit-inner-spin-button {
     }
 
     .nav-card {
-        border-radius: 8px;
+        border-radius: 6px;
         padding: 16px;
     }
 
     .card {
-        border-radius: 8px;
+        border-radius: 6px;
         padding: 14px;
         margin-bottom: 12px;
     }
@@ -838,7 +847,7 @@ input[type="date"]::-webkit-inner-spin-button {
     tr {
         background-color: var(--bg-card) !important;
         border: 1px solid var(--border-color) !important;
-        border-radius: 8px !important;
+        border-radius: 6px !important;
         margin-bottom: 12px !important;
         padding: 12px !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -863,7 +872,7 @@ input[type="date"]::-webkit-inner-spin-button {
     td::before {
         content: attr(data-label);
         float: left;
-        font-weight: bold;
+        font-weight: 600;
         color: var(--text-secondary);
         font-size: 12px;
         text-transform: uppercase;
