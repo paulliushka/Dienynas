@@ -61,6 +61,7 @@
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
+    <script src="select.js"></script>
     <script>
         function toggleClassField() {
             const role = document.querySelector('select[name="role"]').value;
@@ -153,9 +154,10 @@
             }
         }
 
-        window.onload = function() {
+        window.onload = async function() {
             toggleClassField();
-            loadUsers();
+            await loadUsers();
+            initCustomSelects();
         };
     </script>
 </body>

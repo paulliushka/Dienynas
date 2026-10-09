@@ -50,6 +50,7 @@
     </div>
 
     <script src="calendar.js"></script>
+    <script src="select.js"></script>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -60,11 +61,12 @@
         async function initPage() {
             if (currentUser.role === 'teacher') {
                 document.getElementById('addAssignmentCard').style.display = 'block';
-                loadTeacherGroups();
+                await loadTeacherGroups();
             }
 
             await loadAssignments();
             initCalendarPickers();
+            initCustomSelects();
         }
 
         async function loadTeacherGroups() {
