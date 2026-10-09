@@ -69,6 +69,7 @@
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
+    <script src="calendar.js"></script>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -79,11 +80,15 @@
         async function initPage() {
             if (currentUser.role === 'teacher') {
                 document.getElementById('addGradeCard').style.display = 'block';
-                document.getElementById('grade_date').valueAsDate = new Date();
+                const now = new Date();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                document.getElementById('grade_date').value = `${now.getFullYear()}-${month}-${day}`;
                 loadTeacherGroups();
             }
 
-            loadGrades();
+            await loadGrades();
+            initCalendarPickers();
         }
 
         async function loadTeacherGroups() {
@@ -210,7 +215,10 @@
 
                     if (response.ok) {
                         this.reset();
-                        document.getElementById('grade_date').valueAsDate = new Date();
+                        const now = new Date();
+                        const month = String(now.getMonth() + 1).padStart(2, '0');
+                        const day = String(now.getDate()).padStart(2, '0');
+                        document.getElementById('grade_date').value = `${now.getFullYear()}-${month}-${day}`;
                         document.getElementById('student_select').disabled = true;
                         loadGrades();
                     } else {

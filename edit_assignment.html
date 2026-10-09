@@ -28,6 +28,7 @@
         </div>
     </div>
 
+    <script src="calendar.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const assignmentId = urlParams.get('id');
@@ -52,6 +53,8 @@
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('task').value = item.task || '';
                 document.getElementById('due_date').value = item.due_date || '';
+                
+                initCalendarPickers();
             } catch (error) {
                 console.error("Klaida užkraunant užduotį:", error);
             }
