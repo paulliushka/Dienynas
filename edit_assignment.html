@@ -2,9 +2,8 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Redaguoti užduotį</title>
-    <link rel="icon" href="favicon.svg">
-    <link rel="alternate icon" href="favicon.png">
+    <title>Redaguoti namų darbą</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
@@ -13,7 +12,7 @@
 <body>
     <div class="container">
         <div class="card">
-            <h2>Redaguoti užduotį</h2>
+            <h2>Redaguoti namų darbą</h2>
             <form id="editAssignmentForm">
                 <label>Grupė</label>
                 <input type="text" id="group_name" disabled>
@@ -37,7 +36,7 @@
         const assignmentId = urlParams.get('id');
 
         if (!assignmentId) {
-            alert("Nenurodytas užduoties ID.");
+            alert("Nenurodytas namų darbo ID.");
             window.location.href = 'assignments';
         }
 
@@ -59,7 +58,7 @@
                 
                 initCalendarPickers();
             } catch (error) {
-                console.error("Klaida užkraunant užduotį:", error);
+                console.error("Klaida užkraunant namų darbą:", error);
             }
         }
 
@@ -81,7 +80,7 @@
                     window.location.href = 'assignments';
                 } else {
                     const result = await response.json();
-                    alert(result.message || "Klaida išsaugant užduotį.");
+                    alert(result.message || "Klaida išsaugant namų darbą.");
                 }
             } catch (error) {
                 alert("Nepavyko prisijungti prie serverio.");
