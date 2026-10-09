@@ -2,9 +2,8 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Užduotys</title>
-    <link rel="icon" href="favicon.svg">
-    <link rel="alternate icon" href="favicon.png">
+    <title>Namų darbai</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
@@ -12,10 +11,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Užduotys</h1>
+        <h1>Namų darbai</h1>
 
         <div class="card" id="addAssignmentCard" style="display: none;">
-            <h2>Paskirti naują užduotį</h2>
+            <h2>Paskirti naują namų darbą</h2>
             <form id="addAssignmentForm">
                 <label>Grupė</label>
                 <select name="group_id" id="group_select" required>
@@ -25,7 +24,7 @@
                 <label>Užduoties aprašymas</label>
                 <textarea name="task" rows="3" placeholder="Pvz., Atlikti 12-15 užduotis 45 puslapyje..." style="width: 100%; padding: 8px; box-sizing: border-box;" required></textarea>
 
-                <label>Atlikimo terminas (Data)</label>
+                <label>Atlikimo terminas (data)</label>
                 <input type="date" name="due_date" id="due_date" required>
 
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Paskirti užduotį</button>
@@ -33,7 +32,7 @@
         </div>
 
         <div class="card">
-            <h2>Esamos užduotys</h2>
+            <h2>Esami namų darbai</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -116,7 +115,7 @@
 
                 if (assignments.length === 0) {
                     const colSpan = showActions ? 5 : 4;
-                    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Užduočių nėra.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Namų darbų nėra.</td></tr>`;
                     return;
                 }
 
@@ -143,7 +142,7 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                console.error("Klaida užkraunant užduotis:", error);
+                console.error("Klaida užkraunant namų darbus:", error);
             }
         }
 
@@ -171,7 +170,7 @@
                         loadAssignments();
                     } else {
                         const errResult = await response.json();
-                        alert(errResult.message || "Klaida pridedant užduotį.");
+                        alert(errResult.message || "Klaida pridedant namų darbą.");
                     }
                 } catch (error) {
                     alert("Nepavyko prisijungti prie serverio.");
@@ -180,7 +179,7 @@
         }
 
         async function deleteAssignment(assignmentId) {
-            if (!confirm('Ar tikrai norite ištrinti šią užduotį?')) return;
+            if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
 
             try {
                 const response = await fetch(`${API_URL}/api/assignments/delete/${assignmentId}`, {
@@ -191,7 +190,7 @@
                 if (response.ok) {
                     loadAssignments();
                 } else {
-                    alert("Klaida trinant užduotį.");
+                    alert("Klaida trinant namų darbą.");
                 }
             } catch (error) {
                 alert("Nepavyko prisijungti prie serverio.");
