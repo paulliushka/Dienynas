@@ -33,17 +33,17 @@
                     <option value="">-- Pasirinkite klasę --</option>
                 </select>
 
+                <div id="teacher_select_container" style="display: none;">
+                    <label>Pasirinkite mokytoją (-us)</label>
+                    <div id="teachers_container" class="scroll-box"></div>
+                </div>
+
                 <label>Pasirinkite mokinius</label>
                 <div>
                     <button type="button" class="btn btn-secondary" onclick="selectAllStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
                     <div id="students_container" class="scroll-box">
                         <p style="color: #8a8d91; font-style: italic; margin: 0;">Kraunami mokiniai...</p>
                     </div>
-                </div>
-                
-                <div id="teacher_select_container" style="display: none;">
-                    <label>Pasirinkite mokytojus</label>
-                    <div id="teachers_container" class="scroll-box"></div>
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti</button>
