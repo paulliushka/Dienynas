@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puslapis nerastas (404)</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
+        }
+
+        .error-card {
+            text-align: center;
+            max-width: 460px;
+            width: 100%;
+            padding: 40px 24px;
+        }
+
+        .error-code {
+            font-size: 72px;
+            font-weight: 800;
+            color: #38bdf8;
+            line-height: 1;
+            margin-bottom: 12px;
+            letter-spacing: -2px;
+        }
+
+        .error-title {
+            font-size: 20px;
+            color: #f8fafc;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .error-desc {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="card error-card">
+        <div class="error-code">404</div>
+        <h1 class="error-title">Puslapis nerastas</h1>
+        <p class="error-desc">
+            Atsiprašome, tačiau ieškomas puslapis neegzistuoja arba buvo perkeltas kitu adresu.
+        </p>
+        <div class="error-actions">
+            <a href="dashboard" class="btn btn-primary">Grįžti į pagrindinį</a>
+        </div>
+    </div>
+</body>
+</html>
