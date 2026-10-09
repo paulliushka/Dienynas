@@ -10,25 +10,40 @@
     <script src="config.js"></script>
 </head>
 <body class="centered-page-body">
-    <div class="card" style="max-width: 400px; width: 100%;">
+    <div class="card register-card">
         <h1>Prisijungti</h1>
+        
+        <div id="errorBox" class="error-message"></div>
+
         <form id="loginForm">
-            <label for="username">Vartotojo vardas</label>
-            <input type="text" id="username" name="username" placeholder="Įveskite vartotojo vardą" required>
+            <div class="form-group">
+                <label for="username">Vartotojo vardas</label>
+                <input type="text" id="username" name="username" placeholder="Įveskite vartotojo vardą" required>
+            </div>
             
-            <label for="password">Slaptažodis</label>
-            <input type="password" id="password" name="password" placeholder="Įveskite slaptažodį" required>
+            <div class="form-group">
+                <label for="password">Slaptažodis</label>
+                <input type="password" id="password" name="password" placeholder="Įveskite slaptažodį" required>
+            </div>
             
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;">Prisijungti</button>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Prisijungti</button>
         </form>
+
         <div style="margin-top: 15px; text-align: center;">
             <a href="register" class="btn-back">Turite registracijos kodą? Užsiregistruokite čia</a>
         </div>
     </div>
 
     <script>
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+        }
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            document.getElementById('errorBox').style.display = 'none';
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
@@ -47,10 +62,10 @@
                     localStorage.setItem('user', JSON.stringify(result.user));
                     window.location.href = 'dashboard';
                 } else {
-                    alert(result.message || "Neteisingas vartotojo vardas arba slaptažodis.");
+                    showError(result.message || "Neteisingas vartotojo vardas arba slaptažodis.");
                 }
             } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
+                showError("Nepavyko prisijungti prie serverio.");
             }
         });
     </script>

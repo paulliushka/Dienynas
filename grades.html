@@ -171,21 +171,21 @@
                     const isGroupTeacher = g.group_teachers && g.group_teachers.includes(currentUser.user_id);
 
                     let rowHtml = `
-                        <td><strong>${g.student}</strong></td>
-                        <td>${g.group_display}</td>
-                        <td><span class="badge-grade">${g.grade}</span></td>
-                        <td>${g.type}</td>
-                        <td>${g.date}</td>
-                        <td>${g.comment || '-'}</td>
-                        <td>${g.teacher || '-'}</td>
+                        <td data-label="Mokinys"><strong>${g.student}</strong></td>
+                        <td data-label="Grupė">${g.group_display}</td>
+                        <td data-label="Pažymys"><span class="badge-grade">${g.grade}</span></td>
+                        <td data-label="Tipas">${g.type}</td>
+                        <td data-label="Data">${g.date}</td>
+                        <td data-label="Komentaras">${g.comment || '-'}</td>
+                        <td data-label="Mokytojas">${g.teacher || '-'}</td>
                     `;
 
                     if (showActions) {
                         const actionsTd = isGroupTeacher 
                             ? `<a href="edit_grade?id=${g.grade_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>`
-                            : '<span style="color: #64748b;">Neturite teisių</span>';
+                            : '<span style="color: #8a8d91;">Neturite teisių</span>';
                         
-                        rowHtml += `<td>${actionsTd}</td>`;
+                        rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
                     }
 
                     tr.innerHTML = rowHtml;

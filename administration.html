@@ -114,12 +114,12 @@
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${usernameDisplay}</td>
-                        <td>${regCodeDisplay}</td>
-                        <td><strong>${u.name} ${u.surname}</strong></td>
-                        <td>${roleTranslations[u.role] || u.role}</td>
-                        <td>${u.class ? u.class : '-'}</td>
-                        <td>
+                        <td data-label="Vartotojo vardas">${usernameDisplay}</td>
+                        <td data-label="Reg. kodas">${regCodeDisplay}</td>
+                        <td data-label="Vardas Pavardė"><strong>${u.name} ${u.surname}</strong></td>
+                        <td data-label="Rolė">${roleTranslations[u.role] || u.role}</td>
+                        <td data-label="Klasė">${u.class ? u.class : '-'}</td>
+                        <td data-label="Veiksmai">
                             <a href="edit_user?id=${u.user_id}">Redaguoti</a> | 
                             <a href="javascript:void(0);" onclick="deleteUser(${u.user_id}); return false;">Ištrinti</a>
                         </td>

@@ -12,14 +12,21 @@
 <body>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id || currentUser.role !== 'teacher') { window.location.href = 'dashboard'; }
+        if (!currentUser.user_id || currentUser.role !== 'teacher') { 
+            window.location.href = 'dashboard'; 
+        }
     </script>
     <div class="container">
+        <h1>Namų darbai</h1>
+
         <div class="card">
             <h2>Redaguoti namų darbą</h2>
+
+            <div id="errorBox" class="error-message"></div>
+
             <form id="editAssignmentForm">
                 <label>Grupė</label>
-                <input type="text" id="group_name" disabled>
+                <input type="text" id="group_name" disabled class="readonly-input">
                 
                 <label>Užduotis</label>
                 <input type="text" name="task" id="task" required>
@@ -30,36 +37,64 @@
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
             </form>
             <br>
-            <a href="assignments" class="btn-back">Grįžti atgal</a>
+            <a href="assignments" class="btn-back">← Grįžti atgal</a>
         </div>
     </div>
+
     <script src="calendar.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const assignmentId = urlParams.get('id');
         if (!assignmentId) { window.location.href = 'assignments'; }
 
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+        }
+
         async function loadAssignment() {
             try {
                 const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
                 const assignments = await response.json();
                 const item = assignments.find(a => a.assignment_id == assignmentId);
+                
                 if (!item) { window.location.href = 'assignments'; return; }
+
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('task').value = item.task || '';
                 document.getElementById('due_date').value = item.due_date || '';
+                
                 initCalendarPickers();
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                showError("Klaida kraunant užduoties duomenis.");
+            }
         }
 
         document.getElementById('editAssignmentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            document.getElementById('errorBox').style.display = 'none';
+
             const data = Object.fromEntries(new FormData(this).entries());
-            const res = await fetch(`${API_URL}/api/assignments/edit/${assignmentId}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
-            });
-            if (res.ok) { window.location.href = 'assignments'; } else { alert("Klaida."); }
+            try {
+                const res = await fetch(`${API_URL}/api/assignments/edit/${assignmentId}`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    credentials: 'include', 
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) { 
+                    window.location.href = 'assignments'; 
+                } else { 
+                    const r = await res.json();
+                    showError(r.message || "Klaida išsaugant namų darbą."); 
+                }
+            } catch (err) {
+                showError("Nepavyko prisijungti prie serverio.");
+            }
         });
+
         window.onload = loadAssignment;
     </script>
 </body>

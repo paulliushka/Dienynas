@@ -12,17 +12,24 @@
 <body>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id || currentUser.role !== 'teacher') { window.location.href = 'dashboard'; }
+        if (!currentUser.user_id || currentUser.role !== 'teacher') { 
+            window.location.href = 'dashboard'; 
+        }
     </script>
     <div class="container">
+        <h1>Pažymiai</h1>
+
         <div class="card">
             <h2>Redaguoti pažymį</h2>
+
+            <div id="errorBox" class="error-message"></div>
+
             <form id="editGradeForm">
                 <label>Grupė:</label>
-                <input type="text" id="group_name" disabled>
+                <input type="text" id="group_name" disabled class="readonly-input">
                 
                 <label>Mokinys:</label>
-                <input type="text" id="student" disabled>
+                <input type="text" id="student" disabled class="readonly-input">
                 
                 <label>Pažymys:</label>
                 <input type="text" name="grade" id="grade" required>
@@ -46,9 +53,10 @@
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
             </form>
             <br>
-            <a href="grades" class="btn-back">Grįžti atgal</a>
+            <a href="grades" class="btn-back">← Grįžti atgal</a>
         </div>
     </div>
+
     <script src="calendar.js"></script>
     <script src="select.js"></script>
     <script>
@@ -56,31 +64,58 @@
         const gradeId = urlParams.get('id');
         if (!gradeId) { window.location.href = 'grades'; }
 
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+        }
+
         async function loadGrade() {
             try {
                 const response = await fetch(`${API_URL}/api/grades`, { credentials: 'include' });
                 const grades = await response.json();
                 const item = grades.find(g => g.grade_id == gradeId);
+                
                 if (!item) { window.location.href = 'grades'; return; }
+
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('student').value = item.student || '';
                 document.getElementById('grade').value = item.grade || '';
                 document.getElementById('type').value = item.type || 'Savarankiškas darbas';
                 document.getElementById('date').value = item.date || '';
                 document.getElementById('comment').value = item.comment || '';
+
                 initCalendarPickers();
                 initCustomSelects();
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                showError("Klaida kraunant pažymio duomenis.");
+            }
         }
 
         document.getElementById('editGradeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            document.getElementById('errorBox').style.display = 'none';
+
             const data = Object.fromEntries(new FormData(this).entries());
-            const res = await fetch(`${API_URL}/api/grades/edit/${gradeId}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
-            });
-            if (res.ok) { window.location.href = 'grades'; } else { alert("Klaida."); }
+            try {
+                const res = await fetch(`${API_URL}/api/grades/edit/${gradeId}`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    credentials: 'include', 
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) { 
+                    window.location.href = 'grades'; 
+                } else { 
+                    const r = await res.json();
+                    showError(r.message || "Klaida išsaugant pažymį."); 
+                }
+            } catch (err) {
+                showError("Nepavyko prisijungti prie serverio.");
+            }
         });
+
         window.onload = loadGrade;
     </script>
 </body>
