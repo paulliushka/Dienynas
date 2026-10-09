@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Mano profilis</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id) { window.location.href = '/'; }
+    </script>
+
+    <div class="container">
+        <h1>Profilio nustatymai</h1>
+
+        <div class="card">
+            <h2>Keisti asmeninius duomenis</h2>
+            <div id="errorBox" class="error-message"></div>
+            <div id="successBox" class="success-message"></div>
+
+            <form id="profileForm">
+                <label>Vardas ir Pavardė (keičia tik admin)</label>
+                <input type="text" id="fullname" disabled class="readonly-input">
+
+                <label>Prisijungimo vardas</label>
+                <input type="text" name="username" id="username" required>
+
+                <label>El. paštas</label>
+                <input type="text" name="email" id="email" required>
+
+                <label>Naujas slaptažodis (palikite tuščią, jei nekeičiate)</label>
+                <input type="password" name="password" id="password" placeholder="Naujas slaptažodis">
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
+            </form>
+            <br>
+            <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
+        </div>
+    </div>
+
+    <script>
+        function showError(msg) {
+            const errBox = document.getElementById('errorBox');
+            const succBox = document.getElementById('successBox');
+            succBox.style.display = 'none';
+            errBox.textContent = msg;
+            errBox.style.display = 'block';
+        }
+
+        function showSuccess(msg) {
+            const errBox = document.getElementById('errorBox');
+            const succBox = document.getElementById('successBox');
+            errBox.style.display = 'none';
+            succBox.textContent = msg;
+            succBox.style.display = 'block';
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!response.ok) { window.location.href = 'dashboard'; return; }
+                const user = await response.json();
+
+                document.getElementById('fullname').value = `${user.name} ${user.surname}`;
+                document.getElementById('username').value = user.username || '';
+                document.getElementById('email').value = user.email || '';
+            } catch (err) {
+                showError("Klaida užkraunant profilio duomenis.");
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const data = Object.fromEntries(new FormData(this).entries());
+            try {
+                const res = await fetch(`${API_URL}/api/profile/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    showSuccess("Profilio duomenys sėkmingai atnaujinti!");
+                    document.getElementById('password').value = '';
+                    
+                    // Atnaujiname vietinę sesiją
+                    currentUser.username = data.username;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                } else {
+                    showError(result.message || "Klaida išsaugant pakeitimus.");
+                }
+            } catch (err) {
+                showError("Nepavyko prisijungti prie serverio.");
+            }
+        });
+
+        window.onload = loadProfile;
+    </script>
+</body>
+</html>

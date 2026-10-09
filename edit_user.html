@@ -20,25 +20,15 @@
         <h1>Vartotojų valdymas</h1>
 
         <div class="card">
-            <h2>Redaguoti vartotoją</h2>
-            
+            <h2>Redaguoti vartotojo duomenis</h2>
             <div id="errorBox" class="error-message"></div>
 
             <form id="editUserForm">
-                <label>Prisijungimo vardas</label>
-                <input type="text" name="username" id="username" placeholder="Vartotojo vardas">
-
-                <label>El. paštas</label>
-                <input type="text" name="email" id="email" placeholder="vardas@pavyzdys.lt">
-
                 <label>Vardas</label>
                 <input type="text" name="name" id="name" required>
 
                 <label>Pavardė</label>
                 <input type="text" name="surname" id="surname" required>
-
-                <label>Slaptažodis (palikite tuščią, jei nekeičiate)</label>
-                <input type="password" name="password" id="password" placeholder="Naujas slaptažodis">
 
                 <label>Rolė</label>
                 <select name="role" id="role" required onchange="toggleClassField()">
@@ -90,8 +80,6 @@
                 if (!response.ok) { window.location.href = 'administration'; return; }
                 const user = await response.json();
                 
-                document.getElementById('username').value = user.username || '';
-                document.getElementById('email').value = user.email || '';
                 document.getElementById('name').value = user.name || '';
                 document.getElementById('surname').value = user.surname || '';
                 
