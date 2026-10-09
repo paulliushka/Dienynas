@@ -32,11 +32,6 @@
                     <option value="">-- Pasirinkite klasę --</option>
                 </select>
 
-                <div id="teacherSelectContainer" style="display: none;">
-                    <label>Paskirti grupės mokytojus</label>
-                    <div id="teachers_container" class="scroll-box"></div>
-                </div>
-
                 <label>Pasirinkite mokinius</label>
                 <div>
                     <button type="button" class="btn btn-secondary" onclick="selectAllNewGroupStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
@@ -45,7 +40,7 @@
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Sukurti grupę</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Sukurti</button>
             </form>
         </div>
 
@@ -208,7 +203,7 @@
                     const isOwner = isTeacherMember || currentUser.role === 'administrator';
 
                     const ownerBadge = isTeacherMember ? '<span class="badge-owner">Mano grupė</span>' : '';
-                    const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span style="color: #8a8d91; font-style: italic;">Grupėje mokinių nėra</span>';
+                    const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span style="color: #8a8d91; font-style: italic;">Grupėje mokinių nėra.</span>';
 
                     let rowHtml = `
                         <td data-label="Grupė"><strong>${g.group_name}</strong> ${ownerBadge}</td>
