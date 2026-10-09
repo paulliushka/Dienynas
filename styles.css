@@ -442,7 +442,34 @@ a:hover {
 }
 
 /* ==========================================================================
-   11. CUSTOM DROPDOWN IR KALENDORIUS (CLASSIC BLUE ACCENTS)
+   11. REGISTRACIJOS KODŲ SPALVOS (ŽALIAS = NEPAN. / RAUDONAS = PAN.)
+   ========================================================================== */
+.reg-code-unused {
+    color: #2b9348;
+    background-color: #dff0d8;
+    border: 1px solid #d6e9c6;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 10px;
+    display: inline-block;
+}
+
+.reg-code-used {
+    color: #d9534f;
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 10px;
+    display: inline-block;
+}
+
+/* ==========================================================================
+   12. CUSTOM DROPDOWN IR KALENDORIUS (CLASSIC BLUE ACCENTS)
    ========================================================================== */
 .custom-calendar-wrapper {
     position: relative;
@@ -618,7 +645,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   12. REGISTRACIJOS IR ADMINISTRAVIMO STILIAI
+   13. REGISTRACIJOS IR ADMINISTRAVIMO STILIAI
    ========================================================================== */
 .centered-page-body {
     display: flex;
@@ -692,7 +719,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   13. ADAPTYVUMAS MOBILIESIEMS
+   14. ADAPTYVUMAS MOBILIESIEMS
    ========================================================================== */
 @media (max-width: 768px) {
     body {
