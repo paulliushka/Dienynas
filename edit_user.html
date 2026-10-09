@@ -14,8 +14,11 @@
         <div class="card">
             <h2>Redaguoti vartotoją</h2>
             <form id="editUserForm">
-                <label>Prisijungimo vardas</label>
-                <input type="text" name="username" id="username" required>
+                <label>Prisijungimo vardas (neprivaloma keisti)</label>
+                <input type="text" name="username" id="username" placeholder="Vartotojo vardas">
+
+                <label>El. paštas (neprivaloma)</label>
+                <input type="text" name="email" id="email" placeholder="el.pastas@pavyzdys.lt">
 
                 <label>Vardas</label>
                 <input type="text" name="name" id="name" required>
@@ -78,6 +81,7 @@
                 const user = await response.json();
 
                 document.getElementById('username').value = user.username || '';
+                document.getElementById('email').value = user.email || '';
                 document.getElementById('name').value = user.name || '';
                 document.getElementById('surname').value = user.surname || '';
                 document.getElementById('role').value = user.role || 'student';

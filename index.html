@@ -8,21 +8,9 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
-    <style>
-        body { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-height: 90vh; 
-        }
-        .card { 
-            width: 100%; 
-            max-width: 400px; 
-        }
-    </style>
 </head>
-<body>
-    <div class="card">
+<body class="centered-page-body">
+    <div class="card" style="max-width: 400px; width: 100%;">
         <h1>Prisijungti</h1>
         <form id="loginForm">
             <label for="username">Vartotojo vardas</label>
@@ -33,6 +21,9 @@
             
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 15px;">Prisijungti</button>
         </form>
+        <div style="margin-top: 15px; text-align: center;">
+            <a href="register" class="btn-back">Turite registracijos kodą? Užsiregistruokite čia</a>
+        </div>
     </div>
 
     <script>
