@@ -74,17 +74,23 @@
         async function loadTeacherGroups() {
             try {
                 const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
+                if (response.status === 401) {
+                    window.location.href = '/';
+                    return;
+                }
                 const groups = await response.json();
 
                 const select = document.getElementById('group_select');
                 select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
 
-                groups.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = g.group_id;
-                    opt.textContent = `${g.group_name} (${g.class} klasė)`;
-                    select.appendChild(opt);
-                });
+                if (Array.isArray(groups)) {
+                    groups.forEach(g => {
+                        const opt = document.createElement('option');
+                        opt.value = g.group_id;
+                        opt.textContent = `${g.group_name} (${g.class} klasė)`;
+                        select.appendChild(opt);
+                    });
+                }
             } catch (error) {
                 console.error("Klaida užkraunant grupes:", error);
             }
@@ -95,6 +101,11 @@
                 const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
                 if (response.status === 401) {
                     window.location.href = '/';
+                    return;
+                }
+
+                if (!response.ok) {
+                    console.error("Serverio klaida gaunant namų darbus");
                     return;
                 }
 
@@ -113,7 +124,7 @@
                     theader.appendChild(th);
                 }
 
-                if (assignments.length === 0) {
+                if (!Array.isArray(assignments) || assignments.length === 0) {
                     const colSpan = showActions ? 5 : 4;
                     tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Namų darbų nėra.</td></tr>`;
                     return;
@@ -165,6 +176,11 @@
                         body: JSON.stringify(payload)
                     });
 
+                    if (response.status === 401) {
+                        window.location.href = '/';
+                        return;
+                    }
+
                     if (response.ok) {
                         this.reset();
                         loadAssignments();
@@ -186,6 +202,11 @@
                     method: 'DELETE',
                     credentials: 'include'
                 });
+
+                if (response.status === 401) {
+                    window.location.href = '/';
+                    return;
+                }
 
                 if (response.ok) {
                     loadAssignments();

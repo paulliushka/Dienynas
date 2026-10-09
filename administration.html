@@ -50,12 +50,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Vartotojo vardas / Reg. kodas</th>
-                            <th>Vardas Pavardė</th>
+                            <th>Vartotojo vardas</th>
+                            <th>Registracijos kodas</th>
+                            <th>Vardas ir Pavardė</th>
                             <th>Rolė</th>
                             <th>Klasė</th>
-                            <th>Būsena</th>
                             <th>Veiksmai</th>
                         </tr>
                     </thead>
@@ -98,23 +97,21 @@
 
                 users.forEach(u => {
                     const isPending = u.status === 'pending';
-                    const statusText = isPending ? '<span style="color: #d9534f; font-weight: bold;">Laukia registracijos</span>' : 'Aktyvus';
+                    const usernameDisplay = u.username ? u.username : '-';
                     
-                    let identityDisplay = u.username;
-                    if (isPending && u.reg_code) {
-                        identityDisplay = `<span class="code-display" style="font-size: 10px;">${u.reg_code} (Kodas)</span>`;
-                    } else if (!identityDisplay) {
-                        identityDisplay = '-';
+                    let regCodeDisplay = '-';
+                    if (u.reg_code) {
+                        const codeClass = isPending ? 'reg-code-unused' : 'reg-code-used';
+                        regCodeDisplay = `<span class="${codeClass}">${u.reg_code}</span>`;
                     }
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${u.user_id}</td>
-                        <td>${identityDisplay}</td>
+                        <td>${usernameDisplay}</td>
+                        <td>${regCodeDisplay}</td>
                         <td><strong>${u.name} ${u.surname}</strong></td>
                         <td>${roleTranslations[u.role] || u.role}</td>
                         <td>${u.class ? u.class : '-'}</td>
-                        <td>${statusText}</td>
                         <td>
                             <a href="edit_user?id=${u.user_id}">Redaguoti</a> | 
                             <a href="javascript:void(0);" onclick="deleteUser(${u.user_id}); return false;">Ištrinti</a>
