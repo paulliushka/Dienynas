@@ -75,9 +75,21 @@
             document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
         }
 
+        function setDefaultDate() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const dateInput = document.getElementById('due_date');
+            if (dateInput) {
+                dateInput.value = `${now.getFullYear()}-${month}-${day}`;
+                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
         async function initPage() {
             if (currentUser.role === 'teacher') {
                 document.getElementById('addAssignmentCard').style.display = 'block';
+                setDefaultDate();
                 await loadTeacherGroups();
             }
 
@@ -183,6 +195,7 @@
 
                     if (response.ok) {
                         this.reset();
+                        setDefaultDate();
                         loadAssignments();
                     } else {
                         const errResult = await response.json();
