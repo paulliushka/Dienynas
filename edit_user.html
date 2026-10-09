@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <script>
@@ -21,7 +22,6 @@
 
         <div class="card">
             <h2>Redaguoti vartotojo duomenis</h2>
-            <div id="errorBox" class="error-message"></div>
 
             <form id="editUserForm">
                 <label>Vardas</label>
@@ -52,14 +52,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
         if (!userId) { window.location.href = 'administration'; }
-
-        function showError(msg) {
-            const box = document.getElementById('errorBox');
-            if (box) {
-                box.textContent = msg;
-                box.style.display = 'block';
-            }
-        }
 
         function toggleClassField() {
             const role = document.getElementById('role').value;
@@ -92,13 +84,12 @@
                 toggleClassField();
                 initCustomSelects();
             } catch (error) { 
-                showError("Klaida kraunant vartotojo duomenis.");
+                showToast("Klaida kraunant vartotojo duomenis.", "error");
             }
         }
 
         document.getElementById('editUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            document.getElementById('errorBox').style.display = 'none';
 
             const data = Object.fromEntries(new FormData(this).entries());
             try {
@@ -113,10 +104,10 @@
                     window.location.href = 'administration'; 
                 } else { 
                     const r = await res.json(); 
-                    showError(r.message || "Klaida išsaugant pakeitimus."); 
+                    showToast(r.message || "Klaida išsaugant pakeitimus.", "error"); 
                 }
             } catch (err) {
-                showError("Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         });
 

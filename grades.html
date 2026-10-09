@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <div class="container">
@@ -15,7 +16,6 @@
 
         <div class="card" id="addGradeCard" style="display: none;">
             <h2>Įrašyti naują pažymį</h2>
-            <div id="formErrorBox" class="error-message"></div>
 
             <form id="addGradeForm">
                 <label>Grupė</label>
@@ -54,7 +54,6 @@
 
         <div class="card">
             <h2>Pažymių sąrašas</h2>
-            <div id="tableErrorBox" class="error-message"></div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -83,18 +82,6 @@
 
         if (!currentUser.user_id) {
             window.location.href = '/';
-        }
-
-        function showError(boxId, msg) {
-            const box = document.getElementById(boxId);
-            if (box) {
-                box.textContent = msg;
-                box.style.display = 'block';
-            }
-        }
-
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
         }
 
         async function initPage() {
@@ -136,7 +123,7 @@
                 });
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                showError('formErrorBox', 'Klaida užkraunant grupes.');
+                showToast('Klaida užkraunant grupes.', 'error');
             }
         }
 
@@ -165,7 +152,7 @@
                 select.disabled = false;
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                showError('formErrorBox', 'Klaida užkraunant mokinius.');
+                showToast('Klaida užkraunant mokinius.', 'error');
             }
         }
 
@@ -220,14 +207,13 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                showError('tableErrorBox', 'Klaida užkraunant pažymių sąrašą.');
+                showToast('Klaida užkraunant pažymių sąrašą.', 'error');
             }
         }
 
         if (currentUser.role === 'teacher') {
             document.getElementById('addGradeForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                clearErrors();
 
                 const formData = new FormData(this);
                 const payload = {
@@ -251,20 +237,20 @@
                         this.reset();
                         setDefaultDate();
                         document.getElementById('student_select').disabled = true;
+                        showToast("Pažymys sėkmingai įrašytas!", "success");
                         loadGrades();
                     } else {
                         const errResult = await response.json();
-                        showError('formErrorBox', errResult.message || "Klaida įrašant pažymį.");
+                        showToast(errResult.message || "Klaida įrašant pažymį.", "error");
                     }
                 } catch (error) {
-                    showError('formErrorBox', "Nepavyko prisijungti prie serverio.");
+                    showToast("Nepavyko prisijungti prie serverio.", "error");
                 }
             });
         }
 
         async function deleteGrade(gradeId) {
             if (!confirm('Ar tikrai norite ištrinti šį pažymį?')) return;
-            clearErrors();
 
             try {
                 const response = await fetch(`${API_URL}/api/grades/delete/${gradeId}`, {
@@ -273,12 +259,13 @@
                 });
 
                 if (response.ok) {
+                    showToast("Pažymys ištrintas.", "success");
                     loadGrades();
                 } else {
-                    showError('tableErrorBox', "Klaida trinant pažymį.");
+                    showToast("Klaida trinant pažymį.", "error");
                 }
             } catch (error) {
-                showError('tableErrorBox', "Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         }
 

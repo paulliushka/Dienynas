@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <script>
@@ -20,8 +21,6 @@
 
         <div class="card">
             <h2>Keisti asmeninius duomenis</h2>
-            <div id="errorBox" class="error-message"></div>
-            <div id="successBox" class="success-message"></div>
 
             <form id="profileForm">
                 <label>Vardas Pavardė</label>
@@ -44,22 +43,6 @@
     </div>
 
     <script>
-        function showError(msg) {
-            const errBox = document.getElementById('errorBox');
-            const succBox = document.getElementById('successBox');
-            succBox.style.display = 'none';
-            errBox.textContent = msg;
-            errBox.style.display = 'block';
-        }
-
-        function showSuccess(msg) {
-            const errBox = document.getElementById('errorBox');
-            const succBox = document.getElementById('successBox');
-            errBox.style.display = 'none';
-            succBox.textContent = msg;
-            succBox.style.display = 'block';
-        }
-
         async function loadProfile() {
             try {
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
@@ -70,7 +53,7 @@
                 document.getElementById('username').value = user.username || '';
                 document.getElementById('email').value = user.email || '';
             } catch (err) {
-                showError("Klaida užkraunant profilio duomenis.");
+                showToast("Klaida užkraunant profilio duomenis.", "error");
             }
         }
 
@@ -88,17 +71,16 @@
 
                 const result = await res.json();
                 if (res.ok) {
-                    showSuccess("Profilio duomenys sėkmingai atnaujinti!");
+                    showToast("Profilio duomenys sėkmingai atnaujinti!", "success");
                     document.getElementById('password').value = '';
                     
-                    // Atnaujiname vietinę sesiją
                     currentUser.username = data.username;
                     localStorage.setItem('user', JSON.stringify(currentUser));
                 } else {
-                    showError(result.message || "Klaida išsaugant pakeitimus.");
+                    showToast(result.message || "Klaida išsaugant pakeitimus.", "error");
                 }
             } catch (err) {
-                showError("Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         });
 

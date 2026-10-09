@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <div class="container">
@@ -15,7 +16,6 @@
 
         <div class="card" id="addAssignmentCard" style="display: none;">
             <h2>Paskirti naują namų darbą</h2>
-            <div id="formErrorBox" class="error-message"></div>
 
             <form id="addAssignmentForm">
                 <label>Grupė</label>
@@ -35,7 +35,6 @@
 
         <div class="card">
             <h2>Esami namų darbai</h2>
-            <div id="tableErrorBox" class="error-message"></div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -61,18 +60,6 @@
 
         if (!currentUser.user_id) {
             window.location.href = '/';
-        }
-
-        function showError(boxId, msg) {
-            const box = document.getElementById(boxId);
-            if (box) {
-                box.textContent = msg;
-                box.style.display = 'block';
-            }
-        }
-
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
         }
 
         function setDefaultDate() {
@@ -117,7 +104,7 @@
                 }
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                showError('formErrorBox', 'Klaida užkraunant grupes.');
+                showToast('Klaida užkraunant grupes.', 'error');
             }
         }
 
@@ -169,14 +156,13 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                showError('tableErrorBox', 'Klaida užkraunant namų darbus.');
+                showToast('Klaida užkraunant namų darbus.', 'error');
             }
         }
 
         if (currentUser.role === 'teacher') {
             document.getElementById('addAssignmentForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                clearErrors();
 
                 const formData = new FormData(this);
                 const payload = {
@@ -196,20 +182,20 @@
                     if (response.ok) {
                         this.reset();
                         setDefaultDate();
+                        showToast("Namų darbas sėkmingai paskirtas!", "success");
                         loadAssignments();
                     } else {
                         const errResult = await response.json();
-                        showError('formErrorBox', errResult.message || "Klaida pridedant namų darbą.");
+                        showToast(errResult.message || "Klaida pridedant namų darbą.", "error");
                     }
                 } catch (error) {
-                    showError('formErrorBox', "Nepavyko prisijungti prie serverio.");
+                    showToast("Nepavyko prisijungti prie serverio.", "error");
                 }
             });
         }
 
         async function deleteAssignment(assignmentId) {
             if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
-            clearErrors();
 
             try {
                 const response = await fetch(`${API_URL}/api/assignments/delete/${assignmentId}`, {
@@ -218,12 +204,13 @@
                 });
 
                 if (response.ok) {
+                    showToast("Namų darbas ištrintas.", "success");
                     loadAssignments();
                 } else {
-                    showError('tableErrorBox', "Klaida trinant namų darbą.");
+                    showToast("Klaida trinant namų darbą.", "error");
                 }
             } catch (error) {
-                showError('tableErrorBox', "Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         }
 

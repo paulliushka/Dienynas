@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <script>
@@ -21,7 +22,6 @@
 
         <div class="card" id="addGroupCard" style="display: none;">
             <h2>Sukurti naują grupę</h2>
-            <div id="formErrorBox" class="error-message"></div>
 
             <form id="createGroupForm">
                 <label>Pavadinimas</label>
@@ -51,7 +51,6 @@
 
         <div class="card">
             <h2>Esamos grupės</h2>
-            <div id="tableErrorBox" class="error-message"></div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -73,18 +72,6 @@
 
     <script src="select.js"></script>
     <script>
-        function showError(boxId, msg) {
-            const box = document.getElementById(boxId);
-            if (box) {
-                box.textContent = msg;
-                box.style.display = 'block';
-            }
-        }
-
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
-        }
-
         async function initPage() {
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
                 document.getElementById('addGroupCard').style.display = 'block';
@@ -115,7 +102,7 @@
                 
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                showError('formErrorBox', "Klaida užkraunant klases.");
+                showToast("Klaida užkraunant klases.", "error");
             }
         }
 
@@ -135,7 +122,6 @@
                     checkbox.className = "teacher-checkbox";
                     checkbox.value = t.user_id;
 
-                    // Jei prisijungęs vartotojas yra mokytojas, jį užžymime automatiškai
                     if (currentUser.role === 'teacher' && Number(t.user_id) === Number(currentUser.user_id)) {
                         checkbox.checked = true;
                     }
@@ -145,7 +131,7 @@
                     container.appendChild(label);
                 });
             } catch (error) {
-                showError('formErrorBox', "Klaida užkraunant mokytojus.");
+                showToast("Klaida užkraunant mokytojus.", "error");
             }
         }
 
@@ -181,7 +167,7 @@
                     studentsContainer.appendChild(label);
                 });
             } catch (error) {
-                showError('formErrorBox', "Klaida užkraunant mokinius.");
+                showToast("Klaida užkraunant mokinius.", "error");
             }
         }
 
@@ -230,20 +216,19 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                showError('tableErrorBox', "Klaida užkraunant grupes.");
+                showToast("Klaida užkraunant grupes.", "error");
             }
         }
 
         document.getElementById('createGroupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            clearErrors();
 
             const formData = new FormData(this);
             const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
             const selectedTeachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
 
             if (selectedTeachers.length === 0 && currentUser.role === 'administrator') {
-                showError('formErrorBox', "Pasirinkite bent vieną mokytoją!");
+                showToast("Pasirinkite bent vieną mokytoją!", "error");
                 return;
             }
 
@@ -270,19 +255,19 @@
 
                     document.getElementById("students_container").innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
                     await loadTeachers();
+                    showToast("Grupė sėkmingai sukurta!", "success");
                     loadGroups();
                 } else {
                     const result = await response.json();
-                    showError('formErrorBox', result.message || "Klaida kuriant grupę.");
+                    showToast(result.message || "Klaida kuriant grupę.", "error");
                 }
             } catch (error) {
-                showError('formErrorBox', "Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         });
 
         async function deleteGroup(groupId) {
             if (!confirm('Ar tikrai norite ištrinti šią grupę?')) return;
-            clearErrors();
 
             try {
                 const response = await fetch(`${API_URL}/api/groups/delete/${groupId}`, {
@@ -291,12 +276,13 @@
                 });
 
                 if (response.ok) {
+                    showToast("Grupė ištrinta.", "success");
                     loadGroups();
                 } else {
-                    showError('tableErrorBox', "Klaida trinant grupę.");
+                    showToast("Klaida trinant grupę.", "error");
                 }
             } catch (error) {
-                showError('tableErrorBox', "Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         }
 
