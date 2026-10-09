@@ -6,10 +6,10 @@
 }
 
 body {
-    background-color: #0f172a;
+    background-color: #0b0f19;
     color: #f1f5f9;
     line-height: 1.6;
-    padding: 20px;
+    padding: 24px;
 }
 
 .container {
@@ -20,42 +20,44 @@ body {
 
 h1 {
     color: #f8fafc;
-    margin-bottom: 20px;
-    font-size: 26px;
+    margin-bottom: 24px;
+    font-size: 28px;
     font-weight: 600;
 }
 
 h2 {
     color: #e2e8f0;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
     font-size: 18px;
     font-weight: 600;
-    border-bottom: 2px solid #334155;
+    border-bottom: 2px solid #1e293b;
     padding-bottom: 8px;
 }
 
 h3 {
     font-size: 15px;
     color: #cbd5e1;
-    margin: 15px 0 10px 0;
+    margin: 16px 0 10px 0;
 }
 
 .card {
-    background: #1e293b;
-    border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    border: 1px solid #334155;
+    background: #131b2e;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    border: 1px solid #1e293b;
 }
 
 label {
     display: block;
-    margin-top: 12px;
+    margin-top: 14px;
     margin-bottom: 6px;
     font-weight: 600;
-    font-size: 14px;
-    color: #cbd5e1;
+    font-size: 13px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 input[type="text"],
@@ -65,36 +67,37 @@ input[type="date"],
 select,
 textarea {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #475569;
-    border-radius: 6px;
+    padding: 11px 14px;
+    border: 1px solid #334155;
+    border-radius: 8px;
     font-size: 14px;
     color: #f8fafc;
     background-color: #0f172a;
-    transition: border-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
 
 .btn {
     display: inline-block;
-    padding: 10px 18px;
+    padding: 11px 20px;
     font-size: 14px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 8px;
     border: none;
     cursor: pointer;
     text-decoration: none;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .btn-primary {
     background-color: #0284c7;
     color: white;
+    box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.3);
 }
 
 .btn-primary:hover {
@@ -102,13 +105,13 @@ input:focus, select:focus, textarea:focus {
 }
 
 .btn-secondary {
-    background-color: #334155;
+    background-color: #1e293b;
     color: #e2e8f0;
-    border: 1px solid #475569;
+    border: 1px solid #334155;
 }
 
 .btn-secondary:hover {
-    background-color: #475569;
+    background-color: #334155;
 }
 
 .btn-back {
@@ -118,6 +121,7 @@ input:focus, select:focus, textarea:focus {
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
+    transition: color 0.2s;
 }
 
 .btn-back:hover {
@@ -127,21 +131,23 @@ input:focus, select:focus, textarea:focus {
 .scroll-box {
     max-height: 180px;
     overflow-y: auto;
-    border: 1px solid #475569;
-    padding: 10px;
-    border-radius: 6px;
+    border: 1px solid #334155;
+    padding: 12px;
+    border-radius: 8px;
     background-color: #0f172a;
 }
 
 .scroll-box label {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 6px 0;
+    gap: 10px;
+    margin: 8px 0;
     font-weight: 400;
     font-size: 14px;
-    color: #e2e8f0;
+    color: #f1f5f9;
     cursor: pointer;
+    text-transform: none;
+    letter-spacing: normal;
 }
 
 .scroll-box input[type="checkbox"] {
@@ -164,22 +170,22 @@ table {
 }
 
 th, td {
-    padding: 12px 15px;
+    padding: 14px 16px;
     text-align: left;
-    border-bottom: 1px solid #334155;
+    border-bottom: 1px solid #1e293b;
 }
 
 th {
     background-color: #0f172a;
-    color: #94a3b8;
+    color: #64748b;
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 12px;
-    letter-spacing: 0.5px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
 }
 
 tr:hover {
-    background-color: #1e293b;
+    background-color: #1a2333;
 }
 
 .badge-owner {
@@ -211,5 +217,5 @@ a:hover {
     text-align: center;
     color: #64748b;
     font-style: italic;
-    padding: 20px;
+    padding: 24px;
 }
