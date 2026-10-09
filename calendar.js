@@ -1,196 +1,153 @@
-// static/js/calendar.js
+class CustomCalendarPicker {
+    constructor(inputElement) {
+        this.input = inputElement;
+        this.input.readOnly = true;
+        this.input.classList.add('custom-calendar-input');
 
-function initCalendar(inputId, showTime = false) {
-    const dateInput = document.getElementById(inputId);
-    if (!dateInput) return;
+        this.today = new Date();
+        
+        // Jeigu laukas jau turi reikšmę (YYYY-MM-DD), naudojame ją
+        if (this.input.value) {
+            const parts = this.input.value.split('-');
+            if (parts.length === 3) {
+                this.selectedYear = parseInt(parts[0], 10);
+                this.selectedMonth = parseInt(parts[1], 10) - 1;
+                this.selectedDay = parseInt(parts[2], 10);
+            }
+        }
 
-    // Create a container and insert it dynamically around the input field
-    const container = document.createElement("div");
-    container.className = "custom-datepicker-container";
-    dateInput.parentNode.insertBefore(container, dateInput);
-    container.appendChild(dateInput);
+        this.currentMonth = this.selectedMonth !== undefined ? this.selectedMonth : this.today.getMonth();
+        this.currentYear = this.selectedYear !== undefined ? this.selectedYear : this.today.getFullYear();
 
-    const calendarBox = document.createElement("div");
-    calendarBox.className = "custom-calendar";
-    
-    // HTML Structure of the calendar (Days and headers in Lithuanian)
-    let calendarHTML = `
-        <div class="calendar-header">
-            <button type="button" class="calendar-btn cal-prev">&lt;</button>
-            <span class="cal-month-year"></span>
-            <button type="button" class="calendar-btn cal-next">&gt;</button>
-        </div>
-        <div class="calendar-weekdays">
-            <div>Pr</div><div>An</div><div>Tr</div><div>Ket</div><div>Pn</div><div>Še</div><div>Se</div>
-        </div>
-        <div class="calendar-days"></div>
-    `;
-
-    // If the user requests time picker, append the time HTML block
-    if (showTime) {
-        calendarHTML += `
-            <div class="calendar-time-picker">
-                <span>Laikas:</span>
-                <select class="cal-hours"></select>
-                <span>:</span>
-                <select class="cal-minutes"></select>
-            </div>
-        `;
+        this.init();
     }
 
-    calendarBox.innerHTML = calendarHTML;
-    container.appendChild(calendarBox);
+    init() {
+        // Wrapper elementas
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-calendar-wrapper';
+        this.input.parentNode.insertBefore(wrapper, this.input);
+        wrapper.appendChild(this.input);
 
-    // Selectors for this specific calendar instance
-    const monthYearText = calendarBox.querySelector(".cal-month-year");
-    const daysGrid = calendarBox.querySelector(".calendar-days");
-    const prevBtn = calendarBox.querySelector(".cal-prev");
-    const nextBtn = calendarBox.querySelector(".cal-next");
+        // Pop-up konteineris
+        this.popup = document.createElement('div');
+        this.popup.className = 'custom-calendar-popup';
+        wrapper.appendChild(this.popup);
 
-    // Month names in Lithuanian
-    const months = [
-        "Sausis", "Vasaris", "Kovas", "Balandis", "Gegužė", "Birželis",
-        "Liepa", "Rugpjūtis", "Rugsėjis", "Spalis", "Lapkritis", "Gruodis"
-    ];
+        this.render();
 
-    let currentNavDate = new Date();
-    let selectedDate = new Date();
-
-    // Generate hours and minutes options if showTime is true
-    if (showTime) {
-        const hoursSelect = calendarBox.querySelector(".cal-hours");
-        const minutesSelect = calendarBox.querySelector(".cal-minutes");
-
-        for (let h = 0; h < 24; h++) {
-            let hStr = h < 10 ? '0' + h : h;
-            hoursSelect.innerHTML += `<option value="${hStr}">${hStr}</option>`;
-        }
-        for (let m = 0; m < 60; m += 5) {
-            let mStr = m < 10 ? '0' + m : m;
-            minutesSelect.innerHTML += `<option value="${mStr}">${mStr}</option>`;
-        }
-
-        // Set current local time by default
-        let currentHour = new Date().getHours();
-        let currentMinute = Math.round(new Date().getMinutes() / 5) * 5;
-        if (currentMinute >= 60) currentMinute = 55;
-        
-        hoursSelect.value = currentHour < 10 ? '0' + currentHour : currentHour;
-        minutesSelect.value = currentMinute < 10 ? '0' + currentMinute : currentMinute;
-
-        hoursSelect.addEventListener("change", updateInputValue);
-        minutesSelect.addEventListener("change", updateInputValue);
-    }
-
-    // Populate initial input field value
-    setInitialDate();
-
-    // Event Listeners
-    dateInput.addEventListener("click", function (e) {
-        e.stopPropagation();
-        // Close any other open custom calendars on the page
-        document.querySelectorAll(".custom-calendar").forEach(cal => {
-            if (cal !== calendarBox) cal.classList.remove("active");
-        });
-        calendarBox.classList.toggle("active");
-        renderCalendar();
-    });
-
-    document.addEventListener("click", function (e) {
-        if (!calendarBox.contains(e.target) && e.target !== dateInput) {
-            calendarBox.classList.remove("active");
-        }
-    });
-
-    prevBtn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        currentNavDate.setMonth(currentNavDate.getMonth() - 1);
-        renderCalendar();
-    });
-
-    nextBtn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        currentNavDate.setMonth(currentNavDate.getMonth() + 1);
-        renderCalendar();
-    });
-
-    function renderCalendar() {
-        daysGrid.innerHTML = "";
-        const year = currentNavDate.getFullYear();
-        const month = currentNavDate.getMonth();
-
-        monthYearText.textContent = `${months[month]} ${year}`;
-
-        const firstDayIndex = new Date(year, month, 1).getDay();
-        const totalDays = new Date(year, month + 1, 0).getDate();
-        
-        // Convert JS Sunday (0) to European Monday (1) standard layout
-        let blankSpaces = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-
-        for (let i = 0; i < blankSpaces; i++) {
-            const emptyDiv = document.createElement("div");
-            emptyDiv.className = "calendar-day empty";
-            daysGrid.appendChild(emptyDiv);
-        }
-
-        const today = new Date();
-        for (let day = 1; day <= totalDays; day++) {
-            const dayDiv = document.createElement("div");
-            dayDiv.className = "calendar-day";
-            dayDiv.textContent = day;
-
-            if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-                dayDiv.classList.add("today");
-            }
-
-            if (selectedDate && day === selectedDate.getDate() && month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
-                dayDiv.classList.add("selected");
-            }
-
-            dayDiv.addEventListener("click", function (e) {
-                e.stopPropagation();
-                selectedDate = new Date(year, month, day);
-                calendarBox.querySelectorAll(".calendar-day").forEach(d => d.classList.remove("selected"));
-                dayDiv.classList.add("selected");
-                
-                updateInputValue();
-                calendarBox.classList.remove("active");
+        // Atidarymas / uždarymas
+        this.input.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.custom-calendar-popup').forEach(p => {
+                if (p !== this.popup) p.classList.remove('show');
             });
+            this.popup.classList.toggle('show');
+        });
 
-            daysGrid.appendChild(dayDiv);
-        }
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+                this.popup.classList.remove('show');
+            }
+        });
     }
 
-    function setInitialDate() {
-        const yyyy = selectedDate.getFullYear();
-        let mm = selectedDate.getMonth() + 1;
-        let dd = selectedDate.getDate();
-        if (mm < 10) mm = '0' + mm;
-        if (dd < 10) dd = '0' + dd;
+    render() {
+        const monthsLT = [
+            'Sausis', 'Vasaris', 'Kovas', 'Balandis', 
+            'Gegužė', 'Birželis', 'Liepa', 'Rugpjūtis', 
+            'Rugsėjis', 'Spalis', 'Lapkritis', 'Gruodis'
+        ];
 
-        if (showTime) {
-            const hoursSelect = calendarBox.querySelector(".cal-hours");
-            const minutesSelect = calendarBox.querySelector(".cal-minutes");
-            dateInput.value = `${yyyy}-${mm}-${dd} ${hoursSelect.value}:${minutesSelect.value}`;
-        } else {
-            dateInput.value = `${yyyy}-${mm}-${dd}`;
+        const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+        const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+
+        // Pirmadienis = 0, Sekmadienis = 6
+        let startingDay = firstDay.getDay() - 1;
+        if (startingDay === -1) startingDay = 6;
+
+        let html = `
+            <div class="calendar-header">
+                <button type="button" class="calendar-nav-btn" id="prevMonth">&lt;</button>
+                <span class="calendar-title">${monthsLT[this.currentMonth]} ${this.currentYear}</span>
+                <button type="button" class="calendar-nav-btn" id="nextMonth">&gt;</button>
+            </div>
+            <div class="calendar-grid">
+                <div class="calendar-day-head">Pr</div>
+                <div class="calendar-day-head">An</div>
+                <div class="calendar-day-head">Tr</div>
+                <div class="calendar-day-head">Ket</div>
+                <div class="calendar-day-head">Pen</div>
+                <div class="calendar-day-head">Še</div>
+                <div class="calendar-day-head">Sek</div>
+        `;
+
+        // Tuščios dienos mėnesio pradžioje
+        for (let i = 0; i < startingDay; i++) {
+            html += `<div class="calendar-day empty"></div>`;
         }
-    }
 
-    function updateInputValue() {
-        if (!selectedDate) return;
-        const yyyy = selectedDate.getFullYear();
-        let mm = selectedDate.getMonth() + 1;
-        let dd = selectedDate.getDate();
-        if (mm < 10) mm = '0' + mm;
-        if (dd < 10) dd = '0' + dd;
+        // Mėnesio dienos
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const formattedMonth = String(this.currentMonth + 1).padStart(2, '0');
+            const formattedDay = String(day).padStart(2, '0');
+            const dateStr = `${this.currentYear}-${formattedMonth}-${formattedDay}`;
 
-        if (showTime) {
-            const hoursSelect = calendarBox.querySelector(".cal-hours");
-            const minutesSelect = calendarBox.querySelector(".cal-minutes");
-            dateInput.value = `${yyyy}-${mm}-${dd} ${hoursSelect.value}:${minutesSelect.value}`;
-        } else {
-            dateInput.value = `${yyyy}-${mm}-${dd}`;
+            const isSelected = this.input.value === dateStr ? 'selected' : '';
+            const isToday = (
+                day === this.today.getDate() && 
+                this.currentMonth === this.today.getMonth() && 
+                this.currentYear === this.today.getFullYear()
+            ) ? 'today' : '';
+
+            html += `<div class="calendar-day ${isSelected} ${isToday}" data-date="${dateStr}">${day}</div>`;
         }
+
+        html += `</div>`;
+        this.popup.innerHTML = html;
+
+        // Navigacija tarp mėnesių
+        this.popup.querySelector('#prevMonth').onclick = (e) => {
+            e.stopPropagation();
+            this.currentMonth--;
+            if (this.currentMonth < 0) {
+                this.currentMonth = 11;
+                this.currentYear--;
+            }
+            this.render();
+        };
+
+        this.popup.querySelector('#nextMonth').onclick = (e) => {
+            e.stopPropagation();
+            this.currentMonth++;
+            if (this.currentMonth > 11) {
+                this.currentMonth = 0;
+                this.currentYear++;
+            }
+            this.render();
+        };
+
+        // Dienos pasirinkimas
+        this.popup.querySelectorAll('.calendar-day:not(.empty)').forEach(dayEl => {
+            dayEl.onclick = (e) => {
+                e.stopPropagation();
+                this.input.value = dayEl.dataset.date;
+                this.popup.classList.remove('show');
+                
+                // Iššaukiame change įvykį formų valdymui
+                this.input.dispatchEvent(new Event('change'));
+                this.render();
+            };
+        });
     }
+}
+
+// Funkcija automatiškai pakeisti visus <input type="date">
+function initCalendarPickers() {
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+        if (!input.classList.contains('custom-calendar-initialized')) {
+            input.classList.add('custom-calendar-initialized');
+            new CustomCalendarPicker(input);
+        }
+    });
 }

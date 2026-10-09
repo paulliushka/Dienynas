@@ -49,6 +49,7 @@
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
+    <script src="calendar.js"></script>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -62,7 +63,8 @@
                 loadTeacherGroups();
             }
 
-            loadAssignments();
+            await loadAssignments();
+            initCalendarPickers();
         }
 
         async function loadTeacherGroups() {

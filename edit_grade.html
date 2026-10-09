@@ -44,6 +44,7 @@
         </div>
     </div>
 
+    <script src="calendar.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const gradeId = urlParams.get('id');
@@ -71,6 +72,8 @@
                 document.getElementById('type').value = item.type || 'Savarankiškas darbas';
                 document.getElementById('date').value = item.date || '';
                 document.getElementById('comment').value = item.comment || '';
+
+                initCalendarPickers();
             } catch (error) {
                 console.error("Klaida užkraunant pažymį:", error);
             }

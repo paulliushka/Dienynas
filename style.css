@@ -219,3 +219,112 @@ a:hover {
     font-style: italic;
     padding: 24px;
 }
+
+.custom-calendar-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-calendar-input {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%3C38bdf8' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 18px;
+    padding-right: 42px !important;
+}
+
+.custom-calendar-popup {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 1000;
+    width: 290px;
+    background-color: #131b2e;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+.custom-calendar-popup.show {
+    display: block;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.calendar-title {
+    font-weight: 600;
+    color: #f8fafc;
+    font-size: 14px;
+}
+
+.calendar-nav-btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #38bdf8;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.calendar-nav-btn:hover {
+    background: #334155;
+    border-color: #0284c7;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.calendar-day-head {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    padding-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.calendar-day {
+    padding: 7px 0;
+    font-size: 13px;
+    color: #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.calendar-day:hover:not(.empty) {
+    background-color: #1e293b;
+    color: #38bdf8;
+}
+
+.calendar-day.today {
+    border: 1px solid #0284c7;
+    color: #38bdf8;
+}
+
+.calendar-day.selected {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+.calendar-day.empty {
+    cursor: default;
+}
