@@ -10,13 +10,19 @@
     <script src="config.js"></script>
 </head>
 <body>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id || currentUser.role !== 'administrator') {
+            window.location.href = 'dashboard';
+        }
+    </script>
     <div class="container">
         <h1>Vartotojų kūrimas ir valdymas</h1>
         
         <div class="card">
             <h2>Sukurti naują vartotoją</h2>
             <div class="info-box">
-                <strong>Pastaba:</strong> Visiems naujiems vartotojams (mokiniams, mokytojams, administratoriams) automatiškai sugeneruojamas vienkartinis registracijos kodas. Vartotojas pats įves savo prisijungimo vardą, el. paštą ir slaptažodį registracijos lange.
+                <strong>Pastaba:</strong> Visiems naujiems vartotojams automatiškai sugeneruojamas registracijos kodas[cite: 14].
             </div>
             
             <div id="regCodeResult" class="info-box info-box-success" style="display: none;">
@@ -84,6 +90,7 @@
         async function loadUsers() {
             try {
                 const response = await fetch(`${API_URL}/api/users`, { credentials: 'include' });
+                if (response.status === 401) { window.location.href = '/'; return; }
                 const users = await response.json();
 
                 const tbody = document.getElementById('usersTableBody');
@@ -160,7 +167,7 @@
         });
 
         async function deleteUser(userId) {
-            if (!confirm('Ar tikrai norite ištrinti šį vartotoją ir visus jo duomenis?')) return;
+            if (!confirm('Ar tikrai norite ištrinti šį vartotoją?')) return;
 
             try {
                 const response = await fetch(`${API_URL}/api/users/delete/${userId}`, {

@@ -10,6 +10,10 @@
     <script src="config.js"></script>
 </head>
 <body>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id || currentUser.role !== 'administrator') { window.location.href = 'dashboard'; }
+    </script>
     <div class="container">
         <div class="card">
             <h2>Redaguoti vartotoją</h2>
@@ -45,80 +49,44 @@
             <a href="administration" class="btn-back">Atšaukti ir grįžti</a>
         </div>
     </div>
-
     <script src="select.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
-
-        if (!userId) {
-            alert("Nenurodytas vartotojo ID.");
-            window.location.href = 'administration';
-        }
+        if (!userId) { window.location.href = 'administration'; }
 
         function toggleClassField() {
             const role = document.getElementById('role').value;
             const classField = document.getElementById('class');
-            if (role === 'student') {
-                classField.disabled = false;
-                classField.required = true;
-            } else {
-                classField.disabled = true;
-                classField.required = false;
-                classField.value = "";
-            }
+            if (role === 'student') { classField.disabled = false; classField.required = true; }
+            else { classField.disabled = true; classField.required = false; classField.value = ""; }
         }
 
         async function loadUser() {
             try {
                 const response = await fetch(`${API_URL}/api/users/${userId}`, { credentials: 'include' });
-                if (!response.ok) {
-                    alert("Vartotojas nerastas.");
-                    window.location.href = 'administration';
-                    return;
-                }
-
+                if (!response.ok) { window.location.href = 'administration'; return; }
                 const user = await response.json();
-
                 document.getElementById('username').value = user.username || '';
                 document.getElementById('email').value = user.email || '';
                 document.getElementById('name').value = user.name || '';
                 document.getElementById('surname').value = user.surname || '';
                 document.getElementById('role').value = user.role || 'student';
                 document.getElementById('class').value = user.class || '';
-
                 toggleClassField();
                 initCustomSelects();
-            } catch (error) {
-                console.error("Klaida užkraunant vartotoją:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
         document.getElementById('editUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
-
-            try {
-                const response = await fetch(`${API_URL}/api/users/edit/${userId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    window.location.href = 'administration';
-                } else {
-                    const result = await response.json();
-                    alert(result.message || "Klaida išsaugant vartotoją.");
-                }
-            } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
-            }
+            const data = Object.fromEntries(new FormData(this).entries());
+            const res = await fetch(`${API_URL}/api/users/edit/${userId}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
+            });
+            if (res.ok) { window.location.href = 'administration'; }
+            else { const r = await res.json(); alert(r.message || "Klaida."); }
         });
-
         window.onload = loadUser;
     </script>
 </body>

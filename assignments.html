@@ -74,10 +74,7 @@
         async function loadTeacherGroups() {
             try {
                 const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
-                if (response.status === 401) {
-                    window.location.href = '/';
-                    return;
-                }
+                if (response.status === 401) { window.location.href = '/'; return; }
                 const groups = await response.json();
 
                 const select = document.getElementById('group_select');
@@ -99,16 +96,7 @@
         async function loadAssignments() {
             try {
                 const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
-                if (response.status === 401) {
-                    window.location.href = '/';
-                    return;
-                }
-
-                if (!response.ok) {
-                    console.error("Serverio klaida gaunant namų darbus");
-                    return;
-                }
-
+                if (response.status === 401) { window.location.href = '/'; return; }
                 const assignments = await response.json();
 
                 const theader = document.getElementById('assignmentsTableHeader');
@@ -176,11 +164,6 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if (response.status === 401) {
-                        window.location.href = '/';
-                        return;
-                    }
-
                     if (response.ok) {
                         this.reset();
                         loadAssignments();
@@ -202,11 +185,6 @@
                     method: 'DELETE',
                     credentials: 'include'
                 });
-
-                if (response.status === 401) {
-                    window.location.href = '/';
-                    return;
-                }
 
                 if (response.ok) {
                     loadAssignments();
