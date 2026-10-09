@@ -27,15 +27,15 @@
                 <label>Pavadinimas</label>
                 <input type="text" name="group_name" placeholder="Pavadinimas..." required>
 
-                <div id="teacherSelectContainer" style="display: none;">
-                    <label>Pasirinkite mokytoją (-us)</label>
-                    <div id="teachers_container" class="scroll-box"></div>
-                </div>
-
                 <label>Pasirinkite klasę</label>
                 <select name="class" id="class_select" onchange="fetchStudentsByClass()" required>
                     <option value="">-- Pasirinkite klasę --</option>
                 </select>
+
+                <div id="teacherSelectContainer" style="display: none;">
+                    <label>Pasirinkite mokytoją (-us)</label>
+                    <div id="teachers_container" class="scroll-box"></div>
+                </div>
 
                 <label>Pasirinkite mokinius</label>
                 <div>
