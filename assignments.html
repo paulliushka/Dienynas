@@ -110,20 +110,18 @@
 
                 assignments.forEach(assign => {
                     const tr = document.createElement('tr');
-                    const isOwner = assign.teacher_id == currentUser.user_id;
-
-                    const ownerBadge = (currentUser.role === 'teacher' && isOwner) ? '<span class="badge-owner">Mano užduotis</span>' : '';
+                    const isGroupTeacher = assign.group_teachers && assign.group_teachers.includes(currentUser.user_id);
 
                     let rowHtml = `
-                        <td><strong>${assign.group_display}</strong> ${ownerBadge}</td>
+                        <td><strong>${assign.group_display}</strong></td>
                         <td>${assign.task}</td>
                         <td>${assign.due_date}</td>
                         <td>${assign.teacher || '-'}</td>
                     `;
 
                     if (showActions) {
-                        const actionsTd = isOwner 
-                            ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="#" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
+                        const actionsTd = isGroupTeacher 
+                            ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
                             : '<span style="color: #64748b;">Neturite teisių</span>';
                         
                         rowHtml += `<td>${actionsTd}</td>`;
