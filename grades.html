@@ -29,16 +29,17 @@
                 </select>
 
                 <label>Pažymys</label>
-                <input type="text" name="grade" placeholder="Pvz., 10 arba N" required>
+                <input type="text" name="grade" placeholder="1-10" required>
 
-                <label>Atsiskaitymo tipas</label>
+                <label>Tipas</label>
                 <select name="type" required>
                     <option value="Savarankiškas darbas">Savarankiškas darbas</option>
+                    <option value="Laboratorinis darbas">Laboratorinis darbas</option>
                     <option value="Kontrolinis darbas">Kontrolinis darbas</option>
                     <option value="Projektinis darbas">Projektinis darbas</option>
+                    <option value="Teorinis darbas">Teorinis darbas</option>
                     <option value="Klasės darbas">Klasės darbas</option>
                     <option value="Namų darbas">Namų darbas</option>
-                    <option value="Kaupiamasis">Kaupiamasis</option>
                 </select>
 
                 <label>Data</label>
@@ -47,7 +48,7 @@
                 <label>Komentaras (neprivalomas)</label>
                 <textarea name="comment" rows="3" placeholder="Komentaras..."></textarea>
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Įrašyti pažymį</button>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Įrašyti</button>
             </form>
         </div>
 
