@@ -25,29 +25,30 @@
             <div id="errorBox" class="error-message"></div>
 
             <form id="editGradeForm">
-                <label>Grupė:</label>
+                <label>Grupė</label>
                 <input type="text" id="group_name" disabled class="readonly-input">
                 
-                <label>Mokinys:</label>
+                <label>Mokinys</label>
                 <input type="text" id="student" disabled class="readonly-input">
                 
-                <label>Pažymys:</label>
+                <label>Pažymys</label>
                 <input type="text" name="grade" id="grade" required>
                 
-                <label>Tipas:</label>
+                <label>Tipas</label>
                 <select name="type" id="type" required>
                     <option value="Savarankiškas darbas">Savarankiškas darbas</option>
+                    <option value="Laboratorinis darbas">Laboratorinis darbas</option>
                     <option value="Kontrolinis darbas">Kontrolinis darbas</option>
                     <option value="Projektinis darbas">Projektinis darbas</option>
+                    <option value="Teorinis darbas">Teorinis darbas</option>
                     <option value="Klasės darbas">Klasės darbas</option>
                     <option value="Namų darbas">Namų darbas</option>
-                    <option value="Kaupiamasis">Kaupiamasis</option>
                 </select>
                 
-                <label>Data:</label>
+                <label>Data</label>
                 <input type="date" name="date" id="date" required>
                 
-                <label>Komentaras:</label>
+                <label>Komentaras (neprivalomas)</label>
                 <input type="text" name="comment" id="comment">
                 
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
