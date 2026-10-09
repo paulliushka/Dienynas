@@ -1,17 +1,27 @@
+/* ==========================================================================
+   CUSTOM CALENDAR PICKER KOMPONENTAS
+   Pakeičia HTML data/date lauką į interaktyvų kalendorių ir
+   suvienodina išvaizdą visuose įrenginiuose.
+   ========================================================================== */
+
 class CustomCalendarPicker {
     constructor(inputElement) {
         this.input = inputElement;
 
-        // Pakeičiame tipą į text, kad iOS/Android neatidarytų natūralaus kalendoriaus
+        // Pakeisti tipą į tekstinį, kad mobilios naršyklės neatidarinėtų natūralaus pasirinkimo
         this.input.type = 'text';
         this.input.readOnly = true;
         this.input.setAttribute('autocomplete', 'off');
         this.input.setAttribute('inputmode', 'none');
-        
         this.input.classList.add('custom-calendar-input');
 
         this.today = new Date();
-        
+        this.parseValue();
+
+        this.init();
+    }
+
+    parseValue() {
         if (this.input.value) {
             const parts = this.input.value.split('-');
             if (parts.length === 3) {
@@ -19,26 +29,31 @@ class CustomCalendarPicker {
                 this.selectedMonth = parseInt(parts[1], 10) - 1;
                 this.selectedDay = parseInt(parts[2], 10);
             }
+        } else {
+            this.selectedYear = undefined;
+            this.selectedMonth = undefined;
+            this.selectedDay = undefined;
         }
 
         this.currentMonth = this.selectedMonth !== undefined ? this.selectedMonth : this.today.getMonth();
         this.currentYear = this.selectedYear !== undefined ? this.selectedYear : this.today.getFullYear();
-
-        this.init();
     }
 
     init() {
+        // Kurti wrapper konteinerį
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-calendar-wrapper';
         this.input.parentNode.insertBefore(wrapper, this.input);
         wrapper.appendChild(this.input);
 
+        // Kurti iskylantį kalendoriaus langą
         this.popup = document.createElement('div');
         this.popup.className = 'custom-calendar-popup';
         wrapper.appendChild(this.popup);
 
         this.render();
 
+        // Įvesties lauko paspaudimas
         this.input.addEventListener('click', (e) => {
             e.stopPropagation();
             document.querySelectorAll('.custom-calendar-popup').forEach(p => {
@@ -47,11 +62,22 @@ class CustomCalendarPicker {
             this.popup.classList.toggle('show');
         });
 
+        // Uždarymas paspaudus išorėje
         document.addEventListener('click', (e) => {
             if (!wrapper.contains(e.target)) {
                 this.popup.classList.remove('show');
             }
         });
+
+        // Stebėti formos reset įvykį
+        if (this.input.form) {
+            this.input.form.addEventListener('reset', () => {
+                setTimeout(() => {
+                    this.parseValue();
+                    this.render();
+                }, 0);
+            });
+        }
     }
 
     render() {
@@ -105,6 +131,7 @@ class CustomCalendarPicker {
         html += `</div>`;
         this.popup.innerHTML = html;
 
+        // Mėnesių navigacijos mygtukai
         this.popup.querySelector('#prevMonth').onclick = (e) => {
             e.stopPropagation();
             this.currentMonth--;
@@ -125,18 +152,21 @@ class CustomCalendarPicker {
             this.render();
         };
 
+        // Dienos pasirinkimas
         this.popup.querySelectorAll('.calendar-day:not(.empty)').forEach(dayEl => {
             dayEl.onclick = (e) => {
                 e.stopPropagation();
                 this.input.value = dayEl.dataset.date;
+                this.parseValue();
                 this.popup.classList.remove('show');
-                this.input.dispatchEvent(new Event('change'));
+                this.input.dispatchEvent(new Event('change', { bubbles: true }));
                 this.render();
             };
         });
     }
 }
 
+// Inicializacijos funkcija visiems neaktyvuotiems laukams
 function initCalendarPickers() {
     document.querySelectorAll('input[type="date"]').forEach(input => {
         if (!input.classList.contains('custom-calendar-initialized')) {

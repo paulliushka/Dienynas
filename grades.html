@@ -12,8 +12,11 @@
 <body>
     <div class="container">
         <h1>Pažymiai</h1>
+
         <div class="card" id="addGradeCard" style="display: none;">
             <h2>Įrašyti naują pažymį</h2>
+            <div id="formErrorBox" class="error-message"></div>
+
             <form id="addGradeForm">
                 <label>Grupė</label>
                 <select name="group_id" id="group_select" onchange="loadStudentsByGroup()" required>
@@ -50,6 +53,7 @@
 
         <div class="card">
             <h2>Pažymių sąrašas</h2>
+            <div id="tableErrorBox" class="error-message"></div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -80,19 +84,39 @@
             window.location.href = '/';
         }
 
+        function showError(boxId, msg) {
+            const box = document.getElementById(boxId);
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
+        }
+
         async function initPage() {
             if (currentUser.role === 'teacher') {
                 document.getElementById('addGradeCard').style.display = 'block';
-                const now = new Date();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                document.getElementById('grade_date').value = `${now.getFullYear()}-${month}-${day}`;
+                setDefaultDate();
                 await loadTeacherGroups();
             }
 
             await loadGrades();
             initCalendarPickers();
             initCustomSelects();
+        }
+
+        function setDefaultDate() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const dateInput = document.getElementById('grade_date');
+            if (dateInput) {
+                dateInput.value = `${now.getFullYear()}-${month}-${day}`;
+                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
         }
 
         async function loadTeacherGroups() {
@@ -109,8 +133,9 @@
                     opt.textContent = `${g.group_name} (${g.class} klasė)`;
                     select.appendChild(opt);
                 });
+                select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                console.error("Klaida užkraunant grupes:", error);
+                showError('formErrorBox', 'Klaida užkraunant grupes.');
             }
         }
 
@@ -121,6 +146,7 @@
             if (!groupId) {
                 select.innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
                 select.disabled = true;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
                 return;
             }
 
@@ -136,8 +162,9 @@
                     select.appendChild(opt);
                 });
                 select.disabled = false;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                console.error("Klaida užkraunant mokinius:", error);
+                showError('formErrorBox', 'Klaida užkraunant mokinius.');
             }
         }
 
@@ -192,13 +219,14 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                console.error("Klaida užkraunant pažymius:", error);
+                showError('tableErrorBox', 'Klaida užkraunant pažymių sąrašą.');
             }
         }
 
         if (currentUser.role === 'teacher') {
             document.getElementById('addGradeForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
+                clearErrors();
 
                 const formData = new FormData(this);
                 const payload = {
@@ -220,24 +248,22 @@
 
                     if (response.ok) {
                         this.reset();
-                        const now = new Date();
-                        const month = String(now.getMonth() + 1).padStart(2, '0');
-                        const day = String(now.getDate()).padStart(2, '0');
-                        document.getElementById('grade_date').value = `${now.getFullYear()}-${month}-${day}`;
+                        setDefaultDate();
                         document.getElementById('student_select').disabled = true;
                         loadGrades();
                     } else {
                         const errResult = await response.json();
-                        alert(errResult.message || "Klaida įrašant pažymį.");
+                        showError('formErrorBox', errResult.message || "Klaida įrašant pažymį.");
                     }
                 } catch (error) {
-                    alert("Nepavyko prisijungti prie serverio.");
+                    showError('formErrorBox', "Nepavyko prisijungti prie serverio.");
                 }
             });
         }
 
         async function deleteGrade(gradeId) {
             if (!confirm('Ar tikrai norite ištrinti šį pažymį?')) return;
+            clearErrors();
 
             try {
                 const response = await fetch(`${API_URL}/api/grades/delete/${gradeId}`, {
@@ -248,10 +274,10 @@
                 if (response.ok) {
                     loadGrades();
                 } else {
-                    alert("Klaida trinant pažymį.");
+                    showError('tableErrorBox', "Klaida trinant pažymį.");
                 }
             } catch (error) {
-                alert("Nepavyko prisijungti prie serverio.");
+                showError('tableErrorBox', "Nepavyko prisijungti prie serverio.");
             }
         }
 
