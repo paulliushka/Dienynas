@@ -397,10 +397,16 @@ a:hover {
    10. CUSTOM DROPDOWN IR KALENDORIUS
    ========================================================================== */
 
-.custom-calendar-wrapper,
+.custom-calendar-wrapper {
+    position: relative;
+    width: 280px;
+    box-sizing: border-box;
+}
+
 .custom-select-wrapper {
     position: relative;
-    width: 100%;
+    width: 280px; /* Pakeista iš 100% į 280px, kad sutaptų su kalendoriumi */
+    max-width: 100%;
     box-sizing: border-box;
 }
 
