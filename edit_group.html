@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <script>
@@ -21,8 +22,6 @@
 
         <div class="card">
             <h2>Redaguoti grupę</h2>
-
-            <div id="errorBox" class="error-message"></div>
 
             <form id="editGroupForm">
                 <label>Pavadinimas</label>
@@ -60,14 +59,6 @@
         let currentGroupStudents = [], currentGroupTeachers = [];
         if (!groupId) { window.location.href = 'groups'; }
 
-        function showError(msg) {
-            const box = document.getElementById('errorBox');
-            if (box) {
-                box.textContent = msg;
-                box.style.display = 'block';
-            }
-        }
-
         async function initPage() {
             try {
                 const groupsResp = await fetch(`${API_URL}/api/groups/${groupId}`, { credentials: 'include' });
@@ -99,7 +90,7 @@
                 await fetchStudentsByClass();
                 initCustomSelects();
             } catch (error) { 
-                showError("Klaida kraunant grupės duomenis.");
+                showToast("Klaida kraunant grupės duomenis.", "error");
             }
         }
 
@@ -120,11 +111,11 @@
                     
                     if (currentGroupTeachers.includes(t.user_id)) checkbox.checked = true;
                     label.appendChild(checkbox); 
-                    label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
+                    label.appendChild(document.createTextNode(` ${t.name} ${t.surname}`));
                     container.appendChild(label);
                 });
             } catch (err) {
-                showError("Klaida kraunant mokytojų sąrašą.");
+                showToast("Klaida kraunant mokytojų sąrašą.", "error");
             }
         }
 
@@ -148,11 +139,11 @@
 
                     if (currentGroupStudents.includes(student.user_id)) checkbox.checked = true;
                     label.appendChild(checkbox); 
-                    label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
+                    label.appendChild(document.createTextNode(` ${student.name} ${student.surname}`));
                     studentsContainer.appendChild(label);
                 });
             } catch (err) {
-                showError("Klaida kraunant mokinių sąrašą.");
+                showToast("Klaida kraunant mokinių sąrašą.", "error");
             }
         }
 
@@ -162,7 +153,6 @@
 
         document.getElementById('editGroupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            document.getElementById('errorBox').style.display = 'none';
 
             const payload = {
                 group_name: document.getElementById('group_name').value,
@@ -186,10 +176,10 @@
                     window.location.href = 'groups'; 
                 } else { 
                     const r = await res.json();
-                    showError(r.message || "Klaida išsaugant grupę."); 
+                    showToast(r.message || "Klaida išsaugant grupę.", "error"); 
                 }
             } catch (err) {
-                showError("Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         });
 

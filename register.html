@@ -8,14 +8,12 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body class="centered-page-body">
     <div class="card register-card">
         <h1>Paskyros registracija</h1>
         <p style="margin-bottom: 16px;">Įveskite mokyklos suteiktą registracijos kodą.</p>
-
-        <div id="errorBox" class="error-message"></div>
-        <div id="successBox" class="success-message"></div>
 
         <form id="codeForm" onsubmit="handleVerifyCode(event)">
             <div class="form-group">
@@ -54,20 +52,6 @@
     <script>
         let currentRegCode = '';
 
-        function showError(msg) {
-            const box = document.getElementById('errorBox');
-            box.textContent = msg;
-            box.style.display = 'block';
-            document.getElementById('successBox').style.display = 'none';
-        }
-
-        function showSuccess(msg) {
-            const box = document.getElementById('successBox');
-            box.textContent = msg;
-            box.style.display = 'block';
-            document.getElementById('errorBox').style.display = 'none';
-        }
-
         async function handleVerifyCode(e) {
             e.preventDefault();
             const code = document.getElementById('regCode').value.trim().toUpperCase();
@@ -94,12 +78,11 @@
                     }
 
                     document.getElementById('registerForm').style.display = 'block';
-                    document.getElementById('errorBox').style.display = 'none';
                 } else {
-                    showError(data.message || 'Neteisingas arba panaudotas kodas!');
+                    showToast(data.message || 'Neteisingas arba panaudotas kodas!', 'error');
                 }
             } catch (err) {
-                showError('Tinklo klaida. Bandykite vėliau.');
+                showToast('Tinklo klaida. Bandykite vėliau.', 'error');
             }
         }
 
@@ -123,13 +106,13 @@
 
                 const data = await res.json();
                 if (res.ok) {
-                    showSuccess('Registracija sėkminga! Peradresuojama į prisijungimą...');
+                    showToast('Registracija sėkminga! Peradresuojama į prisijungimą...', 'success');
                     setTimeout(() => { window.location.href = '/'; }, 2000);
                 } else {
-                    showError(data.message || 'Klaida registruojantis.');
+                    showToast(data.message || 'Klaida registruojantis.', 'error');
                 }
             } catch (err) {
-                showError('Tinklo klaida. Bandykite vėliau.');
+                showToast('Tinklo klaida. Bandykite vėliau.', 'error');
             }
         }
     </script>

@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <script>
@@ -21,8 +22,6 @@
 
         <div class="card">
             <h2>Redaguoti namų darbą</h2>
-
-            <div id="errorBox" class="error-message"></div>
 
             <form id="editAssignmentForm">
                 <label>Grupė</label>
@@ -47,14 +46,6 @@
         const assignmentId = urlParams.get('id');
         if (!assignmentId) { window.location.href = 'assignments'; }
 
-        function showError(msg) {
-            const box = document.getElementById('errorBox');
-            if (box) {
-                box.textContent = msg;
-                box.style.display = 'block';
-            }
-        }
-
         async function loadAssignment() {
             try {
                 const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
@@ -72,13 +63,12 @@
                 
                 initCalendarPickers();
             } catch (error) { 
-                showError("Klaida kraunant užduoties duomenis.");
+                showToast("Klaida kraunant užduoties duomenis.", "error");
             }
         }
 
         document.getElementById('editAssignmentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            document.getElementById('errorBox').style.display = 'none';
 
             const data = Object.fromEntries(new FormData(this).entries());
             try {
@@ -93,10 +83,10 @@
                     window.location.href = 'assignments'; 
                 } else { 
                     const r = await res.json();
-                    showError(r.message || "Klaida išsaugant namų darbą."); 
+                    showToast(r.message || "Klaida išsaugant namų darbą.", "error"); 
                 }
             } catch (err) {
-                showError("Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         });
 

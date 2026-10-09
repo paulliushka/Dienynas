@@ -8,12 +8,11 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body class="centered-page-body">
     <div class="card register-card">
         <h1>Prisijungti</h1>
-        
-        <div id="errorBox" class="error-message"></div>
 
         <form id="loginForm">
             <div class="form-group">
@@ -35,15 +34,8 @@
     </div>
 
     <script>
-        function showError(msg) {
-            const box = document.getElementById('errorBox');
-            box.textContent = msg;
-            box.style.display = 'block';
-        }
-
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            document.getElementById('errorBox').style.display = 'none';
 
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
@@ -62,10 +54,10 @@
                     localStorage.setItem('user', JSON.stringify(result.user));
                     window.location.href = 'dashboard';
                 } else {
-                    showError(result.message || "Neteisingas vartotojo vardas arba slaptažodis.");
+                    showToast(result.message || "Neteisingas vartotojo vardas arba slaptažodis.", "error");
                 }
             } catch (error) {
-                showError("Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         });
     </script>

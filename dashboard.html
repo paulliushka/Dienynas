@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <div class="container">
@@ -35,12 +36,13 @@
         function initDashboard() {
             document.getElementById('welcomeText').textContent = `Sveiki, ${currentUser.name} ${currentUser.surname}!`;
             
-            let roleNameLT = 'Vartotojas';
-            if (currentUser.role === 'administrator') roleNameLT = 'Administratorius';
-            else if (currentUser.role === 'teacher') roleNameLT = 'Mokytojas';
-            else if (currentUser.role === 'student') roleNameLT = 'Mokinys';
+            const roleTranslations = {
+                'administrator': 'Administratorius',
+                'teacher': 'Mokytojas',
+                'student': 'Mokinys'
+            };
 
-            document.getElementById('roleBadge').textContent = roleNameLT;
+            document.getElementById('roleBadge').textContent = roleTranslations[currentUser.role] || 'Vartotojas';
 
             if (currentUser.role === 'student' && currentUser.class) {
                 const classP = document.getElementById('classText');

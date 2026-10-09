@@ -8,6 +8,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <script src="config.js"></script>
+    <script src="toast.js"></script>
 </head>
 <body>
     <script>
@@ -21,7 +22,6 @@
         
         <div class="card">
             <h2>Sukurti naują vartotoją</h2>
-            <div id="formErrorBox" class="error-message"></div>
             
             <div id="regCodeResult" class="info-box info-box-success" style="display: none;">
                 <strong>Vartotojas sėkmingai sukurtas!</strong> Registracijos kodas: <span id="generatedCode" class="code-display"></span>
@@ -50,7 +50,6 @@
 
         <div class="card">
             <h2>Esami vartotojai</h2>
-            <div id="tableErrorBox" class="error-message"></div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -73,18 +72,6 @@
 
     <script src="select.js"></script>
     <script>
-        function showError(boxId, msg) {
-            const box = document.getElementById(boxId);
-            if (box) {
-                box.textContent = msg;
-                box.style.display = 'block';
-            }
-        }
-
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(box => box.style.display = 'none');
-        }
-
         function toggleClassField() {
             const role = document.getElementById('roleSelect').value;
             const classField = document.getElementById('class');
@@ -138,13 +125,12 @@
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                showError('tableErrorBox', "Klaida užkraunant vartotojus.");
+                showToast("Klaida užkraunant vartotojus.", "error");
             }
         }
 
         document.getElementById('addUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            clearErrors();
             
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
@@ -161,7 +147,6 @@
                 if (response.ok) {
                     this.reset();
                     
-                    // Sinchronizuojame custom select lauką su pradinėmis reikšmėmis
                     const roleSelect = document.getElementById('roleSelect');
                     roleSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -175,17 +160,17 @@
                     } else {
                         resultBox.style.display = 'none';
                     }
+                    showToast("Vartotojas sėkmingai sukurtas!", "success");
                 } else {
-                    showError('formErrorBox', result.message || "Klaida pridedant vartotoją.");
+                    showToast(result.message || "Klaida pridedant vartotoją.", "error");
                 }
             } catch (error) {
-                showError('formErrorBox', "Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         });
 
         async function deleteUser(userId) {
             if (!confirm('Ar tikrai norite ištrinti šį vartotoją?')) return;
-            clearErrors();
 
             try {
                 const response = await fetch(`${API_URL}/api/users/delete/${userId}`, {
@@ -194,12 +179,13 @@
                 });
 
                 if (response.ok) {
+                    showToast("Vartotojas ištrintas.", "success");
                     loadUsers();
                 } else {
-                    showError('tableErrorBox', "Klaida trinant vartotoją.");
+                    showToast("Klaida trinant vartotoją.", "error");
                 }
             } catch (error) {
-                showError('tableErrorBox', "Nepavyko prisijungti prie serverio.");
+                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         }
 
