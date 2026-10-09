@@ -22,7 +22,7 @@
                 </select>
 
                 <label>Užduoties aprašymas</label>
-                <textarea name="task" rows="3" placeholder="Pvz., Atlikti 12-15 užduotis 45 puslapyje..." style="width: 100%; padding: 8px; box-sizing: border-box;" required></textarea>
+                <textarea name="task" rows="3" placeholder="Pvz., Atlikti 12-15 užduotis 45 puslapyje..." required></textarea>
 
                 <label>Atlikimo terminas (data)</label>
                 <input type="date" name="due_date" id="due_date" required>
@@ -123,18 +123,18 @@
                     const isGroupTeacher = assign.group_teachers && assign.group_teachers.includes(currentUser.user_id);
 
                     let rowHtml = `
-                        <td><strong>${assign.group_display}</strong></td>
-                        <td>${assign.task}</td>
-                        <td>${assign.due_date}</td>
-                        <td>${assign.teacher || '-'}</td>
+                        <td data-label="Grupė"><strong>${assign.group_display}</strong></td>
+                        <td data-label="Užduotis">${assign.task}</td>
+                        <td data-label="Atlikti iki">${assign.due_date}</td>
+                        <td data-label="Mokytojas">${assign.teacher || '-'}</td>
                     `;
 
                     if (showActions) {
                         const actionsTd = isGroupTeacher 
                             ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
-                            : '<span style="color: #64748b;">Neturite teisių</span>';
+                            : '<span style="color: #8a8d91;">Neturite teisių</span>';
                         
-                        rowHtml += `<td>${actionsTd}</td>`;
+                        rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
                     }
 
                     tr.innerHTML = rowHtml;

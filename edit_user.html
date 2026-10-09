@@ -12,11 +12,18 @@
 <body>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id || currentUser.role !== 'administrator') { window.location.href = 'dashboard'; }
+        if (!currentUser.user_id || currentUser.role !== 'administrator') { 
+            window.location.href = 'dashboard'; 
+        }
     </script>
     <div class="container">
+        <h1>Vartotojų valdymas</h1>
+
         <div class="card">
             <h2>Redaguoti vartotoją</h2>
+            
+            <div id="errorBox" class="error-message"></div>
+
             <form id="editUserForm">
                 <label>Prisijungimo vardas</label>
                 <input type="text" name="username" id="username" placeholder="Vartotojo vardas">
@@ -46,20 +53,33 @@
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
             </form>
             <br>
-            <a href="administration" class="btn-back">Atšaukti ir grįžti</a>
+            <a href="administration" class="btn-back">← Atšaukti ir grįžti</a>
         </div>
     </div>
+
     <script src="select.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
         if (!userId) { window.location.href = 'administration'; }
 
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+        }
+
         function toggleClassField() {
             const role = document.getElementById('role').value;
             const classField = document.getElementById('class');
-            if (role === 'student') { classField.disabled = false; classField.required = true; }
-            else { classField.disabled = true; classField.required = false; classField.value = ""; }
+            if (role === 'student') { 
+                classField.disabled = false; 
+                classField.required = true; 
+            } else { 
+                classField.disabled = true; 
+                classField.required = false; 
+                classField.value = ""; 
+            }
         }
 
         async function loadUser() {
@@ -67,26 +87,45 @@
                 const response = await fetch(`${API_URL}/api/users/${userId}`, { credentials: 'include' });
                 if (!response.ok) { window.location.href = 'administration'; return; }
                 const user = await response.json();
+                
                 document.getElementById('username').value = user.username || '';
                 document.getElementById('email').value = user.email || '';
                 document.getElementById('name').value = user.name || '';
                 document.getElementById('surname').value = user.surname || '';
                 document.getElementById('role').value = user.role || 'student';
                 document.getElementById('class').value = user.class || '';
+                
                 toggleClassField();
                 initCustomSelects();
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                showError("Klaida kraunant vartotojo duomenis.");
+            }
         }
 
         document.getElementById('editUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            document.getElementById('errorBox').style.display = 'none';
+
             const data = Object.fromEntries(new FormData(this).entries());
-            const res = await fetch(`${API_URL}/api/users/edit/${userId}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(data)
-            });
-            if (res.ok) { window.location.href = 'administration'; }
-            else { const r = await res.json(); alert(r.message || "Klaida."); }
+            try {
+                const res = await fetch(`${API_URL}/api/users/edit/${userId}`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    credentials: 'include', 
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) { 
+                    window.location.href = 'administration'; 
+                } else { 
+                    const r = await res.json(); 
+                    showError(r.message || "Klaida išsaugant pakeitimus."); 
+                }
+            } catch (err) {
+                showError("Nepavyko prisijungti prie serverio.");
+            }
         });
+
         window.onload = loadUser;
     </script>
 </body>

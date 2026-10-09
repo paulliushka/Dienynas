@@ -12,11 +12,18 @@
 <body>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id || currentUser.role === 'student') { window.location.href = 'dashboard'; }
+        if (!currentUser.user_id || currentUser.role === 'student') { 
+            window.location.href = 'dashboard'; 
+        }
     </script>
     <div class="container">
+        <h1>Grupės</h1>
+
         <div class="card">
             <h2>Redaguoti grupę</h2>
+
+            <div id="errorBox" class="error-message"></div>
+
             <form id="editGroupForm">
                 <label>Grupės pavadinimas</label>
                 <input type="text" name="group_name" id="group_name" required>
@@ -35,16 +42,17 @@
                 <div>
                     <button type="button" class="btn btn-secondary" onclick="selectAllStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
                     <div id="students_container" class="scroll-box">
-                        <p style="color: gray; font-style: italic; margin: 0;">Kraunami mokiniai...</p>
+                        <p style="color: #8a8d91; font-style: italic; margin: 0;">Kraunami mokiniai...</p>
                     </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
             </form>
             <br>
-            <a href="groups" class="btn-back">Atšaukti ir grįžti</a>
+            <a href="groups" class="btn-back">← Atšaukti ir grįžti</a>
         </div>
     </div>
+
     <script src="select.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -52,11 +60,18 @@
         let currentGroupStudents = [], currentGroupTeachers = [];
         if (!groupId) { window.location.href = 'groups'; }
 
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            box.textContent = msg;
+            box.style.display = 'block';
+        }
+
         async function initPage() {
             try {
                 const groupsResp = await fetch(`${API_URL}/api/groups/${groupId}`, { credentials: 'include' });
                 if (!groupsResp.ok) { window.location.href = 'groups'; return; }
                 const group = await groupsResp.json();
+
                 currentGroupStudents = group.students || [];
                 currentGroupTeachers = group.teachers || [];
                 document.getElementById('group_name').value = group.group_name || group.subject || '';
@@ -64,9 +79,11 @@
                 const classesResp = await fetch(`${API_URL}/api/classes`, { credentials: 'include' });
                 const classes = await classesResp.json();
                 const classSelect = document.getElementById('class_select');
+
                 classes.forEach(c => {
                     const opt = document.createElement('option');
-                    opt.value = c; opt.textContent = `${c} klasė`;
+                    opt.value = c; 
+                    opt.textContent = `${c} klasė`;
                     if (c === group.class) opt.selected = true;
                     classSelect.appendChild(opt);
                 });
@@ -77,7 +94,9 @@
                 }
                 await fetchStudentsByClass();
                 initCustomSelects();
-            } catch (error) { console.error(error); }
+            } catch (error) { 
+                showError("Klaida kraunant grupės duomenis.");
+            }
         }
 
         async function loadTeachers() {
@@ -85,12 +104,18 @@
             const teachers = await response.json();
             const container = document.getElementById('teachers_container');
             container.innerHTML = '';
+
             teachers.forEach(t => {
                 const label = document.createElement("label");
                 const checkbox = document.createElement("input");
-                checkbox.type = "checkbox"; checkbox.name = "teachers"; checkbox.className = "teacher-checkbox"; checkbox.value = t.user_id;
+                checkbox.type = "checkbox"; 
+                checkbox.name = "teachers"; 
+                checkbox.className = "teacher-checkbox"; 
+                checkbox.value = t.user_id;
+                
                 if (currentGroupTeachers.includes(t.user_id)) checkbox.checked = true;
-                label.appendChild(checkbox); label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
+                label.appendChild(checkbox); 
+                label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
                 container.appendChild(label);
             });
         }
@@ -100,35 +125,62 @@
             const studentsContainer = document.getElementById("students_container");
             studentsContainer.innerHTML = "";
             if (!className) return;
+
             const response = await fetch(`${API_URL}/get_students/${className}`, { credentials: 'include' });
             const data = await response.json();
+
             data.forEach(student => {
                 const label = document.createElement("label");
                 const checkbox = document.createElement("input");
-                checkbox.type = "checkbox"; checkbox.name = "students"; checkbox.className = "student-checkbox"; checkbox.value = student.user_id;
+                checkbox.type = "checkbox"; 
+                checkbox.name = "students"; 
+                checkbox.className = "student-checkbox"; 
+                checkbox.value = student.user_id;
+
                 if (currentGroupStudents.includes(student.user_id)) checkbox.checked = true;
-                label.appendChild(checkbox); label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
+                label.appendChild(checkbox); 
+                label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
                 studentsContainer.appendChild(label);
             });
         }
 
-        function selectAllStudents() { document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true); }
+        function selectAllStudents() { 
+            document.querySelectorAll('.student-checkbox').forEach(cb => cb.checked = true); 
+        }
 
         document.getElementById('editGroupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            document.getElementById('errorBox').style.display = 'none';
+
             const payload = {
                 group_name: document.getElementById('group_name').value,
                 class: document.getElementById('class_select').value,
                 students: Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value)
             };
+
             if (currentUser.role === 'administrator' || currentUser.role === 'teacher') {
                 payload.teachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
             }
-            const res = await fetch(`${API_URL}/api/groups/edit/${groupId}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload)
-            });
-            if (res.ok) { window.location.href = 'groups'; } else { alert("Klaida."); }
+
+            try {
+                const res = await fetch(`${API_URL}/api/groups/edit/${groupId}`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    credentials: 'include', 
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) { 
+                    window.location.href = 'groups'; 
+                } else { 
+                    const r = await res.json();
+                    showError(r.message || "Klaida išsaugant grupę."); 
+                }
+            } catch (err) {
+                showError("Nepavyko prisijungti prie serverio.");
+            }
         });
+
         window.onload = initPage;
     </script>
 </body>

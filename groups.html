@@ -39,7 +39,7 @@
                 <div>
                     <button type="button" class="btn btn-secondary" onclick="selectAllNewGroupStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
                     <div id="students_container" class="scroll-box">
-                        <p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>
+                        <p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>
                     </div>
                 </div>
                 
@@ -135,7 +135,7 @@
             studentsContainer.innerHTML = "";
 
             if (!className) {
-                studentsContainer.innerHTML = '<p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
+                studentsContainer.innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
                 return;
             }
 
@@ -144,7 +144,7 @@
                 const data = await response.json();
 
                 if (data.length === 0) {
-                    studentsContainer.innerHTML = "<p style='color: gray; font-style: italic; margin:0;'>Šioje klasėje mokinių nėra.</p>";
+                    studentsContainer.innerHTML = "<p style='color: #8a8d91; font-style: italic; margin:0;'>Šioje klasėje mokinių nėra.</p>";
                     return;
                 }
 
@@ -191,22 +191,22 @@
                     const isOwner = isTeacherMember || currentUser.role === 'administrator';
 
                     const ownerBadge = isTeacherMember ? '<span class="badge-owner">Mano grupė</span>' : '';
-                    const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span style="color: gray; font-style: italic;">Grupėje mokinių nėra</span>';
+                    const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span style="color: #8a8d91; font-style: italic;">Grupėje mokinių nėra</span>';
 
                     let rowHtml = `
-                        <td><strong>${g.group_name}</strong> ${ownerBadge}</td>
-                        <td>${g.class} klasė</td>
-                        <td>${g.teacher || '-'}</td>
-                        <td>${studentsText}</td>
+                        <td data-label="Grupė"><strong>${g.group_name}</strong> ${ownerBadge}</td>
+                        <td data-label="Klasė">${g.class} klasė</td>
+                        <td data-label="Mokytojai">${g.teacher || '-'}</td>
+                        <td data-label="Mokiniai">${studentsText}</td>
                     `;
 
                     let actionsTd = '';
                     if (isOwner) {
                         actionsTd = `<a href="edit_group?id=${g.group_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>`;
                     } else {
-                        actionsTd = '<span style="color: #64748b;">Neturite teisių</span>';
+                        actionsTd = '<span style="color: #8a8d91;">Neturite teisių</span>';
                     }
-                    rowHtml += `<td>${actionsTd}</td>`;
+                    rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
 
                     tr.innerHTML = rowHtml;
                     tbody.appendChild(tr);
@@ -246,7 +246,7 @@
 
                 if (response.ok) {
                     this.reset();
-                    document.getElementById("students_container").innerHTML = '<p style="color: gray; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
+                    document.getElementById("students_container").innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
                     loadGroups();
                 } else {
                     const result = await response.json();
