@@ -24,8 +24,13 @@
             <div id="formErrorBox" class="error-message"></div>
 
             <form id="createGroupForm">
-                <label>Grupės pavadinimas</label>
-                <input type="text" name="group_name" placeholder="Pvz., Matematika A lygis" required>
+                <label>Pavadinimas</label>
+                <input type="text" name="group_name" placeholder="Pavadinimas..." required>
+
+                <div id="teacherSelectContainer" style="display: none;">
+                    <label>Pasirinkite mokytoją (-us)</label>
+                    <div id="teachers_container" class="scroll-box"></div>
+                </div>
 
                 <label>Pasirinkite klasę</label>
                 <select name="class" id="class_select" onchange="fetchStudentsByClass()" required>
@@ -133,7 +138,7 @@
                     checkbox.value = t.user_id;
 
                     label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(`${t.name} ${t.surname}`));
+                    label.appendChild(document.createTextNode(` ${t.name} ${t.surname}`));
                     container.appendChild(label);
                 });
             } catch (error) {
@@ -169,7 +174,7 @@
                     checkbox.value = student.user_id;
 
                     label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(`${student.name} ${student.surname}`));
+                    label.appendChild(document.createTextNode(` ${student.name} ${student.surname}`));
                     studentsContainer.appendChild(label);
                 });
             } catch (error) {
@@ -189,8 +194,6 @@
 
                 const tbody = document.getElementById('groupsTableBody');
                 tbody.innerHTML = '';
-
-                const showActions = currentUser.role === 'teacher' || currentUser.role === 'administrator';
 
                 if (!Array.isArray(groups) || groups.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Grupių nėra.</td></tr>`;
@@ -238,6 +241,10 @@
             let selectedTeachers = [];
             if (currentUser.role === 'administrator') {
                 selectedTeachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
+                if (selectedTeachers.length === 0) {
+                    showError('formErrorBox', "Pasirinkite bent vieną mokytoją!");
+                    return;
+                }
             } else {
                 selectedTeachers = [currentUser.user_id];
             }
