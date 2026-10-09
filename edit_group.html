@@ -41,6 +41,7 @@
         </div>
     </div>
 
+    <script src="select.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('id');
@@ -86,6 +87,7 @@
                 }
 
                 await fetchStudentsByClass();
+                initCustomSelects();
             } catch (error) {
                 console.error("Klaida inicijuojant puslapį:", error);
             }

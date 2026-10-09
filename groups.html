@@ -61,6 +61,7 @@
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
+    <script src="select.js"></script>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -76,12 +77,13 @@
 
                 if (currentUser.role === 'administrator') {
                     document.getElementById('teacherSelectContainer').style.display = 'block';
-                    loadTeachers();
+                    await loadTeachers();
                 }
-                loadClasses();
+                await loadClasses();
             }
 
-            loadGroups();
+            await loadGroups();
+            initCustomSelects();
         }
 
         async function loadClasses() {

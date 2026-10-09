@@ -328,3 +328,85 @@ a:hover {
 .calendar-day.empty {
     cursor: default;
 }
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.custom-select-trigger {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #f8fafc;
+    background-color: #0f172a;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.custom-select-trigger:hover,
+.custom-select-wrapper.open .custom-select-trigger {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+.custom-select-arrow {
+    border: solid #38bdf8;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 3px;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+}
+
+.custom-select-wrapper.open .custom-select-arrow {
+    transform: rotate(-135deg);
+}
+
+.custom-select-options {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #131b2e;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+.custom-select-wrapper.open .custom-select-options {
+    display: block;
+}
+
+.custom-select-option {
+    padding: 10px 14px;
+    font-size: 14px;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.custom-select-option:hover {
+    background-color: #1e293b;
+    color: #38bdf8;
+}
+
+.custom-select-option.selected {
+    background-color: #0284c7;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.custom-select-option.disabled {
+    color: #64748b;
+    cursor: not-allowed;
+}

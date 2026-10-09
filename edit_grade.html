@@ -45,6 +45,7 @@
     </div>
 
     <script src="calendar.js"></script>
+    <script src="select.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const gradeId = urlParams.get('id');
@@ -74,6 +75,7 @@
                 document.getElementById('comment').value = item.comment || '';
 
                 initCalendarPickers();
+                initCustomSelects();
             } catch (error) {
                 console.error("Klaida užkraunant pažymį:", error);
             }

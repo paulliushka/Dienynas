@@ -41,6 +41,7 @@
         </div>
     </div>
 
+    <script src="select.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
@@ -81,6 +82,7 @@
                 document.getElementById('class').value = user.class || '';
 
                 toggleClassField();
+                initCustomSelects();
             } catch (error) {
                 console.error("Klaida užkraunant vartotoją:", error);
             }
