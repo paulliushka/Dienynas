@@ -162,7 +162,130 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   6. SĄRAŠAI IR MOKINIŲ PASIRINKIMO DĖŽUTĖS
+   6. DASHBOARD (PAGRINDINIO PUSLAPIO) STILIAI
+   ========================================================================== */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #131b2e;
+    padding: 24px 32px;
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+    margin-bottom: 32px;
+}
+
+.user-welcome h2 {
+    color: #f8fafc;
+    font-size: 22px;
+    margin-bottom: 4px;
+    border: none;
+    padding: 0;
+}
+
+.user-welcome p {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.badge-role {
+    background-color: #0c4a6e;
+    color: #38bdf8;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    border: 1px solid #0284c7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.nav-card {
+    background: #131b2e;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 28px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-card:hover {
+    border-color: #38bdf8;
+    background: #172138;
+}
+
+.nav-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: rgba(2, 132, 199, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #38bdf8;
+    margin-bottom: 20px;
+    font-size: 24px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.nav-card h3 {
+    color: #f8fafc;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.nav-card p {
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.nav-card-arrow {
+    margin-top: 20px;
+    color: #38bdf8;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.logout-btn {
+    background-color: #ef4444;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logout-btn:hover {
+    background-color: #dc2626;
+}
+
+/* ==========================================================================
+   7. SĄRAŠAI IR MOKINIŲ PASIRINKIMO DĖŽUTĖS
    ========================================================================== */
 .scroll-box {
     max-height: 180px;
@@ -194,7 +317,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   7. LENTELĖS
+   8. LENTELĖS
    ========================================================================== */
 .table-responsive {
     width: 100%;
@@ -243,7 +366,7 @@ tr:hover {
 }
 
 /* ==========================================================================
-   8. ŽENKLIUKAI IR NUORODOS
+   9. ŽENKLIUKAI IR NUORODOS
    ========================================================================== */
 .badge-owner {
     background-color: #0c4a6e;
@@ -271,7 +394,7 @@ a:hover {
 }
 
 /* ==========================================================================
-   9. CUSTOM DROPDOWN IR KALENDORIUS (KOMPAKTIŠKI DROPDOWN)
+   10. CUSTOM DROPDOWN IR KALENDORIUS
    ========================================================================== */
 
 .custom-calendar-wrapper,
@@ -348,7 +471,7 @@ input[type="date"]::-webkit-inner-spin-button {
     margin-top: -1px;
 }
 
-/* POP-UP LANGELIAI: Nebe per visą plotį! Nedidelis, kompaktiškas langas (~280px) */
+/* POP-UP LANGELIAI */
 .custom-calendar-popup,
 .custom-select-options {
     display: none;
@@ -356,7 +479,7 @@ input[type="date"]::-webkit-inner-spin-button {
     top: calc(100% + 6px);
     left: 0;
     z-index: 1000;
-    width: 280px; /* Kompaktiškas, maždaug trečdalio ar ribotas plotis */
+    width: 280px;
     max-width: 90vw;
     background-color: #131b2e;
     border: 1px solid #38bdf8;
@@ -373,7 +496,7 @@ input[type="date"]::-webkit-inner-spin-button {
 .custom-select-options {
     max-height: 200px;
     overflow-y: auto;
-    width: 100%; /* Dropdownas prisitaiko prie pasirinkimo lauko pločio */
+    width: 100%;
 }
 
 .custom-calendar-popup.show,
@@ -381,7 +504,6 @@ input[type="date"]::-webkit-inner-spin-button {
     display: block;
 }
 
-/* Select Pasirinkimai */
 .custom-select-option {
     padding: 10px 14px;
     font-size: 13px;
@@ -406,7 +528,6 @@ input[type="date"]::-webkit-inner-spin-button {
     cursor: not-allowed;
 }
 
-/* Kalendoriaus Vidinės Dalys */
 .calendar-header {
     display: flex;
     justify-content: space-between;
@@ -484,7 +605,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   10. SPECIALUS MOBILUS UI (DEDICATED MOBILE OVERHAUL)
+   11. ADAPTYVUMAS MOBILIESIEMS (MOBILE OVERHAUL)
    ========================================================================== */
 
 @media (max-width: 768px) {
@@ -515,7 +636,6 @@ input[type="date"]::-webkit-inner-spin-button {
         border: 1px solid #1f2937;
     }
 
-    /* Mobiliųjų formų valdymo ir mygtukų pritaikymas */
     input[type="text"],
     input[type="password"],
     input[type="number"],
@@ -535,7 +655,6 @@ input[type="date"]::-webkit-inner-spin-button {
         margin-top: 4px;
     }
 
-    /* Dashboard Header mobilus dizainas */
     .dashboard-header {
         flex-direction: column !important;
         align-items: flex-start !important;
@@ -553,7 +672,6 @@ input[type="date"]::-webkit-inner-spin-button {
         font-size: 13px !important;
     }
 
-    /* Grid tinklelio kortelių pritaikymas mobiliesiems */
     .grid-container {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
@@ -570,8 +688,6 @@ input[type="date"]::-webkit-inner-spin-button {
         margin-bottom: 12px !important;
     }
 
-    /* KALENDORIAUS POP-UP MOBILIAJAME:
-       Neišsitempia per visą ekraną, o išlieka kompaktiškas plūduriuojantis langas (~270px pločio) */
     .custom-calendar-popup {
         width: 270px !important;
         max-width: 85vw !important;
@@ -582,7 +698,6 @@ input[type="date"]::-webkit-inner-spin-button {
         transform: none !important;
     }
 
-    /* Lentelių mobilus pritaikymas */
     .table-responsive {
         border-radius: 6px;
     }
@@ -593,7 +708,6 @@ input[type="date"]::-webkit-inner-spin-button {
     }
 }
 
-/* Mažesniems telefonų ekranams (< 480px) */
 @media (max-width: 480px) {
     body {
         padding: 8px;
