@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Redaguoti įrašą</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+</head>
+<body>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id || currentUser.role !== 'teacher') { 
+            window.location.href = 'dashboard'; 
+        }
+    </script>
+    <div class="container">
+        <h1>Pagyrimai ir pastabos</h1>
+
+        <div class="card">
+            <h2>Redaguoti įrašą</h2>
+
+            <div id="errorBox" class="error-message"></div>
+
+            <form id="editRemarkForm">
+                <label>Grupė:</label>
+                <input type="text" id="group_name" disabled class="readonly-input">
+                
+                <label>Mokinys:</label>
+                <input type="text" id="student" disabled class="readonly-input">
+                
+                <label>Tipas:</label>
+                <select name="type" id="type" required>
+                    <option value="praise">Pagyrimas</option>
+                    <option value="reprimand">Pastaba</option>
+                </select>
+                
+                <label>Turinys / Priežastis:</label>
+                <textarea name="content" id="content" rows="3" required></textarea>
+
+                <label>Data:</label>
+                <input type="date" name="date" id="date" required>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti pakeitimus</button>
+            </form>
+            <br>
+            <a href="remarks" class="btn-back">← Grįžti atgal</a>
+        </div>
+    </div>
+
+    <script src="calendar.js"></script>
+    <script src="select.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const remarkId = urlParams.get('id');
+        if (!remarkId) { window.location.href = 'remarks'; }
+
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            if (box) {
+                box.textContent = msg;
+                box.style.display = 'block';
+            }
+        }
+
+        async function loadRemark() {
+            try {
+                const response = await fetch(`${API_URL}/api/remarks`, { credentials: 'include' });
+                const remarks = await response.json();
+                const item = remarks.find(r => r.remark_id == remarkId);
+                
+                if (!item) { window.location.href = 'remarks'; return; }
+
+                document.getElementById('group_name').value = item.group_display || '';
+                document.getElementById('student').value = item.student || '';
+                document.getElementById('content').value = item.content || '';
+
+                const typeSelect = document.getElementById('type');
+                typeSelect.value = item.type || 'praise';
+                typeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+                const dateInput = document.getElementById('date');
+                dateInput.value = item.date || '';
+                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+                initCalendarPickers();
+                initCustomSelects();
+            } catch (error) { 
+                showError("Klaida kraunant įrašo duomenis.");
+            }
+        }
+
+        document.getElementById('editRemarkForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            document.getElementById('errorBox').style.display = 'none';
+
+            const data = Object.fromEntries(new FormData(this).entries());
+            try {
+                const res = await fetch(`${API_URL}/api/remarks/edit/${remarkId}`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    credentials: 'include', 
+                    body: JSON.stringify(data)
+                });
+
+                if (res.ok) { 
+                    window.location.href = 'remarks'; 
+                } else { 
+                    const r = await res.json();
+                    showError(r.message || "Klaida išsaugant įrašą."); 
+                }
+            } catch (err) {
+                showError("Nepavyko prisijungti prie serverio.");
+            }
+        });
+
+        window.onload = loadRemark;
+    </script>
+</body>
+</html>
