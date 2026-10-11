@@ -1,10 +1,10 @@
 {
-  "name": "Mokslus Dienynas",
+  "name": "Mokslus",
   "short_name": "Mokslus",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#121212",
+  "background_color": "#18191a",
+  "theme_color": "#18191a",
   "icons": [
     {
       "src": "icon-512x512.png",

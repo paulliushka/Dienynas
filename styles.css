@@ -105,7 +105,7 @@ label {
 }
 
 /* ==========================================================================
-   4. ĮVESTIES LAUKAI (FORMOS)
+   4. ĮVESTIES LAUKAI (FORMOS IR FILTRAI)
    ========================================================================== */
 input[type="text"],
 input[type="password"],
@@ -138,6 +138,25 @@ textarea:focus {
     outline: none;
     border-color: var(--accent-blue) !important;
     box-shadow: 0 0 0 1px var(--accent-blue) !important;
+    z-index: 2;
+    position: relative;
+}
+
+/* Paieškos ir filtravimo juosta, kur langai liečiasi */
+.card div[style*="display: flex"] {
+    display: flex;
+    gap: 0 !important;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.card div[style*="display: flex"] > div {
+    margin-right: -1px;
+}
+
+.card div[style*="display: flex"] > div input,
+.card div[style*="display: flex"] > div select {
+    border-radius: 0 !important;
 }
 
 /* ==========================================================================
@@ -217,22 +236,23 @@ textarea:focus {
 .user-welcome h2 {
     color: #ffffff;
     font-size: 16px;
-    margin-bottom: 2px;
+    margin-bottom: 0;
     border: none;
     padding: 0;
     background: transparent;
 }
 
-.user-welcome p {
-    color: #d8dfea;
-    font-size: 11px;
+.dashboard-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .badge-role {
     background-color: #2a2b2c;
     color: var(--accent-blue);
     font-size: 10px;
-    padding: 2px 6px;
+    padding: 4px 8px;
     border-radius: 2px;
     font-weight: bold;
     border: 1px solid var(--border-color);
@@ -291,16 +311,6 @@ textarea:focus {
     color: var(--text-secondary);
     font-size: 11px;
     line-height: 1.4;
-}
-
-.nav-card-arrow {
-    margin-top: 12px;
-    color: var(--accent-blue);
-    font-weight: bold;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
 .logout-btn {
@@ -401,48 +411,30 @@ tr:hover {
 }
 
 /* ==========================================================================
-   9. KLAIDŲ KORTELĖS IR PRANEŠIMAI
+   9. REGISTRACIJOS KODŲ SPALVOS (STATUSAS)
    ========================================================================== */
-.error-page-body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: var(--bg-main);
-}
-
-.error-card {
-    text-align: center;
-    max-width: 440px;
-    width: 90%;
-    padding: 32px 20px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-card);
-    border-radius: 0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.error-code {
-    font-size: 64px;
+.reg-code-unused {
+    color: var(--success-text);
+    background-color: var(--success-bg);
+    border: 1px solid var(--success-border);
+    padding: 2px 6px;
+    border-radius: 2px;
     font-weight: bold;
-    color: var(--accent-blue);
-    line-height: 1;
-    margin-bottom: 8px;
-    letter-spacing: -1px;
-}
-
-.error-title {
-    font-size: 16px;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-.error-desc {
-    color: var(--text-secondary);
+    font-family: monospace;
     font-size: 11px;
-    margin-bottom: 20px;
-    line-height: 1.5;
+    display: inline-block;
+}
+
+.reg-code-used {
+    color: var(--danger-text);
+    background-color: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 11px;
+    display: inline-block;
 }
 
 /* ==========================================================================

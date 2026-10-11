@@ -15,9 +15,11 @@
         <div class="dashboard-header">
             <div class="user-welcome">
                 <h2 id="welcomeText">Sveiki</h2>
-                <p><span id="roleBadge" class="badge-role"></span></p>
             </div>
-            <button class="logout-btn" onclick="logout()">Atsijungti</button>
+            <div class="dashboard-right">
+                <span id="roleBadge" class="badge-role"></span>
+                <button class="logout-btn" onclick="logout()">Atsijungti</button>
+            </div>
         </div>
 
         <div class="grid-container" id="menuGrid">
@@ -34,7 +36,12 @@
         let roleName = 'Vartotojas';
         if (currentUser.role === 'administrator') roleName = 'Administratorius';
         if (currentUser.role === 'teacher') roleName = 'Mokytojas';
-        if (currentUser.role === 'student') roleName = 'Mokinys';
+        if (currentUser.role === 'student') {
+            roleName = 'Mokinys';
+            if (currentUser.class) {
+                roleName += ` (${currentUser.class} klasė)`;
+            }
+        }
         document.getElementById('roleBadge').textContent = roleName;
 
         const grid = document.getElementById('menuGrid');
