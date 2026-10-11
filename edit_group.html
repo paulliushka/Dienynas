@@ -11,12 +11,6 @@
     <script src="toast.js"></script>
 </head>
 <body>
-    <script>
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id || currentUser.role === 'student') { 
-            window.location.href = 'dashboard'; 
-        }
-    </script>
     <div class="container">
         <h1>Grupės</h1>
 
@@ -54,10 +48,29 @@
 
     <script src="select.js"></script>
     <script>
+        let currentUser = {};
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('id');
         let currentGroupStudents = [], currentGroupTeachers = [];
         if (!groupId) { window.location.href = 'groups'; }
+
+        async function checkAuthAndInit() {
+            try {
+                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                currentUser = await response.json();
+                if (currentUser.role === 'student') {
+                    window.location.href = 'dashboard';
+                    return;
+                }
+                await initPage();
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
 
         async function initPage() {
             try {
@@ -183,7 +196,7 @@
             }
         });
 
-        window.onload = initPage;
+        window.onload = checkAuthAndInit;
     </script>
 </body>
 </html>

@@ -51,7 +51,6 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    localStorage.setItem('user', JSON.stringify(result.user));
                     window.location.href = 'dashboard';
                 } else {
                     showToast(result.message || "Neteisingas vartotojo vardas arba slaptažodis.", "error");

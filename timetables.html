@@ -95,10 +95,19 @@
 
     <script src="select.js"></script>
     <script>
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id) { window.location.href = '/'; }
-
+        let currentUser = {};
         let allTimetableEntries = [];
+
+        async function checkAuthAndInit() {
+            try {
+                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!response.ok) { window.location.href = '/'; return; }
+                currentUser = await response.json();
+                await initPage();
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
 
         async function initPage() {
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
@@ -131,7 +140,6 @@
 
         async function loadTimetable() {
             try {
-                // PAKEISTA: api/timetable -> api/timetables
                 const response = await fetch(`${API_URL}/api/timetables`, { credentials: 'include' });
                 if (response.status === 401) { window.location.href = '/'; return; }
                 allTimetableEntries = await response.json();
@@ -203,10 +211,10 @@
             renderTimetable(filtered);
         }
 
-        if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
-            document.getElementById('addTimetableForm').addEventListener('submit', async function(e) {
+        document.addEventListener('submit', async function(e) {
+            if (e.target && e.target.id === 'addTimetableForm') {
                 e.preventDefault();
-                const formData = new FormData(this);
+                const formData = new FormData(e.target);
                 const payload = {
                     group_id: formData.get('group_id'),
                     day_of_week: formData.get('day_of_week'),
@@ -215,7 +223,6 @@
                 };
 
                 try {
-                    // PAKEISTA: api/timetable/add -> api/timetables/add
                     const response = await fetch(`${API_URL}/api/timetables/add`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -224,7 +231,7 @@
                     });
 
                     if (response.ok) {
-                        this.reset();
+                        e.target.reset();
                         showToast("Pamoka sėkmingai pridėta į tvarkaraštį!", "success");
                         loadTimetable();
                     } else {
@@ -234,13 +241,12 @@
                 } catch (error) {
                     showToast("Nepavyko prisijungti prie serverio.", "error");
                 }
-            });
-        }
+            }
+        });
 
         async function deleteTimetableEntry(id) {
             if (!confirm('Ar tikrai norite pašalinti šią pamoką iš tvarkaraščio?')) return;
             try {
-                // PAKEISTA: api/timetable/delete -> api/timetables/delete
                 const response = await fetch(`${API_URL}/api/timetables/delete/${id}`, {
                     method: 'DELETE',
                     credentials: 'include'
@@ -257,7 +263,7 @@
             }
         }
 
-        window.onload = initPage;
+        window.onload = checkAuthAndInit;
     </script>
 </body>
 </html>

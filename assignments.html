@@ -73,10 +73,22 @@
     <script src="calendar.js"></script>
     <script src="select.js"></script>
     <script>
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id) { window.location.href = '/'; }
-
+        let currentUser = {};
         let allAssignments = [];
+
+        async function checkAuthAndInit() {
+            try {
+                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                currentUser = await response.json();
+                await initPage();
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
 
         function setDefaultDate() {
             const now = new Date();
@@ -199,10 +211,10 @@
             renderAssignments(filtered);
         }
 
-        if (currentUser.role === 'teacher') {
-            document.getElementById('addAssignmentForm').addEventListener('submit', async function(e) {
+        document.addEventListener('submit', async function(e) {
+            if (e.target && e.target.id === 'addAssignmentForm') {
                 e.preventDefault();
-                const formData = new FormData(this);
+                const formData = new FormData(e.target);
                 const payload = {
                     group_id: formData.get('group_id'),
                     task: formData.get('task'),
@@ -218,7 +230,7 @@
                     });
 
                     if (response.ok) {
-                        this.reset();
+                        e.target.reset();
                         setDefaultDate();
                         showToast("Namų darbas sėkmingai paskirtas!", "success");
                         loadAssignments();
@@ -229,8 +241,8 @@
                 } catch (error) {
                     showToast("Nepavyko prisijungti prie serverio.", "error");
                 }
-            });
-        }
+            }
+        });
 
         async function deleteAssignment(assignmentId) {
             if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
@@ -251,7 +263,7 @@
             }
         }
 
-        window.onload = initPage;
+        window.onload = checkAuthAndInit;
     </script>
 </body>
 </html>

@@ -11,12 +11,6 @@
     <script src="toast.js"></script>
 </head>
 <body>
-    <script>
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id || currentUser.role !== 'administrator') {
-            window.location.href = 'dashboard';
-        }
-    </script>
     <div class="container">
         <h1>Vartotojai</h1>
         
@@ -72,6 +66,25 @@
 
     <script src="select.js"></script>
     <script>
+        let currentUser = {};
+
+        async function checkAuthAndInit() {
+            try {
+                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!response.ok) { window.location.href = '/'; return; }
+                currentUser = await response.json();
+                if (currentUser.role !== 'administrator') {
+                    window.location.href = 'dashboard';
+                    return;
+                }
+                toggleClassField();
+                await loadUsers();
+                initCustomSelects();
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
+
         function toggleClassField() {
             const role = document.getElementById('roleSelect').value;
             const classField = document.getElementById('class');
@@ -189,11 +202,7 @@
             }
         }
 
-        window.onload = async function() {
-            toggleClassField();
-            await loadUsers();
-            initCustomSelects();
-        };
+        window.onload = checkAuthAndInit;
     </script>
 </body>
 </html>

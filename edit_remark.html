@@ -11,12 +11,6 @@
     <script src="toast.js"></script>
 </head>
 <body>
-    <script>
-        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-        if (!currentUser.user_id || currentUser.role !== 'teacher') { 
-            window.location.href = 'dashboard'; 
-        }
-    </script>
     <div class="container">
         <h1>Pagyrimai ir pastabos</h1>
 
@@ -52,9 +46,28 @@
     <script src="calendar.js"></script>
     <script src="select.js"></script>
     <script>
+        let currentUser = {};
         const urlParams = new URLSearchParams(window.location.search);
         const remarkId = urlParams.get('id');
         if (!remarkId) { window.location.href = 'remarks'; }
+
+        async function checkAuthAndInit() {
+            try {
+                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                currentUser = await response.json();
+                if (currentUser.role !== 'teacher') {
+                    window.location.href = 'dashboard';
+                    return;
+                }
+                await loadRemark();
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
 
         async function loadRemark() {
             try {
@@ -106,7 +119,7 @@
             }
         });
 
-        window.onload = loadRemark;
+        window.onload = checkAuthAndInit;
     </script>
 </body>
 </html>
