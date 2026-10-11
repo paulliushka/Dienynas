@@ -46,6 +46,23 @@
 
         <div class="card">
             <h2>Įrašų sąrašas</h2>
+
+            <!-- Paieškos ir filtravimo juosta -->
+            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="margin-top:0;">Filtruoti pagal tipą:</label>
+                    <select id="filter_type" onchange="filterRemarks()">
+                        <option value="">-- Visi tipai --</option>
+                        <option value="praise">Pagyrimai</option>
+                        <option value="reprimand">Pastabos</option>
+                    </select>
+                </div>
+                <div style="flex: 2; min-width: 220px;">
+                    <label style="margin-top:0;">Paieška (mokinys / turinys / mokytojas):</label>
+                    <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterRemarks()">
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -70,10 +87,9 @@
     <script src="select.js"></script>
     <script>
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id) { window.location.href = '/'; }
 
-        if (!currentUser.user_id) {
-            window.location.href = '/';
-        }
+        let allRemarks = [];
 
         async function initPage() {
             if (currentUser.role === 'teacher') {
@@ -102,7 +118,6 @@
             try {
                 const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
                 const groups = await response.json();
-
                 const select = document.getElementById('group_select');
                 select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
 
@@ -151,64 +166,83 @@
             try {
                 const response = await fetch(`${API_URL}/api/remarks`, { credentials: 'include' });
                 if (response.status === 401) { window.location.href = '/'; return; }
-                const remarks = await response.json();
-
-                const theader = document.getElementById('remarksTableHeader');
-                const tbody = document.getElementById('remarksTableBody');
-                tbody.innerHTML = '';
-
-                const showActions = currentUser.role === 'teacher';
-
-                if (showActions && !document.getElementById('actionsHeader')) {
-                    const th = document.createElement('th');
-                    th.id = 'actionsHeader';
-                    th.textContent = 'Veiksmai';
-                    theader.appendChild(th);
-                }
-
-                if (!Array.isArray(remarks) || remarks.length === 0) {
-                    const colSpan = showActions ? 7 : 6;
-                    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Įrašų nėra.</td></tr>`;
-                    return;
-                }
-
-                remarks.forEach(r => {
-                    const tr = document.createElement('tr');
-                    const isGroupTeacher = r.group_teachers && r.group_teachers.includes(currentUser.user_id);
-
-                    const typeBadge = r.type === 'praise' 
-                        ? '<span style="color: #4cd964; font-weight: bold;">Pagyrimas</span>' 
-                        : '<span style="color: #ff3b30; font-weight: bold;">Pastaba</span>';
-
-                    let rowHtml = `
-                        <td data-label="Mokinys"><strong>${r.student}</strong></td>
-                        <td data-label="Grupė">${r.group_display}</td>
-                        <td data-label="Tipas">${typeBadge}</td>
-                        <td data-label="Turinys">${r.content}</td>
-                        <td data-label="Data">${r.date}</td>
-                        <td data-label="Mokytojas">${r.teacher || '-'}</td>
-                    `;
-
-                    if (showActions) {
-                        const actionsTd = isGroupTeacher 
-                            ? `<a href="edit_remark?id=${r.remark_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteRemark(${r.remark_id}); return false;">Ištrinti</a>`
-                            : '<span style="color: #8a8d91;">Neturite teisių</span>';
-                        
-                        rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
-                    }
-
-                    tr.innerHTML = rowHtml;
-                    tbody.appendChild(tr);
-                });
+                allRemarks = await response.json();
+                renderRemarks(allRemarks);
             } catch (error) {
                 showToast('Klaida užkraunant įrašų sąrašą.', 'error');
             }
         }
 
+        function renderRemarks(remarks) {
+            const theader = document.getElementById('remarksTableHeader');
+            const tbody = document.getElementById('remarksTableBody');
+            tbody.innerHTML = '';
+
+            const showActions = currentUser.role === 'teacher';
+
+            if (showActions && !document.getElementById('actionsHeader')) {
+                const th = document.createElement('th');
+                th.id = 'actionsHeader';
+                th.textContent = 'Veiksmai';
+                theader.appendChild(th);
+            }
+
+            if (!Array.isArray(remarks) || remarks.length === 0) {
+                const colSpan = showActions ? 7 : 6;
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Įrašų nerasta.</td></tr>`;
+                return;
+            }
+
+            remarks.forEach(r => {
+                const tr = document.createElement('tr');
+                const isGroupTeacher = r.group_teachers && r.group_teachers.includes(currentUser.user_id);
+
+                const typeBadge = r.type === 'praise' 
+                    ? '<span style="color: #4cd964; font-weight: bold;">Pagyrimas</span>' 
+                    : '<span style="color: #ff3b30; font-weight: bold;">Pastaba</span>';
+
+                let rowHtml = `
+                    <td data-label="Mokinys"><strong>${r.student}</strong></td>
+                    <td data-label="Grupė">${r.group_display}</td>
+                    <td data-label="Tipas">${typeBadge}</td>
+                    <td data-label="Turinys">${r.content}</td>
+                    <td data-label="Data">${r.date}</td>
+                    <td data-label="Mokytojas">${r.teacher || '-'}</td>
+                `;
+
+                if (showActions) {
+                    const actionsTd = isGroupTeacher 
+                        ? `<a href="edit_remark?id=${r.remark_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteRemark(${r.remark_id}); return false;">Ištrinti</a>`
+                        : '<span style="color: #8a8d91;">Neturite teisių</span>';
+                    
+                    rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
+                }
+
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterRemarks() {
+            const filterType = document.getElementById('filter_type').value;
+            const searchText = document.getElementById('filter_search').value.toLowerCase().trim();
+
+            const filtered = allRemarks.filter(r => {
+                let match = true;
+                if (filterType && r.type !== filterType) match = false;
+                if (searchText) {
+                    const combined = `${r.student} ${r.group_display} ${r.content} ${r.teacher}`.toLowerCase();
+                    if (!combined.includes(searchText)) match = false;
+                }
+                return match;
+            });
+
+            renderRemarks(filtered);
+        }
+
         if (currentUser.role === 'teacher') {
             document.getElementById('addRemarkForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
-
                 const formData = new FormData(this);
                 const payload = {
                     student_id: formData.get('student_id'),
@@ -244,7 +278,6 @@
 
         async function deleteRemark(remarkId) {
             if (!confirm('Ar tikrai norite ištrinti šį įrašą?')) return;
-
             try {
                 const response = await fetch(`${API_URL}/api/remarks/delete/${remarkId}`, {
                     method: 'DELETE',

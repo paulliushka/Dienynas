@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Lankomumas</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+    <script src="toast.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Lankomumas</h1>
+
+        <!-- Mokytojo forma lankomumui žymėti -->
+        <div class="card" id="addAttendanceCard" style="display: none;">
+            <h2>Žymėti lankomumą</h2>
+
+            <form id="addAttendanceForm">
+                <label>Grupė</label>
+                <select name="group_id" id="group_select" onchange="loadStudentsByGroup()" required>
+                    <option value="">-- Pasirinkite grupę --</option>
+                </select>
+
+                <label>Mokinys</label>
+                <select name="student_id" id="student_select" required disabled>
+                    <option value="">-- Pirmiausia pasirinkite grupę --</option>
+                </select>
+
+                <label>Būsena</label>
+                <select name="status" required>
+                    <option value="present">Dalyvauja</option>
+                    <option value="absent_unexcused">Praleista (be pateisinimo)</option>
+                    <option value="absent_excused">Pateisinta</option>
+                    <option value="late">Vėluoja</option>
+                </select>
+
+                <label>Data</label>
+                <input type="date" name="date" id="attendance_date" required>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti lankomumą</button>
+            </form>
+        </div>
+
+        <!-- Lankomumo sąrašo kortelė -->
+        <div class="card">
+            <h2>Lankomumo įrašai</h2>
+
+            <!-- Filtravimo ir paieškos juosta -->
+            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="margin-top:0;">Filtruoti pagal būseną:</label>
+                    <select id="filter_status" onchange="filterAttendance()">
+                        <option value="">-- Visos būsenos --</option>
+                        <option value="present">Dalyvauja</option>
+                        <option value="absent_unexcused">Praleista (be pateisinimo)</option>
+                        <option value="absent_excused">Pateisinta</option>
+                        <option value="late">Vėluoja</option>
+                    </select>
+                </div>
+                <div style="flex: 2; min-width: 220px;">
+                    <label style="margin-top:0;">Paieška (mokinys / grupė / mokytojas):</label>
+                    <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterAttendance()">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mokinys</th>
+                            <th>Grupė</th>
+                            <th>Būsena</th>
+                            <th>Data</th>
+                            <th>Mokytojas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
+    </div>
+
+    <script src="calendar.js"></script>
+    <script src="select.js"></script>
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!currentUser.user_id) { window.location.href = '/'; }
+
+        let allAttendance = [];
+
+        async function initPage() {
+            if (currentUser.role === 'teacher') {
+                document.getElementById('addAttendanceCard').style.display = 'block';
+                setDefaultDate();
+                await loadTeacherGroups();
+            }
+
+            await loadAttendance();
+            initCalendarPickers();
+            initCustomSelects();
+        }
+
+        function setDefaultDate() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const dateInput = document.getElementById('attendance_date');
+            if (dateInput) {
+                dateInput.value = `${now.getFullYear()}-${month}-${day}`;
+                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        async function loadTeacherGroups() {
+            try {
+                const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
+                const groups = await response.json();
+                const select = document.getElementById('group_select');
+                select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
+
+                groups.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g.group_id;
+                    opt.textContent = `${g.group_name} (${g.class} klasė)`;
+                    select.appendChild(opt);
+                });
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch (error) {
+                showToast('Klaida užkraunant grupes.', 'error');
+            }
+        }
+
+        async function loadStudentsByGroup() {
+            const groupId = document.getElementById('group_select').value;
+            const select = document.getElementById('student_select');
+
+            if (!groupId) {
+                select.innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
+                select.disabled = true;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
+                const students = await response.json();
+
+                select.innerHTML = '<option value="">-- Pasirinkite mokinį --</option>';
+                students.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.user_id;
+                    opt.textContent = `${s.name} ${s.surname}`;
+                    select.appendChild(opt);
+                });
+                select.disabled = false;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch (error) {
+                showToast('Klaida užkraunant mokinius.', 'error');
+            }
+        }
+
+        async function loadAttendance() {
+            try {
+                const response = await fetch(`${API_URL}/api/attendance`, { credentials: 'include' });
+                if (response.status === 401) { window.location.href = '/'; return; }
+                allAttendance = await response.json();
+                renderAttendance(allAttendance);
+            } catch (error) {
+                showToast('Klaida užkraunant lankomumą.', 'error');
+            }
+        }
+
+        function renderAttendance(records) {
+            const tbody = document.getElementById('attendanceTableBody');
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(records) || records.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Lankomumo įrašų nerasta.</td></tr>`;
+                return;
+            }
+
+            records.forEach(att => {
+                const tr = document.createElement('tr');
+
+                let statusBadge = '';
+                if (att.status === 'present') statusBadge = '<span style="color: #70e000;">Dalyvauja</span>';
+                else if (att.status === 'absent_unexcused') statusBadge = '<span style="color: #ff3b30; font-weight: bold;">Praleista (be pateisinimo)</span>';
+                else if (att.status === 'absent_excused') statusBadge = '<span style="color: #4cd964;">Pateisinta</span>';
+                else if (att.status === 'late') statusBadge = '<span style="color: #ffcc00;">Vėluoja</span>';
+
+                tr.innerHTML = `
+                    <td data-label="Mokinys"><strong>${att.student}</strong></td>
+                    <td data-label="Grupė">${att.group_display}</td>
+                    <td data-label="Būsena">${statusBadge}</td>
+                    <td data-label="Data">${att.date}</td>
+                    <td data-label="Mokytojas">${att.teacher || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterAttendance() {
+            const filterStatus = document.getElementById('filter_status').value;
+            const searchText = document.getElementById('filter_search').value.toLowerCase().trim();
+
+            const filtered = allAttendance.filter(att => {
+                let match = true;
+                if (filterStatus && att.status !== filterStatus) match = false;
+                if (searchText) {
+                    const combined = `${att.student} ${att.group_display} ${att.teacher}`.toLowerCase();
+                    if (!combined.includes(searchText)) match = false;
+                }
+                return match;
+            });
+
+            renderAttendance(filtered);
+        }
+
+        if (currentUser.role === 'teacher') {
+            document.getElementById('addAttendanceForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const payload = {
+                    student_id: formData.get('student_id'),
+                    group_id: formData.get('group_id'),
+                    status: formData.get('status'),
+                    date: formData.get('date')
+                };
+
+                try {
+                    const response = await fetch(`${API_URL}/api/attendance/add`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        this.reset();
+                        setDefaultDate();
+                        document.getElementById('student_select').disabled = true;
+                        showToast("Lankomumas sėkmingai pažymėtas!", "success");
+                        loadAttendance();
+                    } else {
+                        const errResult = await response.json();
+                        showToast(errResult.message || "Klaida žymint lankomumą.", "error");
+                    }
+                } catch (error) {
+                    showToast("Nepavyko prisijungti prie serverio.", "error");
+                }
+            });
+        }
+
+        window.onload = initPage;
+    </script>
+</body>
+</html>

@@ -51,6 +51,21 @@
 
         <div class="card">
             <h2>Esamos grupės</h2>
+
+            <!-- Paieškos ir filtravimo juosta -->
+            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 180px;">
+                    <label style="margin-top:0;">Filtruoti pagal klasę:</label>
+                    <select id="filter_class" onchange="filterGroups()">
+                        <option value="">-- Visos klasės --</option>
+                    </select>
+                </div>
+                <div style="flex: 2; min-width: 220px;">
+                    <label style="margin-top:0;">Paieška (grupė / mokytojas / mokinys):</label>
+                    <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterGroups()">
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -72,6 +87,8 @@
 
     <script src="select.js"></script>
     <script>
+        let allGroups = [];
+
         async function initPage() {
             if (currentUser.role === 'teacher' || currentUser.role === 'administrator') {
                 document.getElementById('addGroupCard').style.display = 'block';
@@ -81,6 +98,7 @@
                 await loadClasses();
             }
 
+            await loadClassesFilter();
             await loadGroups();
             initCustomSelects();
         }
@@ -89,7 +107,6 @@
             try {
                 const response = await fetch(`${API_URL}/api/classes`, { credentials: 'include' });
                 const classes = await response.json();
-
                 const select = document.getElementById('class_select');
                 select.innerHTML = '<option value="">-- Pasirinkite klasę --</option>';
 
@@ -99,18 +116,30 @@
                     opt.textContent = `${c} klasė`;
                     select.appendChild(opt);
                 });
-                
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
                 showToast("Klaida užkraunant klases.", "error");
             }
         }
 
+        async function loadClassesFilter() {
+            try {
+                const response = await fetch(`${API_URL}/api/classes`, { credentials: 'include' });
+                const classes = await response.json();
+                const select = document.getElementById('filter_class');
+                classes.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = `${c} klasė`;
+                    select.appendChild(opt);
+                });
+            } catch (err) {}
+        }
+
         async function loadTeachers() {
             try {
                 const response = await fetch(`${API_URL}/api/teachers`, { credentials: 'include' });
                 const teachers = await response.json();
-
                 const container = document.getElementById('teachers_container');
                 container.innerHTML = '';
 
@@ -179,50 +208,70 @@
             try {
                 const response = await fetch(`${API_URL}/api/groups`, { credentials: 'include' });
                 if (response.status === 401) { window.location.href = '/'; return; }
-                const groups = await response.json();
-
-                const tbody = document.getElementById('groupsTableBody');
-                tbody.innerHTML = '';
-
-                if (!Array.isArray(groups) || groups.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Grupių nėra.</td></tr>`;
-                    return;
-                }
-
-                groups.forEach(g => {
-                    const tr = document.createElement('tr');
-                    const isTeacherMember = g.teachers && g.teachers.includes(currentUser.user_id);
-                    const isOwner = isTeacherMember || currentUser.role === 'administrator';
-
-                    const ownerBadge = isTeacherMember ? '<span class="badge-owner">Mano grupė</span>' : '';
-                    const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span style="color: #8a8d91; font-style: italic;">Grupėje mokinių nėra.</span>';
-
-                    let rowHtml = `
-                        <td data-label="Grupė"><strong>${g.group_name}</strong> ${ownerBadge}</td>
-                        <td data-label="Klasė">${g.class} klasė</td>
-                        <td data-label="Mokytojai">${g.teacher || '-'}</td>
-                        <td data-label="Mokiniai">${studentsText}</td>
-                    `;
-
-                    let actionsTd = '';
-                    if (isOwner) {
-                        actionsTd = `<a href="edit_group?id=${g.group_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>`;
-                    } else {
-                        actionsTd = '<span style="color: #8a8d91;">Neturite teisių</span>';
-                    }
-                    rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
-
-                    tr.innerHTML = rowHtml;
-                    tbody.appendChild(tr);
-                });
+                allGroups = await response.json();
+                renderGroups(allGroups);
             } catch (error) {
                 showToast("Klaida užkraunant grupes.", "error");
             }
         }
 
+        function renderGroups(groups) {
+            const tbody = document.getElementById('groupsTableBody');
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(groups) || groups.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Grupių nerasta.</td></tr>`;
+                return;
+            }
+
+            groups.forEach(g => {
+                const tr = document.createElement('tr');
+                const isTeacherMember = g.teachers && g.teachers.includes(currentUser.user_id);
+                const isOwner = isTeacherMember || currentUser.role === 'administrator';
+
+                const ownerBadge = isTeacherMember ? '<span class="badge-owner">Mano grupė</span>' : '';
+                const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span style="color: #8a8d91; font-style: italic;">Grupėje mokinių nėra.</span>';
+
+                let rowHtml = `
+                    <td data-label="Grupė"><strong>${g.group_name}</strong> ${ownerBadge}</td>
+                    <td data-label="Klasė">${g.class} klasė</td>
+                    <td data-label="Mokytojai">${g.teacher || '-'}</td>
+                    <td data-label="Mokiniai">${studentsText}</td>
+                `;
+
+                let actionsTd = '';
+                if (isOwner) {
+                    actionsTd = `<a href="edit_group?id=${g.group_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>`;
+                } else {
+                    actionsTd = '<span style="color: #8a8d91;">Neturite teisių</span>';
+                }
+                rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
+
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterGroups() {
+            const filterClass = document.getElementById('filter_class').value;
+            const searchText = document.getElementById('filter_search').value.toLowerCase().trim();
+
+            const filtered = allGroups.filter(g => {
+                let match = true;
+                if (filterClass && String(g.class) !== String(filterClass)) match = false;
+                if (searchText) {
+                    const studentsStr = (g.student_names || []).join(" ");
+                    const combined = `${g.group_name} ${g.class} ${g.teacher} ${studentsStr}`.toLowerCase();
+                    if (!combined.includes(searchText)) match = false;
+                }
+                return match;
+            });
+
+            renderGroups(filtered);
+        }
+
         document.getElementById('createGroupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
             const formData = new FormData(this);
             const selectedStudents = Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value);
             const selectedTeachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
@@ -249,10 +298,8 @@
 
                 if (response.ok) {
                     this.reset();
-                    
                     const classSelect = document.getElementById('class_select');
                     classSelect.dispatchEvent(new Event('change', { bubbles: true }));
-
                     document.getElementById("students_container").innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
                     await loadTeachers();
                     showToast("Grupė sėkmingai sukurta!", "success");
@@ -268,7 +315,6 @@
 
         async function deleteGroup(groupId) {
             if (!confirm('Ar tikrai norite ištrinti šią grupę?')) return;
-
             try {
                 const response = await fetch(`${API_URL}/api/groups/delete/${groupId}`, {
                     method: 'DELETE',
