@@ -105,7 +105,7 @@ label {
 }
 
 /* ==========================================================================
-   4. ĮVESTIES LAUKAI (FORMOS IR FILTRAI)
+   4. ĮVESTIES LAUKAI (FORMOS IR TOBULAI SUSIGLAUDŽIANTYS FILTRAI)
    ========================================================================== */
 input[type="text"],
 input[type="password"],
@@ -138,25 +138,40 @@ textarea:focus {
     outline: none;
     border-color: var(--accent-blue) !important;
     box-shadow: 0 0 0 1px var(--accent-blue) !important;
-    z-index: 2;
+    z-index: 5;
     position: relative;
 }
 
-/* Paieškos ir filtravimo juosta, kur langai liečiasi */
+/* Paieškos ir filtravimo juosta, kur visi elementai (įskaitant kalendorius ir custom select wrapperius) idealiai liečiasi be tarpų */
 .card div[style*="display: flex"] {
-    display: flex;
+    display: flex !important;
     gap: 0 !important;
     margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
-.card div[style*="display: flex"] > div {
-    margin-right: -1px;
+.card div[style*="display: flex"] > div,
+.card div[style*="display: flex"] > input,
+.card div[style*="display: flex"] > select,
+.card div[style*="display: flex"] > .custom-calendar-wrapper,
+.card div[style*="display: flex"] > .custom-select-wrapper {
+    margin-right: -1px !important;
+    margin-bottom: 0 !important;
+    flex: 1;
+    min-width: 160px;
 }
 
-.card div[style*="display: flex"] > div input,
-.card div[style*="display: flex"] > div select {
+.card div[style*="display: flex"] .custom-calendar-wrapper,
+.card div[style*="display: flex"] .custom-select-wrapper {
+    width: 100% !important;
+}
+
+.card div[style*="display: flex"] input,
+.card div[style*="display: flex"] select,
+.card div[style*="display: flex"] .custom-calendar-input,
+.card div[style*="display: flex"] .custom-select-trigger {
     border-radius: 0 !important;
+    height: 28px !important;
 }
 
 /* ==========================================================================
@@ -470,13 +485,13 @@ a:hover {
    ========================================================================== */
 .custom-calendar-wrapper {
     position: relative;
-    width: 240px;
+    width: 100%;
     box-sizing: border-box;
 }
 
 .custom-select-wrapper {
     position: relative;
-    width: 240px;
+    width: 100%;
     max-width: 100%;
     box-sizing: border-box;
 }
@@ -698,7 +713,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   13. TOAST / PRANEŠIMŲ SISTEMA
+   13. TOAST / PRANEŠIMŲ SISTEMA (2010s DARK GLOSSY STYLE)
    ========================================================================== */
 #toast-container {
     position: fixed;
@@ -722,26 +737,27 @@ input[type="date"]::-webkit-inner-spin-button {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.5);
     border: 1px solid;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
 }
 
 .toast-error {
-    background-color: var(--danger-bg);
-    border-color: var(--danger-border);
-    color: var(--danger-text);
+    background: linear-gradient(to bottom, #d9534f 0%, #a94442 100%);
+    border-color: #843534;
+    color: #ffffff;
 }
 
 .toast-success {
-    background-color: var(--success-bg);
-    border-color: var(--success-border);
-    color: var(--success-text);
+    background: linear-gradient(to bottom, #5cb85c 0%, #4cae4c 100%);
+    border-color: #398439;
+    color: #ffffff;
 }
 
 .toast-info {
-    background-color: #1a273a;
-    border-color: #2a4365;
-    color: var(--accent-blue);
+    background: linear-gradient(to bottom, #5b8bd0 0%, #2d65b5 100%);
+    border-color: #1a4480;
+    color: #ffffff;
 }
 
 .toast-close {
@@ -752,7 +768,7 @@ input[type="date"]::-webkit-inner-spin-button {
     font-weight: bold;
     cursor: pointer;
     margin-left: 10px;
-    opacity: 0.7;
+    opacity: 0.8;
 }
 
 .toast-close:hover {
