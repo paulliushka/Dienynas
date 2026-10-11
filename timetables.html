@@ -131,7 +131,8 @@
 
         async function loadTimetable() {
             try {
-                const response = await fetch(`${API_URL}/api/timetable`, { credentials: 'include' });
+                // PAKEISTA: api/timetable -> api/timetables
+                const response = await fetch(`${API_URL}/api/timetables`, { credentials: 'include' });
                 if (response.status === 401) { window.location.href = '/'; return; }
                 allTimetableEntries = await response.json();
                 renderTimetable(allTimetableEntries);
@@ -214,7 +215,8 @@
                 };
 
                 try {
-                    const response = await fetch(`${API_URL}/api/timetable/add`, {
+                    // PAKEISTA: api/timetable/add -> api/timetables/add
+                    const response = await fetch(`${API_URL}/api/timetables/add`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
@@ -238,7 +240,8 @@
         async function deleteTimetableEntry(id) {
             if (!confirm('Ar tikrai norite pašalinti šią pamoką iš tvarkaraščio?')) return;
             try {
-                const response = await fetch(`${API_URL}/api/timetable/delete/${id}`, {
+                // PAKEISTA: api/timetable/delete -> api/timetables/delete
+                const response = await fetch(`${API_URL}/api/timetables/delete/${id}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
