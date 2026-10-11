@@ -1,6 +1,31 @@
 /* ==========================================================================
-   1. BAZINIAI STILIAI IR KINTAMIEJI (CLASSIC 2010 DARK GLOSSY)
+   1. BAZINIAI STILIAI IR KINTAMIEJI (CLASSIC 2010 DARK THEME)
    ========================================================================== */
+:root {
+    --bg-main: #18191a;
+    --bg-card: #242526;
+    --bg-header: #242526;
+    --bg-input: #3a3b3c;
+    --border-color: #3e4042;
+    --border-light: #4e5052;
+    
+    --accent-blue: #4a90e2;
+    --accent-blue-hover: #357abd;
+    --header-bg: #3b5998;
+    
+    --text-primary: #e4e6eb;
+    --text-secondary: #b0b3b8;
+    --text-muted: #8a8d91;
+    
+    --success-bg: #132f20;
+    --success-border: #1e4620;
+    --success-text: #4ade80;
+    
+    --danger-bg: #3f1d1d;
+    --danger-border: #5c2c2c;
+    --danger-text: #f87171;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -10,8 +35,8 @@
 }
 
 body {
-    background-color: #18191a;
-    color: #e4e6eb;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
     line-height: 1.34;
     padding: 0;
     font-size: 11px;
@@ -27,43 +52,43 @@ body {
    2. ANTRAŠTĖS IR TEKSTAS
    ========================================================================== */
 h1 {
-    color: #ffffff;
-    margin-bottom: 12px;
+    color: var(--text-primary);
+    margin-bottom: 14px;
     font-size: 20px;
     font-weight: bold;
     letter-spacing: -0.5px;
 }
 
 h2 {
-    color: #4a90e2;
+    color: var(--accent-blue);
     margin-bottom: 12px;
     font-size: 14px;
     font-weight: bold;
     background-color: #2a2b2c;
-    border-top: 1px solid #3e4042;
-    border-bottom: 1px solid #3e4042;
-    padding: 6px 10px;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 12px;
 }
 
 h3 {
     font-size: 12px;
-    color: #e4e6eb;
+    color: var(--text-primary);
     margin: 10px 0 6px 0;
     font-weight: bold;
 }
 
 p {
-    color: #b0b3b8;
+    color: var(--text-secondary);
 }
 
 /* ==========================================================================
    3. KORTELĖS IR KONTEINERIAI
    ========================================================================== */
 .card {
-    background: #242526;
+    background: var(--bg-card);
     padding: 16px;
     margin-bottom: 16px;
-    border: 1px solid #3e4042;
+    border: 1px solid var(--border-color);
     border-radius: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -74,7 +99,7 @@ label {
     margin-bottom: 4px;
     font-weight: bold;
     font-size: 11px;
-    color: #b0b3b8;
+    color: var(--text-secondary);
     text-transform: none;
     letter-spacing: normal;
 }
@@ -95,21 +120,24 @@ textarea {
     border-radius: 0;
     font-size: 12px;
     color: #ffffff;
-    background-color: #3a3b3c;
+    background-color: var(--bg-input);
     box-sizing: border-box;
+    transition: border-color 0.15s ease;
 }
 
 textarea {
     height: auto;
-    padding: 6px;
+    min-height: 60px;
+    padding: 8px;
+    resize: vertical;
 }
 
 input:focus, 
 select:focus, 
 textarea:focus {
     outline: none;
-    border-color: #4a90e2 !important;
-    box-shadow: 0 0 0 1px #4a90e2 !important;
+    border-color: var(--accent-blue) !important;
+    box-shadow: 0 0 0 1px var(--accent-blue) !important;
 }
 
 /* ==========================================================================
@@ -128,6 +156,7 @@ textarea:focus {
     text-decoration: none;
     white-space: nowrap;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+    transition: background 0.15s ease;
 }
 
 .btn-primary {
@@ -144,7 +173,7 @@ textarea:focus {
 
 .btn-secondary {
     background: linear-gradient(to bottom, #4e4f50 0%, #3a3b3c 100%);
-    color: #e4e6eb;
+    color: var(--text-primary);
     border: 1px solid #666666;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.2);
 }
@@ -156,8 +185,8 @@ textarea:focus {
 
 .btn-back {
     display: inline-block;
-    margin-top: 10px;
-    color: #4a90e2;
+    margin-top: 12px;
+    color: var(--accent-blue);
     text-decoration: none;
     font-weight: bold;
     font-size: 11px;
@@ -166,6 +195,7 @@ textarea:focus {
 
 .btn-back:hover {
     text-decoration: underline;
+    color: var(--text-primary);
 }
 
 /* ==========================================================================
@@ -175,9 +205,9 @@ textarea:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(to bottom, #3b5998 0%, #1d2a5b 100%);
+    background: linear-gradient(to bottom, #4c66a4 0%, #3b5998 100%);
     padding: 12px 16px;
-    border-bottom: 1px solid #111a3b;
+    border-bottom: 1px solid #133783;
     margin-bottom: 20px;
     color: #ffffff;
     border-radius: 2px;
@@ -200,12 +230,12 @@ textarea:focus {
 
 .badge-role {
     background-color: #2a2b2c;
-    color: #4a90e2;
+    color: var(--accent-blue);
     font-size: 10px;
     padding: 2px 6px;
     border-radius: 2px;
     font-weight: bold;
-    border: 1px solid #3e4042;
+    border: 1px solid var(--border-color);
     text-transform: uppercase;
 }
 
@@ -217,21 +247,23 @@ textarea:focus {
 }
 
 .nav-card {
-    background: #242526;
-    border: 1px solid #3e4042;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
     padding: 16px;
-    text-decoration: none;
+    text-decoration: none !important;
     color: inherit;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: background 0.1s ease, border-color 0.1s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .nav-card:hover {
     background: #2a2b2c;
-    border-color: #4a90e2;
+    border-color: var(--accent-blue);
+    text-decoration: none !important;
 }
 
 .nav-card-icon {
@@ -242,28 +274,28 @@ textarea:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #4a90e2;
+    color: var(--accent-blue);
     margin-bottom: 12px;
     font-size: 18px;
-    border: 1px solid #4e5052;
+    border: 1px solid var(--border-light);
 }
 
 .nav-card h3 {
-    color: #4a90e2;
+    color: var(--accent-blue);
     font-size: 13px;
     margin-bottom: 4px;
     font-weight: bold;
 }
 
 .nav-card p {
-    color: #b0b3b8;
+    color: var(--text-secondary);
     font-size: 11px;
     line-height: 1.4;
 }
 
 .nav-card-arrow {
     margin-top: 12px;
-    color: #4a90e2;
+    color: var(--accent-blue);
     font-weight: bold;
     font-size: 11px;
     display: flex;
@@ -300,7 +332,7 @@ textarea:focus {
     border: 1px solid #555555;
     padding: 6px;
     border-radius: 0;
-    background-color: #3a3b3c;
+    background-color: var(--bg-input);
 }
 
 .scroll-box label {
@@ -310,7 +342,7 @@ textarea:focus {
     margin: 4px 0;
     font-weight: normal;
     font-size: 11px;
-    color: #e4e6eb;
+    color: var(--text-primary);
     cursor: pointer;
 }
 
@@ -321,14 +353,14 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   8. LENTELĖS (OLD-SCHOOL DARK STRIPED TABLES)
+   8. LENTELĖS
    ========================================================================== */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
     margin-top: 8px;
-    border: 1px solid #3e4042;
-    background: #242526;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
 }
 
 table {
@@ -341,16 +373,16 @@ table {
 th, td {
     padding: 8px 10px;
     text-align: left;
-    border-bottom: 1px solid #333435;
+    border-bottom: 1px solid var(--border-light);
 }
 
 th {
     background-color: #2a2b2c;
-    color: #4a90e2;
+    color: var(--accent-blue);
     font-weight: bold;
     text-transform: none;
     font-size: 11px;
-    border-bottom: 1px solid #3e4042;
+    border-bottom: 1px solid var(--border-color);
 }
 
 tr:nth-child(even) {
@@ -363,32 +395,77 @@ tr:hover {
 
 .empty-row {
     text-align: center;
-    color: #8a8d91;
+    color: var(--text-muted);
     font-style: italic;
     padding: 16px;
 }
 
 /* ==========================================================================
-   9. ŽENKLIUKAI IR NUORODOS
+   9. KLAIDŲ KORTELĖS IR PRANEŠIMAI
+   ========================================================================== */
+.error-page-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-main);
+}
+
+.error-card {
+    text-align: center;
+    max-width: 440px;
+    width: 90%;
+    padding: 32px 20px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    border-radius: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.error-code {
+    font-size: 64px;
+    font-weight: bold;
+    color: var(--accent-blue);
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+}
+
+.error-title {
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.error-desc {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   10. ŽENKLIUKAI IR NUORODOS
    ========================================================================== */
 .badge-owner {
     background-color: #2a2b2c;
-    color: #4a90e2;
+    color: var(--accent-blue);
     font-size: 10px;
     padding: 1px 4px;
     border-radius: 2px;
     font-weight: bold;
     margin-left: 4px;
-    border: 1px solid #3e4042;
+    border: 1px solid var(--border-color);
 }
 
 .badge-grade {
     font-weight: bold;
-    color: #4a90e2;
+    color: var(--accent-blue);
 }
 
 a {
-    color: #4a90e2;
+    color: var(--accent-blue);
     text-decoration: none;
 }
 
@@ -397,7 +474,7 @@ a:hover {
 }
 
 /* ==========================================================================
-   10. CUSTOM DROPDOWN IR KALENDORIUS
+   11. CUSTOM DROPDOWN IR KALENDORIUS
    ========================================================================== */
 .custom-calendar-wrapper {
     position: relative;
@@ -435,7 +512,7 @@ input[type="date"]::-webkit-inner-spin-button {
     border-radius: 0;
     font-size: 11px;
     color: #ffffff;
-    background-color: #3a3b3c;
+    background-color: var(--bg-input);
     cursor: pointer;
     position: relative;
     display: flex;
@@ -443,7 +520,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 .custom-select-trigger:hover {
-    border-color: #4a90e2;
+    border-color: var(--accent-blue);
 }
 
 .custom-select-arrow {
@@ -455,7 +532,7 @@ input[type="date"]::-webkit-inner-spin-button {
     height: 0;
     border-left: 4px solid transparent;
     border-right: 4px solid transparent;
-    border-top: 5px solid #4a90e2;
+    border-top: 5px solid var(--accent-blue);
 }
 
 .custom-calendar-popup,
@@ -466,8 +543,8 @@ input[type="date"]::-webkit-inner-spin-button {
     left: 0;
     z-index: 1000;
     width: 240px;
-    background-color: #242526;
-    border: 1px solid #4a90e2;
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-blue);
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
@@ -489,17 +566,17 @@ input[type="date"]::-webkit-inner-spin-button {
 .custom-select-option {
     padding: 6px 10px;
     font-size: 11px;
-    color: #e4e6eb;
+    color: var(--text-primary);
     cursor: pointer;
 }
 
 .custom-select-option:hover {
-    background-color: #4a90e2;
+    background-color: var(--accent-blue);
     color: #ffffff;
 }
 
 .custom-select-option.selected {
-    background-color: #2d65b5;
+    background-color: #357abd;
     color: #ffffff;
     font-weight: bold;
 }
@@ -511,19 +588,19 @@ input[type="date"]::-webkit-inner-spin-button {
     margin-bottom: 8px;
     background: #2a2b2c;
     padding: 4px;
-    border-bottom: 1px solid #3e4042;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .calendar-title {
     font-weight: bold;
-    color: #4a90e2;
+    color: var(--accent-blue);
     font-size: 11px;
 }
 
 .calendar-nav-btn {
-    background: #3a3b3c;
-    border: 1px solid #4e5052;
-    color: #4a90e2;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    color: var(--accent-blue);
     border-radius: 2px;
     width: 22px;
     height: 22px;
@@ -545,35 +622,91 @@ input[type="date"]::-webkit-inner-spin-button {
 .calendar-day-head {
     font-size: 10px;
     font-weight: bold;
-    color: #b0b3b8;
+    color: var(--text-secondary);
     padding-bottom: 2px;
 }
 
 .calendar-day {
     padding: 4px 0;
     font-size: 11px;
-    color: #e4e6eb;
+    color: var(--text-primary);
     border: 1px solid #333435;
     cursor: pointer;
 }
 
 .calendar-day:hover:not(.empty) {
     background-color: #2c2d2e;
-    color: #4a90e2;
+    color: var(--accent-blue);
 }
 
 .calendar-day.today {
-    border: 1px solid #4a90e2;
+    border: 1px solid var(--accent-blue);
     font-weight: bold;
 }
 
 .calendar-day.selected {
-    background-color: #4a90e2 !important;
+    background-color: var(--accent-blue) !important;
     color: #ffffff !important;
 }
 
 /* ==========================================================================
-   11. TOAST / PRANEŠIMAI
+   12. REGISTRACIJOS IR CENTRUOTŲ PUSLAPIŲ SPECIFIKOS
+   ========================================================================== */
+.centered-page-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-main);
+    margin: 0;
+}
+
+.register-card {
+    max-width: 420px;
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.readonly-input {
+    background-color: #2a2b2c !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed;
+}
+
+.step-2 {
+    display: none;
+}
+
+.info-box {
+    background-color: #2a2b2c;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    padding: 8px;
+    margin-bottom: 10px;
+    font-size: 11px;
+}
+
+.info-box-success {
+    background-color: var(--success-bg);
+    border-color: var(--success-border);
+    color: var(--success-text);
+}
+
+.code-display {
+    font-weight: bold;
+    color: var(--accent-blue);
+    background: var(--bg-input);
+    padding: 2px 5px;
+    border: 1px solid var(--border-color);
+    display: inline-block;
+    margin-top: 3px;
+}
+
+/* ==========================================================================
+   13. TOAST / PRANEŠIMŲ SISTEMA
    ========================================================================== */
 #toast-container {
     position: fixed;
@@ -591,7 +724,7 @@ input[type="date"]::-webkit-inner-spin-button {
 .toast {
     pointer-events: auto;
     padding: 8px 12px;
-    border-radius: 3px;
+    border-radius: 2px;
     font-size: 11px;
     font-weight: bold;
     display: flex;
@@ -602,21 +735,21 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 .toast-error {
-    background-color: #3f1d1d;
-    border-color: #5c2c2c;
-    color: #f87171;
+    background-color: var(--danger-bg);
+    border-color: var(--danger-border);
+    color: var(--danger-text);
 }
 
 .toast-success {
-    background-color: #132f20;
-    border-color: #1e4620;
-    color: #4ade80;
+    background-color: var(--success-bg);
+    border-color: var(--success-border);
+    color: var(--success-text);
 }
 
 .toast-info {
     background-color: #1a273a;
     border-color: #2a4365;
-    color: #4a90e2;
+    color: var(--accent-blue);
 }
 
 .toast-close {
@@ -635,7 +768,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   12. ADAPTYVUMAS MOBILIESIEMS
+   14. ADAPTYVUMAS MOBILIESIEMS (RESPONSIVE)
    ========================================================================== */
 @media (max-width: 768px) {
     body {
