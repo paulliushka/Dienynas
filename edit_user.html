@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Redaguoti vartotoją</title>
+    <title>Mokslus - Redaguoti vartotoją</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
@@ -18,7 +18,7 @@
         }
     </script>
     <div class="container">
-        <h1>Vartotojų valdymas</h1>
+        <h1>Vartotojai</h1>
 
         <div class="card">
             <h2>Redaguoti vartotojo duomenis</h2>
@@ -43,7 +43,7 @@
                 <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti</button>
             </form>
             <br>
-            <a href="administration" class="btn-back">← Grįžti atgal</a>
+            <a href="users" class="btn-back">← Grįžti atgal</a>
         </div>
     </div>
 
@@ -51,7 +51,7 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const userId = urlParams.get('id');
-        if (!userId) { window.location.href = 'administration'; }
+        if (!userId) { window.location.href = 'users'; }
 
         function toggleClassField() {
             const role = document.getElementById('role').value;
@@ -69,7 +69,7 @@
         async function loadUser() {
             try {
                 const response = await fetch(`${API_URL}/api/users/${userId}`, { credentials: 'include' });
-                if (!response.ok) { window.location.href = 'administration'; return; }
+                if (!response.ok) { window.location.href = 'users'; return; }
                 const user = await response.json();
                 
                 document.getElementById('name').value = user.name || '';
@@ -101,7 +101,7 @@
                 });
                 
                 if (res.ok) { 
-                    window.location.href = 'administration'; 
+                    window.location.href = 'users'; 
                 } else { 
                     const r = await res.json(); 
                     showToast(r.message || "Klaida išsaugant pakeitimus.", "error"); 
