@@ -142,7 +142,7 @@ textarea:focus {
     position: relative;
 }
 
-/* Paieškos ir filtravimo juosta, kur visi elementai (įskaitant kalendorius ir custom select wrapperius) idealiai liečiasi be tarpų */
+/* Paieškos ir filtravimo juosta, kur visi elementai idealiai liečiasi be tarpų */
 .card div[style*="display: flex"] {
     display: flex !important;
     gap: 0 !important;
@@ -230,6 +230,31 @@ textarea:focus {
 .btn-back:hover {
     text-decoration: underline;
     color: var(--text-primary);
+}
+
+/* Lankomumo / Greiti mygtukai žurnale */
+.btn-att {
+    background: #3a3b3c;
+    color: var(--text-primary);
+    border: 1px solid #555;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 2px;
+}
+.btn-att:hover {
+    background: #4e4f50;
+}
+.btn-att.active-n {
+    background: linear-gradient(to bottom, #d9534f 0%, #a94442 100%) !important;
+    color: white !important;
+    border-color: #843534 !important;
+}
+.btn-att.active-v {
+    background: linear-gradient(to bottom, #f0ad4e 0%, #eea236 100%) !important;
+    color: white !important;
+    border-color: #eea236 !important;
 }
 
 /* ==========================================================================
@@ -657,59 +682,55 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   12. REGISTRACIJOS IR CENTRUOTŲ PUSLAPIŲ SPECIFIKOS
+   12. PAMOKŲ DIENŲ KORTELĖS IR MODALINIAI LANGAI (LESSONS.HTML)
    ========================================================================== */
-.centered-page-body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: var(--bg-main);
-    margin: 0;
-}
-
-.register-card {
-    max-width: 420px;
-    width: 100%;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
-.readonly-input {
-    background-color: #2a2b2c !important;
-    color: var(--text-muted) !important;
-    cursor: not-allowed;
-}
-
-.step-2 {
-    display: none;
-}
-
-.info-box {
-    background-color: #2a2b2c;
+.day-section {
+    margin-bottom: 20px;
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 0;
-    padding: 8px;
-    margin-bottom: 10px;
-    font-size: 11px;
+    padding: 12px;
 }
-
-.info-box-success {
-    background-color: var(--success-bg);
-    border-color: var(--success-border);
-    color: var(--success-text);
-}
-
-.code-display {
+.day-title {
+    font-size: 13px;
     font-weight: bold;
     color: var(--accent-blue);
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 4px;
+}
+.lesson-grid-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+.lesson-item-card {
     background: var(--bg-input);
-    padding: 2px 5px;
-    border: 1px solid var(--border-color);
-    display: inline-block;
-    margin-top: 3px;
+    border: 1px solid var(--border-light);
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+.lesson-item-card:hover {
+    border-color: var(--accent-blue);
+    background: #2a2b2c;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--accent-blue);
+    padding: 20px;
+    width: 360px;
+    max-width: 90%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
 }
 
 /* ==========================================================================

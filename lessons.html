@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus - Pamokos žurnalas</title>
+    <title>Mokslus - Pamokų žurnalas</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
@@ -12,74 +12,83 @@
 </head>
 <body>
     <div class="container">
-        <h1>Pamokos žurnalas</h1>
+        <h1>Pamokų žurnalas</h1>
 
-        <!-- Viršutinė kortelė pamokos ir grupės pasirinkimui -->
-        <div class="card">
-            <h2>Pamokos nustatymai</h2>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                <div style="flex: 2; min-width: 220px;">
-                    <label>Pasirinkite grupę</label>
-                    <select id="group_select" onchange="loadGroupStudents()" required>
-                        <option value="">-- Pasirinkite grupę --</option>
-                    </select>
-                </div>
-                <div style="flex: 1; min-width: 180px;">
-                    <label>Pamokos data</label>
-                    <input type="date" id="lesson_date" required>
-                </div>
+        <!-- Dienų tvarkaraščio rodinys (Pradinis pamokų pasirinkimas) -->
+        <div class="card" id="scheduleViewCard">
+            <h2>Pasirinkite pamoką iš tvarkaraščio</h2>
+            <div style="margin-bottom: 12px; display: flex; gap: 10px; align-items: center;">
+                <label style="margin:0;">Pasirinkite datą:</label>
+                <input type="date" id="selected_lesson_date" style="width: 160px;" onchange="loadTimetableLessons()">
+            </div>
+            <div id="daysScheduleContainer">
+                <!-- Dinamiškai užsikraus dienos pamokos -->
             </div>
         </div>
 
-        <!-- Mokinių lankomumo ir pažymių lentelė -->
+        <!-- Konkrečios pamokos žurnalo redagavimo kortelė -->
         <div class="card" id="journalCard" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
-                <h2 style="margin: 0;">Mokinių sąrašas ir vertinimai</h2>
-                <div>
-                    <label style="display: inline-block; margin-right: 8px; font-weight: bold;">Visai grupei tipas:</label>
-                    <select id="applyAllType" style="padding: 6px; display: inline-block; width: auto;" onchange="applyTypeToAll()">
-                        <option value="Klasės darbas">Klasės darbas</option>
-                        <option value="Savarankiškas darbas">Savarankiškas darbas</option>
-                        <option value="Namų darbas">Namų darbas</option>
-                        <option value="Kontrolinis darbas">Kontrolinis darbas</option>
-                    </select>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h2 id="journalTitle" style="margin:0;">Pamokos žurnalas</h2>
+                <button type="button" class="btn btn-secondary" onclick="backToScheduleList()">← Atgal į tvarkaraštį</button>
             </div>
 
+            <div style="background: var(--bg-input); padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-light);">
+                <p><strong>Grupė:</strong> <span id="lblGroup"></span> | <strong>Laikas:</strong> <span id="lblOrder"></span> | <strong>Kabinetas:</strong> <span id="lblClassroom"></span> | <strong>Data:</strong> <span id="lblDate"></span></p>
+            </div>
+
+            <!-- Klasės darbas ir namų darbas -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label>Klasės darbas / Tema</label>
+                    <textarea id="class_work_input" rows="2" placeholder="Įveskite klasės darbą..."></textarea>
+                </div>
+                <div>
+                    <label>Namų darbai ir terminas</label>
+                    <textarea id="homework_input" rows="2" placeholder="Įveskite namų darbų užduotį..."></textarea>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="saveClassworkAndHomework()" style="margin-bottom: 20px;">Išsaugoti klasės ir namų darbus</button>
+
+            <!-- Mokinių sąrašas (Lankomumas ir pažymiai su tiesioginiu įrašymu) -->
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
                             <th>Nr. Mokinys</th>
-                            <th>Lankomumas (Būsena)</th>
-                            <th>Pažymys</th>
+                            <th>Lankomumas (Tiesioginis)</th>
+                            <th>Pažymys (1-10)</th>
                             <th>Tipas</th>
                             <th>Komentaras</th>
                         </tr>
                     </thead>
-                    <tbody id="journalTableBody">
-                        <!-- Dinamiškai užsikraus mokiniai -->
-                    </tbody>
+                    <tbody id="journalTableBody"></tbody>
                 </table>
             </div>
-
-            <!-- Namų darbų sekcija iš tos pačios pamokos -->
-            <div style="margin-top: 25px; border-top: 1px solid #ddd; padding-top: 15px;">
-                <h3>Šios pamokos namų darbai</h3>
-                <textarea id="homework_task" rows="3" placeholder="Įveskite namų darbu užduotį mokiniams (jei skiriama)..." style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;"></textarea>
-            </div>
-
-            <button type="button" class="btn btn-primary" style="margin-top: 20px; width: 100%; padding: 12px; font-size: 16px;" onclick="saveLessonJournal()">Išsaugoti visos pamokos duomenis</button>
         </div>
 
-        <a href="dashboard" class="btn-back" style="margin-top: 20px; display: inline-block;">← Grįžti į pagrindinį</a>
+        <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
-    <script src="calendar.js"></script>
-    <script src="select.js"></script>
+    <!-- Komentaro iššokantis langas (Modal) -->
+    <div id="commentModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color: var(--accent-blue); margin-bottom: 10px;">Įvesti pažymio komentarą</h3>
+            <p id="modalStudentName" style="margin-bottom: 8px; font-weight: bold;"></p>
+            <textarea id="modalCommentInput" rows="3" placeholder="Įrašykite komentarą (nebūtina)..." style="width: 100%; margin-bottom: 12px;"></textarea>
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" class="btn btn-secondary" onclick="closeCommentModal()">Atšaukti</button>
+                <button type="button" class="btn btn-primary" onclick="saveCommentModal()">Išsaugoti</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentUser = {};
+        let allTimetables = [];
+        let currentActiveLesson = null;
         let currentStudents = [];
+        let activeCommentStudentId = null;
 
         async function checkAuthAndInit() {
             try {
@@ -93,9 +102,7 @@
                 }
 
                 setDefaultDate();
-                await loadTeacherGroups();
-                initCalendarPickers();
-                initCustomSelects();
+                await loadTimetablesData();
             } catch (err) {
                 window.location.href = '/';
             }
@@ -105,154 +112,272 @@
             const now = new Date();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-            const dateInput = document.getElementById('lesson_date');
-            if (dateInput) {
-                dateInput.value = `${now.getFullYear()}-${month}-${day}`;
-            }
+            document.getElementById('selected_lesson_date').value = `${now.getFullYear()}-${month}-${day}`;
         }
 
-        async function loadTeacherGroups() {
+        async function loadTimetablesData() {
             try {
-                const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
-                const groups = await response.json();
-                const select = document.getElementById('group_select');
-                select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
-
-                groups.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = g.group_id;
-                    opt.textContent = `${g.group_name} (${g.class} klasė)`;
-                    select.appendChild(opt);
-                });
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-            } catch (error) {
-                showToast('Klaida užkraunant grupes.', 'error');
+                const res = await fetch(`${API_URL}/api/timetables`, { credentials: 'include' });
+                allTimetables = await res.json();
+                loadTimetableLessons();
+            } catch (err) {
+                showToast('Klaida užkraunant tvarkaraštį.', 'error');
             }
         }
 
-        async function loadGroupStudents() {
-            const groupId = document.getElementById('group_select').value;
-            const card = document.getElementById('journalCard');
-            const tbody = document.getElementById('journalTableBody');
-            tbody.innerHTML = '';
+        function getDayOfWeekName(dateStr) {
+            const days = ['Sekmadienis', 'Pirmadienis', 'Antradienis', 'Trečiadienis', 'Ketvirtadienis', 'Penktadienis', 'Šeštadienis'];
+            const d = new Date(dateStr);
+            return days[d.getDay()];
+        }
 
-            if (!groupId) {
-                card.style.display = 'none';
+        function loadTimetableLessons() {
+            const dateVal = document.getElementById('selected_lesson_date').value;
+            const dayName = getDayOfWeekName(dateVal);
+            const container = document.getElementById('daysScheduleContainer');
+            container.innerHTML = '';
+
+            const dayTimetables = allTimetables.filter(t => t.day_of_week === dayName);
+
+            if (dayTimetables.length === 0) {
+                container.innerHTML = `<div class="empty-row">Šiai dienai (${dayName}) suplanuotų pamokų nėra.</div>`;
                 return;
             }
 
-            try {
-                const response = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
-                currentStudents = await response.json();
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day-section';
+            dayDiv.innerHTML = `<div class="day-title">${dayName} (${dateVal})</div>`;
+            const listDiv = document.createElement('div');
+            listDiv.className = 'lesson-grid-list';
 
+            dayTimetables.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'lesson-item-card';
+                card.innerHTML = `
+                    <strong>${t.group_display}</strong><br>
+                    <span style="color: var(--accent-blue);">${t.lesson_order}</span><br>
+                    <span style="color: var(--text-secondary);">Kabinetas: ${t.classroom}</span><br>
+                    <span style="color: var(--text-muted);">Mokytojas: ${t.teacher}</span>
+                `;
+                card.onclick = () => openLessonJournal(t, dateVal);
+                listDiv.appendChild(card);
+            });
+
+            dayDiv.appendChild(listDiv);
+            container.appendChild(dayDiv);
+        }
+
+        async function openLessonJournal(timetableItem, dateStr) {
+            currentActiveLesson = { ...timetableItem, date: dateStr };
+            document.getElementById('scheduleViewCard').style.display = 'none';
+            document.getElementById('journalCard').style.display = 'block';
+
+            document.getElementById('lblGroup').textContent = timetableItem.group_display;
+            document.getElementById('lblOrder').textContent = timetableItem.lesson_order;
+            document.getElementById('lblClassroom').textContent = timetableItem.classroom;
+            document.getElementById('lblDate').textContent = dateStr;
+
+            await loadGroupStudentsAndJournalData(timetableItem.group_id, dateStr);
+        }
+
+        function backToScheduleList() {
+            document.getElementById('journalCard').style.display = 'none';
+            document.getElementById('scheduleViewCard').style.display = 'block';
+            loadTimetableLessons();
+        }
+
+        async function loadGroupStudentsAndJournalData(groupId, dateStr) {
+            const tbody = document.getElementById('journalTableBody');
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Kraunami duomenys...</td></tr>`;
+
+            try {
+                // Gauname grupės mokinius
+                const resStu = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
+                currentStudents = await resStu.json();
+
+                // Gauname jau išsaugotus žurnalo duomenis (lankomumą, pažymius, darbus)
+                const resJ = await fetch(`${API_URL}/api/lesson-journal/data?group_id=${groupId}&date=${dateStr}`, { credentials: 'include' });
+                const journalData = await resJ.json();
+
+                document.getElementById('class_work_input').value = journalData.class_work || '';
+                document.getElementById('homework_input').value = journalData.homework || '';
+
+                tbody.innerHTML = '';
                 if (currentStudents.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Šioje grupėje mokinių nėra.</td></tr>`;
-                    card.style.display = 'block';
                     return;
                 }
 
-                currentStudents.forEach((s, index) => {
+                currentStudents.forEach((s, idx) => {
+                    const studentId = s.user_id;
+                    const attStatus = journalData.attendance[studentId] || 'present'; // numatytasis dalyvauja
+                    const gradeInfo = journalData.grades[studentId] || { grade: '', type: 'Klasės darbas', comment: '' };
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td data-label="Nr. Mokinys"><strong>${index + 1}. ${s.name} ${s.surname}</strong></td>
-                        <td data-label="Lankomumas">
-                            <select name="status_${s.user_id}" class="att-status" style="padding: 6px;">
-                                <option value="present">Dalyvauja</option>
-                                <option value="absent_unexcused">Praleista (n)</option>
-                                <option value="absent_excused">Pateisinta (p)</option>
-                                <option value="late">Vėluoja (v)</option>
+                        <td><strong>${idx + 1}. ${s.name} ${s.surname}</strong></td>
+                        <td>
+                            <div style="display: flex; gap: 4px;">
+                                <button type="button" class="btn-att ${attStatus === 'absent_unexcused' ? 'active-n' : ''}" onclick="setAttendance(${studentId}, 'absent_unexcused', this)">N</button>
+                                <button type="button" class="btn-att ${attStatus === 'late' ? 'active-v' : ''}" onclick="setAttendance(${studentId}, 'late', this)">V</button>
+                                <button type="button" class="btn-att ${attStatus === 'present' ? 'active-p' : ''}" style="font-size:9px;" onclick="setAttendance(${studentId}, 'present', this)" title="Dalyvauja (valyti)">✔</button>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="text" value="${gradeInfo.grade}" onblur="saveGradeInstant(${studentId}, this)" placeholder="1-10" style="width: 60px; text-align: center;">
+                        </td>
+                        <td>
+                            <select onchange="saveGradeInstant(${studentId}, this)" class="grade-type-sel" style="padding: 2px;">
+                                <option value="Klasės darbas" ${gradeInfo.type === 'Klasės darbas' ? 'selected' : ''}>Klasės darbas</option>
+                                <option value="Savarankiškas darbas" ${gradeInfo.type === 'Savarankiškas darbas' ? 'selected' : ''}>Savarankiškas darbas</option>
+                                <option value="Namų darbas" ${gradeInfo.type === 'Namų darbas' ? 'selected' : ''}>Namų darbas</option>
+                                <option value="Kontrolinis darbas" ${gradeInfo.type === 'Kontrolinis darbas' ? 'selected' : ''}>Kontrolinis darbas</option>
                             </select>
                         </td>
-                        <td data-label="Pažymys">
-                            <input type="text" name="grade_${s.user_id}" placeholder="1-10" style="width: 70px; padding: 6px; text-align: center;">
-                        </td>
-                        <td data-label="Tipas">
-                            <select name="type_${s.user_id}" class="grade-type" style="padding: 6px;">
-                                <option value="Klasės darbas">Klasės darbas</option>
-                                <option value="Savarankiškas darbas">Savarankiškas darbas</option>
-                                <option value="Namų darbas">Namų darbas</option>
-                                <option value="Kontrolinis darbas">Kontrolinis darbas</option>
-                            </select>
-                        </td>
-                        <td data-label="Komentaras">
-                            <input type="text" name="comment_${s.user_id}" placeholder="Komentaras..." style="width: 100%; padding: 6px;">
+                        <td>
+                            <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size:10px;" onclick="openCommentModal(${studentId}, '${s.name} ${s.surname}', '${gradeInfo.comment.replace(/'/g, "\\'")}')">
+                                💬 ${gradeInfo.comment ? 'Komentaras (yra)' : 'Pridėti komentarą'}
+                            </button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
 
-                card.style.display = 'block';
-            } catch (error) {
-                showToast('Klaida užkraunant mokinius.', 'error');
+            } catch (err) {
+                showToast('Klaida užkraunant pamokos duomenis.', 'error');
             }
         }
 
-        function applyTypeToAll() {
-            const selectedType = document.getElementById('applyAllType').value;
-            document.querySelectorAll('.grade-type').forEach(select => {
-                select.value = selectedType;
-            });
-        }
-
-        async function saveLessonJournal() {
-            const groupId = document.getElementById('group_select').value;
-            const date = document.getElementById('lesson_date').value;
-            const homeworkTask = document.getElementById('homework_task').value;
-
-            if (!groupId || !date) {
-                showToast("Pasirinkite grupę ir datą!", "error");
-                return;
-            }
-
-            const attendance = {};
-            const grades = {};
-
-            currentStudents.forEach(s => {
-                const attSelect = document.querySelector(`[name="status_${s.user_id}"]`);
-                const gradeInput = document.querySelector(`[name="grade_${s.user_id}"]`);
-                const typeSelect = document.querySelector(`[name="type_${s.user_id}"]`);
-                const commentInput = document.querySelector(`[name="comment_${s.user_id}"]`);
-
-                if (attSelect) attendance[s.user_id] = attSelect.value;
-                if (gradeInput && gradeInput.value.trim() !== '') {
-                    grades[s.user_id] = {
-                        grade: gradeInput.value.trim(),
-                        type: typeSelect ? typeSelect.value : 'Klasės darbas',
-                        comment: commentInput ? commentInput.value.trim() : ''
-                    };
-                }
-            });
-
-            const payload = {
-                group_id: groupId,
-                date: date,
-                attendance: attendance,
-                grades: grades,
-                homework_task: homeworkTask
-            };
+        async function setAttendance(studentId, status, btnElement) {
+            const row = btnElement.closest('tr');
+            row.querySelectorAll('.btn-att').forEach(b => { b.classList.remove('active-n', 'active-v'); });
+            
+            if (status === 'absent_unexcused') btnElement.classList.add('active-n');
+            if (status === 'late') btnElement.classList.add('active-v');
 
             try {
-                const response = await fetch(`${API_URL}/api/lesson-journal/save`, {
+                await fetch(`${API_URL}/api/lesson-journal/save-attendance`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        group_id: currentActiveLesson.group_id,
+                        student_id: studentId,
+                        date: currentActiveLesson.date,
+                        status: status
+                    })
                 });
+                showToast('Lankomumas atnaujintas', 'success');
+            } catch (err) {
+                showToast('Nepavyko išsaugoti lankomumo.', 'error');
+            }
+        }
 
-                const result = await response.json();
-                if (response.ok) {
-                    showToast("Pamokos žurnalas sėkmingai išsaugotas!", "success");
-                    document.getElementById('homework_task').value = '';
-                    // Galima išvalyti pažymių laukelius po sėkmingo išsaugojimo
-                    currentStudents.forEach(s => {
-                        const gInput = document.querySelector(`[name="grade_${s.user_id}"]`);
-                        if (gInput) gInput.value = '';
+        async function saveGradeInstant(studentId, inputElement) {
+            const row = inputElement.closest('tr');
+            const gradeVal = row.querySelector('input[type="text"]').value.trim();
+            const typeVal = row.querySelector('.grade-type-sel').value;
+
+            try {
+                await fetch(`${API_URL}/api/lesson-journal/save-grade`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        group_id: currentActiveLesson.group_id,
+                        student_id: studentId,
+                        date: currentActiveLesson.date,
+                        grade: gradeVal,
+                        type: typeVal,
+                        comment: inputElement.dataset.comment || ''
+                    })
+                });
+                if (gradeVal !== '') showToast('Pažymys įrašytas', 'success');
+            } catch (err) {
+                showToast('Klaida įrašant pažymį.', 'error');
+            }
+        }
+
+        function openCommentModal(studentId, studentName, currentComment) {
+            activeCommentStudentId = studentId;
+            document.getElementById('modalStudentName').textContent = studentName;
+            document.getElementById('modalCommentInput').value = currentComment;
+            document.getElementById('commentModal').style.display = 'flex';
+        }
+
+        function closeCommentModal() {
+            document.getElementById('commentModal').style.display = 'none';
+            activeCommentStudentId = null;
+        }
+
+        async function saveCommentModal() {
+            if (!activeCommentStudentId) return;
+            const commentText = document.getElementById('modalCommentInput').value.trim();
+            
+            // Surandame atitinkamą eilutę lentelėje
+            const rows = document.querySelectorAll('#journalTableBody tr');
+            let targetRow = null;
+            let targetStudentIdx = null;
+            
+            currentStudents.forEach((s, idx) => {
+                if (s.user_id === activeCommentStudentId) {
+                    targetStudentIdx = idx;
+                }
+            });
+
+            if (targetStudentIdx !== null) {
+                targetRow = rows[targetStudentIdx];
+                const gradeInput = targetRow.querySelector('input[type="text"]');
+                const gradeVal = gradeInput.value.trim();
+                const typeVal = targetRow.querySelector('.grade-type-sel').value;
+
+                // Išsaugome su nauju komentaru per API
+                try {
+                    await fetch(`${API_URL}/api/lesson-journal/save-grade`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            group_id: currentActiveLesson.group_id,
+                            student_id: activeCommentStudentId,
+                            date: currentActiveLesson.date,
+                            grade: gradeVal,
+                            type: typeVal,
+                            comment: commentText
+                        })
                     });
+                    showToast('Komentaras išsaugotas!', 'success');
+                    closeCommentModal();
+                    loadGroupStudentsAndJournalData(currentActiveLesson.group_id, currentActiveLesson.date);
+                } catch (err) {
+                    showToast('Klaida išsaugant komentarą.', 'error');
+                }
+            }
+        }
+
+        async function saveClassworkAndHomework() {
+            const classWork = document.getElementById('class_work_input').value.trim();
+            const homeworkTask = document.getElementById('homework_input').value.trim();
+
+            try {
+                const res = await fetch(`${API_URL}/api/lesson-journal/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        group_id: currentActiveLesson.group_id,
+                        date: currentActiveLesson.date,
+                        class_work: classWork,
+                        homework_task: homeworkTask
+                    })
+                });
+                if (res.ok) {
+                    showToast('Pamokos darbai ir namų darbai išsaugoti!', 'success');
                 } else {
-                    showToast(result.message || "Klaida išsaugant žurnalą.", "error");
+                    showToast('Klaida išsaugant.', 'error');
                 }
             } catch (err) {
-                showToast("Nepavyko prisijungti prie serverio.", "error");
+                showToast('Nepavyko pasiekti serverio.', 'error');
             }
         }
 

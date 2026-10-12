@@ -12,69 +12,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>Pažymiai</h1>
-
-        <div class="card" id="addGradeCard" style="display: none;">
-            <h2>Įrašyti naują pažymį</h2>
-
-            <form id="addGradeForm">
-                <label>Grupė</label>
-                <select name="group_id" id="group_select" onchange="loadStudentsByGroup()" required>
-                    <option value="">-- Pasirinkite grupę --</option>
-                </select>
-
-                <label>Mokinys</label>
-                <select name="student_id" id="student_select" required disabled>
-                    <option value="">-- Pirmiausia pasirinkite grupę --</option>
-                </select>
-
-                <label>Pažymys</label>
-                <input type="text" name="grade" placeholder="1-10" required>
-
-                <label>Tipas</label>
-                <select name="type" required>
-                    <option value="Savarankiškas darbas">Savarankiškas darbas</option>
-                    <option value="Laboratorinis darbas">Laboratorinis darbas</option>
-                    <option value="Kontrolinis darbas">Kontrolinis darbas</option>
-                    <option value="Projektinis darbas">Projektinis darbas</option>
-                    <option value="Teorinis darbas">Teorinis darbas</option>
-                    <option value="Klasės darbas">Klasės darbas</option>
-                    <option value="Namų darbas">Namų darbas</option>
-                </select>
-
-                <label>Data</label>
-                <input type="date" name="date" id="grade_date" required>
-
-                <label>Komentaras (neprivalomas)</label>
-                <textarea name="comment" rows="3" placeholder="Komentaras..."></textarea>
-
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Įrašyti</button>
-            </form>
-        </div>
+        <h1>Mano pažymiai</h1>
 
         <div class="card">
             <h2>Pažymių sąrašas</h2>
-
-            <!-- Filtravimo ir paieškos juosta -->
-            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 180px;">
-                    <label style="margin-top:0;">Filtruoti pagal klasę:</label>
-                    <select id="filter_class" onchange="filterGrades()">
-                        <option value="">-- Visos klasės --</option>
-                    </select>
-                </div>
-                <div style="flex: 2; min-width: 220px;">
-                    <label style="margin-top:0;">Paieška (mokinys / dalykas / tipas):</label>
-                    <input type="text" id="filter_search" placeholder="Įveskite mokinio vardą ar dalyką..." oninput="filterGrades()">
-                </div>
-            </div>
-
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr id="gradesTableHeader">
-                            <th>Mokinys</th>
-                            <th>Grupė</th>
+                        <tr>
+                            <th>Grupė / Dalykas</th>
                             <th>Pažymys</th>
                             <th>Tipas</th>
                             <th>Data</th>
@@ -90,106 +36,22 @@
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
-    <script src="calendar.js"></script>
-    <script src="select.js"></script>
     <script>
-        let currentUser = {};
-        let allGrades = [];
-
         async function checkAuthAndInit() {
             try {
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
                 if (!response.ok) { window.location.href = '/'; return; }
-                currentUser = await response.json();
-                await initPage();
+                const currentUser = await response.json();
+
+                if (currentUser.role !== 'student') {
+                    showToast('Pažymių puslapis pasiekiamas tik mokiniams.', 'error');
+                    window.location.href = 'dashboard';
+                    return;
+                }
+
+                await loadGrades();
             } catch (err) {
                 window.location.href = '/';
-            }
-        }
-
-        async function initPage() {
-            if (currentUser.role === 'teacher') {
-                document.getElementById('addGradeCard').style.display = 'block';
-                setDefaultDate();
-                await loadTeacherGroups();
-            }
-
-            await loadClassesFilter();
-            await loadGrades();
-            initCalendarPickers();
-            initCustomSelects();
-        }
-
-        async function loadClassesFilter() {
-            try {
-                const response = await fetch(`${API_URL}/api/classes`, { credentials: 'include' });
-                const classes = await response.json();
-                const select = document.getElementById('filter_class');
-                classes.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c;
-                    opt.textContent = `${c} klasė`;
-                    select.appendChild(opt);
-                });
-            } catch (err) {}
-        }
-
-        function setDefaultDate() {
-            const now = new Date();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const dateInput = document.getElementById('grade_date');
-            if (dateInput) {
-                dateInput.value = `${now.getFullYear()}-${month}-${day}`;
-                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }
-
-        async function loadTeacherGroups() {
-            try {
-                const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
-                const groups = await response.json();
-                const select = document.getElementById('group_select');
-                select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
-
-                groups.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = g.group_id;
-                    opt.textContent = `${g.group_name} (${g.class} klasė)`;
-                    select.appendChild(opt);
-                });
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-            } catch (error) {
-                showToast('Klaida užkraunant grupes.', 'error');
-            }
-        }
-
-        async function loadStudentsByGroup() {
-            const groupId = document.getElementById('group_select').value;
-            const select = document.getElementById('student_select');
-
-            if (!groupId) {
-                select.innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
-                select.disabled = true;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
-                const students = await response.json();
-
-                select.innerHTML = '<option value="">-- Pasirinkite mokinį --</option>';
-                students.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.user_id;
-                    opt.textContent = `${s.name} ${s.surname}`;
-                    select.appendChild(opt);
-                });
-                select.disabled = false;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-            } catch (error) {
-                showToast('Klaida užkraunant mokinius.', 'error');
             }
         }
 
@@ -197,132 +59,29 @@
             try {
                 const response = await fetch(`${API_URL}/api/grades`, { credentials: 'include' });
                 if (response.status === 401) { window.location.href = '/'; return; }
-                allGrades = await response.json();
-                renderGrades(allGrades);
-            } catch (error) {
-                showToast('Klaida užkraunant pažymių sąrašą.', 'error');
-            }
-        }
+                const grades = await response.json();
+                const tbody = document.getElementById('gradesTableBody');
+                tbody.innerHTML = '';
 
-        function renderGrades(grades) {
-            const theader = document.getElementById('gradesTableHeader');
-            const tbody = document.getElementById('gradesTableBody');
-            tbody.innerHTML = '';
-
-            const showActions = currentUser.role === 'teacher';
-
-            if (showActions && !document.getElementById('actionsHeader')) {
-                const th = document.createElement('th');
-                th.id = 'actionsHeader';
-                th.textContent = 'Veiksmai';
-                theader.appendChild(th);
-            }
-
-            if (!Array.isArray(grades) || grades.length === 0) {
-                const colSpan = showActions ? 8 : 7;
-                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Pažymių nerasta.</td></tr>`;
-                return;
-            }
-
-            grades.forEach(g => {
-                const tr = document.createElement('tr');
-                const isGroupTeacher = g.group_teachers && g.group_teachers.includes(currentUser.user_id);
-
-                let rowHtml = `
-                    <td data-label="Mokinys"><strong>${g.student}</strong></td>
-                    <td data-label="Grupė">${g.group_display}</td>
-                    <td data-label="Pažymys"><span class="badge-grade">${g.grade}</span></td>
-                    <td data-label="Tipas">${g.type}</td>
-                    <td data-label="Data">${g.date}</td>
-                    <td data-label="Komentaras">${g.comment || '-'}</td>
-                    <td data-label="Mokytojas">${g.teacher || '-'}</td>
-                `;
-
-                if (showActions) {
-                    const actionsTd = isGroupTeacher 
-                        ? `<a href="edit_grade?id=${g.grade_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGrade(${g.grade_id}); return false;">Ištrinti</a>`
-                        : '<span style="color: #8a8d91;">Neturite teisių</span>';
-                    
-                    rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
+                if (!Array.isArray(grades) || grades.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="empty-row">Pažymių nerasta.</td></tr>`;
+                    return;
                 }
 
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function filterGrades() {
-            const filterClass = document.getElementById('filter_class').value;
-            const searchText = document.getElementById('filter_search').value.toLowerCase().trim();
-
-            const filtered = allGrades.filter(g => {
-                let match = true;
-                if (filterClass && !g.group_display.includes(`${filterClass} klasė`)) {
-                    match = false;
-                }
-                if (searchText) {
-                    const combined = `${g.student} ${g.group_display} ${g.type} ${g.comment}`.toLowerCase();
-                    if (!combined.includes(searchText)) match = false;
-                }
-                return match;
-            });
-
-            renderGrades(filtered);
-        }
-
-        document.addEventListener('submit', async function(e) {
-            if (e.target && e.target.id === 'addGradeForm') {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const payload = {
-                    student_id: formData.get('student_id'),
-                    group_id: formData.get('group_id'),
-                    grade: formData.get('grade'),
-                    type: formData.get('type'),
-                    date: formData.get('date'),
-                    comment: formData.get('comment')
-                };
-
-                try {
-                    const response = await fetch(`${API_URL}/api/grades/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        e.target.reset();
-                        setDefaultDate();
-                        document.getElementById('student_select').disabled = true;
-                        showToast("Pažymys sėkmingai įrašytas!", "success");
-                        loadGrades();
-                    } else {
-                        const errResult = await response.json();
-                        showToast(errResult.message || "Klaida įrašant pažymį.", "error");
-                    }
-                } catch (error) {
-                    showToast("Nepavyko prisijungti prie serverio.", "error");
-                }
-            }
-        });
-
-        async function deleteGrade(gradeId) {
-            if (!confirm('Ar tikrai norite ištrinti šį pažymį?')) return;
-            try {
-                const response = await fetch(`${API_URL}/api/grades/delete/${gradeId}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
+                grades.forEach(g => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="Grupė"><strong>${g.group_display}</strong></td>
+                        <td data-label="Pažymys"><span class="badge-grade" style="font-size:13px; color: var(--accent-blue);">${g.grade}</span></td>
+                        <td data-label="Tipas">${g.type}</td>
+                        <td data-label="Data">${g.date}</td>
+                        <td data-label="Komentaras">${g.comment || '-'}</td>
+                        <td data-label="Mokytojas">${g.teacher || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
                 });
-
-                if (response.ok) {
-                    showToast("Pažymys ištrintas.", "success");
-                    loadGrades();
-                } else {
-                    showToast("Klaida trinant pažymį.", "error");
-                }
             } catch (error) {
-                showToast("Nepavyko prisijungti prie serverio.", "error");
+                showToast('Klaida užkraunant pažymius.', 'error');
             }
         }
 

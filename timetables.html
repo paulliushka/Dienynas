@@ -14,10 +14,8 @@
     <div class="container">
         <h1>Tvarkaraštis</h1>
 
-        <!-- Mokytojo / Administratoriaus forma naujai pamokai suplanuoti -->
         <div class="card" id="addTimetableCard" style="display: none;">
             <h2>Pridėti pamoką į tvarkaraštį</h2>
-
             <form id="addTimetableForm">
                 <label>Grupė</label>
                 <select name="group_id" id="group_select" required>
@@ -51,11 +49,8 @@
             </form>
         </div>
 
-        <!-- Tvarkaraščio peržiūros kortelė -->
         <div class="card">
             <h2>Esamas tvarkaraštis</h2>
-
-            <!-- Filtravimo juosta -->
             <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 180px;">
                     <label style="margin-top:0;">Filtruoti pagal dieną:</label>
@@ -69,7 +64,7 @@
                     </select>
                 </div>
                 <div style="flex: 2; min-width: 220px;">
-                    <label style="margin-top:0;">Paieška (grupė / kabinetas / mokytojas):</label>
+                    <label style="margin-top:0;">Paieška:</label>
                     <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterTimetable()">
                 </div>
             </div>
@@ -114,7 +109,6 @@
                 document.getElementById('addTimetableCard').style.display = 'block';
                 await loadTeacherGroups();
             }
-
             await loadTimetable();
             initCustomSelects();
         }
@@ -125,14 +119,12 @@
                 const groups = await response.json();
                 const select = document.getElementById('group_select');
                 select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
-
                 groups.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = g.group_id;
                     opt.textContent = `${g.group_name} (${g.class} klasė)`;
                     select.appendChild(opt);
                 });
-                select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
                 showToast('Klaida užkraunant grupes.', 'error');
             }
@@ -155,7 +147,6 @@
             tbody.innerHTML = '';
 
             const showActions = currentUser.role === 'teacher' || currentUser.role === 'administrator';
-
             if (showActions && !document.getElementById('actionsHeader')) {
                 const th = document.createElement('th');
                 th.id = 'actionsHeader';
@@ -185,7 +176,6 @@
                     const actionsTd = isOwner 
                         ? `<a href="javascript:void(0);" onclick="deleteTimetableEntry(${t.timetable_id}); return false;">Ištrinti</a>`
                         : '<span style="color: #8a8d91;">Neturite teisių</span>';
-                    
                     rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
                 }
 
@@ -207,7 +197,6 @@
                 }
                 return match;
             });
-
             renderTimetable(filtered);
         }
 
@@ -229,10 +218,9 @@
                         credentials: 'include',
                         body: JSON.stringify(payload)
                     });
-
                     if (response.ok) {
                         e.target.reset();
-                        showToast("Pamoka sėkmingai pridėta į tvarkaraštį!", "success");
+                        showToast("Pamoka sėkmingai pridėta!", "success");
                         loadTimetable();
                     } else {
                         const errResult = await response.json();
@@ -245,13 +233,9 @@
         });
 
         async function deleteTimetableEntry(id) {
-            if (!confirm('Ar tikrai norite pašalinti šią pamoką iš tvarkaraščio?')) return;
+            if (!confirm('Ar tikrai norite pašalinti šią pamoką?')) return;
             try {
-                const response = await fetch(`${API_URL}/api/timetables/delete/${id}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
+                const response = await fetch(`${API_URL}/api/timetables/delete/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (response.ok) {
                     showToast("Pamoka pašalinta.", "success");
                     loadTimetable();

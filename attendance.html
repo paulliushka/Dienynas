@@ -14,10 +14,8 @@
     <div class="container">
         <h1>Lankomumas</h1>
 
-        <!-- Mokytojo forma lankomumui žymėti -->
         <div class="card" id="addAttendanceCard" style="display: none;">
             <h2>Žymėti lankomumą</h2>
-
             <form id="addAttendanceForm">
                 <label>Grupė</label>
                 <select name="group_id" id="group_select" onchange="loadStudentsByGroup()" required>
@@ -32,7 +30,7 @@
                 <label>Būsena</label>
                 <select name="status" required>
                     <option value="present">Dalyvauja</option>
-                    <option value="absent_unexcused">Praleista (be pateisinimo)</option>
+                    <option value="absent_unexcused">Praleista (Nebuvo)</option>
                     <option value="absent_excused">Pateisinta</option>
                     <option value="late">Vėluoja</option>
                 </select>
@@ -44,24 +42,21 @@
             </form>
         </div>
 
-        <!-- Lankomumo sąrašo kortelė -->
         <div class="card">
             <h2>Lankomumo įrašai</h2>
-
-            <!-- Filtravimo ir paieškos juosta -->
             <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 180px;">
                     <label style="margin-top:0;">Filtruoti pagal būseną:</label>
                     <select id="filter_status" onchange="filterAttendance()">
                         <option value="">-- Visos būsenos --</option>
                         <option value="present">Dalyvauja</option>
-                        <option value="absent_unexcused">Praleista (be pateisinimo)</option>
+                        <option value="absent_unexcused">Praleista</option>
                         <option value="absent_excused">Pateisinta</option>
                         <option value="late">Vėluoja</option>
                     </select>
                 </div>
                 <div style="flex: 2; min-width: 220px;">
-                    <label style="margin-top:0;">Paieška (mokinys / grupė / mokytojas):</label>
+                    <label style="margin-top:0;">Paieška:</label>
                     <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterAttendance()">
                 </div>
             </div>
@@ -85,7 +80,6 @@
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
-    <script src="calendar.js"></script>
     <script src="select.js"></script>
     <script>
         let currentUser = {};
@@ -94,10 +88,7 @@
         async function checkAuthAndInit() {
             try {
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
-                if (!response.ok) {
-                    window.location.href = '/';
-                    return;
-                }
+                if (!response.ok) { window.location.href = '/'; return; }
                 currentUser = await response.json();
                 await initPage();
             } catch (err) {
@@ -111,9 +102,7 @@
                 setDefaultDate();
                 await loadTeacherGroups();
             }
-
             await loadAttendance();
-            initCalendarPickers();
             initCustomSelects();
         }
 
@@ -124,7 +113,6 @@
             const dateInput = document.getElementById('attendance_date');
             if (dateInput) {
                 dateInput.value = `${now.getFullYear()}-${month}-${day}`;
-                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
         }
 
@@ -134,14 +122,12 @@
                 const groups = await response.json();
                 const select = document.getElementById('group_select');
                 select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
-
                 groups.forEach(g => {
                     const opt = document.createElement('option');
                     opt.value = g.group_id;
                     opt.textContent = `${g.group_name} (${g.class} klasė)`;
                     select.appendChild(opt);
                 });
-                select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
                 showToast('Klaida užkraunant grupes.', 'error');
             }
@@ -154,14 +140,12 @@
             if (!groupId) {
                 select.innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
                 select.disabled = true;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
                 return;
             }
 
             try {
                 const response = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
                 const students = await response.json();
-
                 select.innerHTML = '<option value="">-- Pasirinkite mokinį --</option>';
                 students.forEach(s => {
                     const opt = document.createElement('option');
@@ -170,7 +154,6 @@
                     select.appendChild(opt);
                 });
                 select.disabled = false;
-                select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
                 showToast('Klaida užkraunant mokinius.', 'error');
             }
@@ -198,10 +181,9 @@
 
             records.forEach(att => {
                 const tr = document.createElement('tr');
-
                 let statusBadge = '';
                 if (att.status === 'present') statusBadge = '<span style="color: #70e000;">Dalyvauja</span>';
-                else if (att.status === 'absent_unexcused') statusBadge = '<span style="color: #ff3b30; font-weight: bold;">Praleista (be pateisinimo)</span>';
+                else if (att.status === 'absent_unexcused') statusBadge = '<span style="color: #ff3b30; font-weight: bold;">Praleista</span>';
                 else if (att.status === 'absent_excused') statusBadge = '<span style="color: #4cd964;">Pateisinta</span>';
                 else if (att.status === 'late') statusBadge = '<span style="color: #ffcc00;">Vėluoja</span>';
 
@@ -229,7 +211,6 @@
                 }
                 return match;
             });
-
             renderAttendance(filtered);
         }
 
@@ -251,7 +232,6 @@
                         credentials: 'include',
                         body: JSON.stringify(payload)
                     });
-
                     if (response.ok) {
                         e.target.reset();
                         setDefaultDate();

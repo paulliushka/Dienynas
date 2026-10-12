@@ -12,51 +12,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>Namų darbai</h1>
-
-        <div class="card" id="addAssignmentCard" style="display: none;">
-            <h2>Paskirti naują namų darbą</h2>
-
-            <form id="addAssignmentForm">
-                <label>Grupė</label>
-                <select name="group_id" id="group_select" required>
-                    <option value="">-- Pasirinkite grupę --</option>
-                </select>
-
-                <label>Užduoties aprašymas</label>
-                <textarea name="task" rows="3" placeholder="Užduoties aprašymas..." required></textarea>
-
-                <label>Atlikti iki</label>
-                <input type="date" name="due_date" id="due_date" required>
-
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Paskirti</button>
-            </form>
-        </div>
+        <h1>Namų darbai ir užduotys</h1>
 
         <div class="card">
-            <h2>Esami namų darbai</h2>
-            
-            <!-- Filtravimo juosta -->
-            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 180px;">
-                    <label style="margin-top:0;">Filtruoti pagal datą (nuo):</label>
-                    <input type="date" id="filter_date_from" onchange="filterAssignments()">
-                </div>
-                <div style="flex: 1; min-width: 180px;">
-                    <label style="margin-top:0;">Filtruoti pagal datą (iki):</label>
-                    <input type="date" id="filter_date_to" onchange="filterAssignments()">
-                </div>
-                <div style="flex: 2; min-width: 200px;">
-                    <label style="margin-top:0;">Paieška (pagal tekstą arba grupę):</label>
-                    <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterAssignments()">
-                </div>
-            </div>
-
+            <h2>Esamos užduotys</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr id="assignmentsTableHeader">
-                            <th>Grupė</th>
+                        <tr>
+                            <th>Grupė / Dalykas</th>
                             <th>Užduotis</th>
                             <th>Atlikti iki</th>
                             <th>Mokytojas</th>
@@ -70,69 +34,22 @@
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
-    <script src="calendar.js"></script>
-    <script src="select.js"></script>
     <script>
-        let currentUser = {};
-        let allAssignments = [];
-
         async function checkAuthAndInit() {
             try {
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
-                if (!response.ok) {
-                    window.location.href = '/';
+                if (!response.ok) { window.location.href = '/'; return; }
+                const currentUser = await response.json();
+
+                if (currentUser.role !== 'student') {
+                    showToast('Namų darbų puslapis pasiekiamas tik mokiniams.', 'error');
+                    window.location.href = 'dashboard';
                     return;
                 }
-                currentUser = await response.json();
-                await initPage();
+
+                await loadAssignments();
             } catch (err) {
                 window.location.href = '/';
-            }
-        }
-
-        function setDefaultDate() {
-            const now = new Date();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const dateInput = document.getElementById('due_date');
-            if (dateInput) {
-                dateInput.value = `${now.getFullYear()}-${month}-${day}`;
-                dateInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        }
-
-        async function initPage() {
-            if (currentUser.role === 'teacher') {
-                document.getElementById('addAssignmentCard').style.display = 'block';
-                setDefaultDate();
-                await loadTeacherGroups();
-            }
-
-            await loadAssignments();
-            initCalendarPickers();
-            initCustomSelects();
-        }
-
-        async function loadTeacherGroups() {
-            try {
-                const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
-                if (response.status === 401) { window.location.href = '/'; return; }
-                const groups = await response.json();
-
-                const select = document.getElementById('group_select');
-                select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
-
-                if (Array.isArray(groups)) {
-                    groups.forEach(g => {
-                        const opt = document.createElement('option');
-                        opt.value = g.group_id;
-                        opt.textContent = `${g.group_name} (${g.class} klasė)`;
-                        select.appendChild(opt);
-                    });
-                }
-                select.dispatchEvent(new Event('change', { bubbles: true }));
-            } catch (error) {
-                showToast('Klaida užkraunant grupes.', 'error');
             }
         }
 
@@ -140,126 +57,27 @@
             try {
                 const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
                 if (response.status === 401) { window.location.href = '/'; return; }
-                allAssignments = await response.json();
+                const assignments = await response.json();
+                const tbody = document.getElementById('assignmentsTableBody');
+                tbody.innerHTML = '';
 
-                renderAssignments(allAssignments);
+                if (!Array.isArray(assignments) || assignments.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty-row">Namų darbų nerasta.</td></tr>`;
+                    return;
+                }
+
+                assignments.forEach(assign => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="Grupė"><strong>${assign.group_display}</strong></td>
+                        <td data-label="Užduotis">${assign.task}</td>
+                        <td data-label="Atlikti iki" style="color: var(--accent-blue); font-weight: bold;">${assign.due_date}</td>
+                        <td data-label="Mokytojas">${assign.teacher || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
             } catch (error) {
                 showToast('Klaida užkraunant namų darbus.', 'error');
-            }
-        }
-
-        function renderAssignments(data) {
-            const theader = document.getElementById('assignmentsTableHeader');
-            const tbody = document.getElementById('assignmentsTableBody');
-            tbody.innerHTML = '';
-
-            const showActions = currentUser.role === 'teacher';
-
-            if (showActions && !document.getElementById('actionsHeader')) {
-                const th = document.createElement('th');
-                th.id = 'actionsHeader';
-                th.textContent = 'Veiksmai';
-                theader.appendChild(th);
-            }
-
-            if (!Array.isArray(data) || data.length === 0) {
-                const colSpan = showActions ? 5 : 4;
-                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="empty-row">Namų darbų nerasta.</td></tr>`;
-                return;
-            }
-
-            data.forEach(assign => {
-                const tr = document.createElement('tr');
-                const isGroupTeacher = assign.group_teachers && assign.group_teachers.includes(currentUser.user_id);
-
-                let rowHtml = `
-                    <td data-label="Grupė"><strong>${assign.group_display}</strong></td>
-                    <td data-label="Užduotis">${assign.task}</td>
-                    <td data-label="Atlikti iki">${assign.due_date}</td>
-                    <td data-label="Mokytojas">${assign.teacher || '-'}</td>
-                `;
-
-                if (showActions) {
-                    const actionsTd = isGroupTeacher 
-                        ? `<a href="edit_assignment?id=${assign.assignment_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteAssignment(${assign.assignment_id}); return false;">Ištrinti</a>`
-                        : '<span style="color: #8a8d91;">Neturite teisių</span>';
-                    
-                    rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
-                }
-
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function filterAssignments() {
-            const dateFrom = document.getElementById('filter_date_from').value;
-            const dateTo = document.getElementById('filter_date_to').value;
-            const searchText = document.getElementById('filter_search').value.toLowerCase().trim();
-
-            const filtered = allAssignments.filter(a => {
-                let match = true;
-                if (dateFrom && a.due_date < dateFrom) match = false;
-                if (dateTo && a.due_date > dateTo) match = false;
-                if (searchText) {
-                    const combined = `${a.group_display} ${a.task} ${a.teacher}`.toLowerCase();
-                    if (!combined.includes(searchText)) match = false;
-                }
-                return match;
-            });
-
-            renderAssignments(filtered);
-        }
-
-        document.addEventListener('submit', async function(e) {
-            if (e.target && e.target.id === 'addAssignmentForm') {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const payload = {
-                    group_id: formData.get('group_id'),
-                    task: formData.get('task'),
-                    due_date: formData.get('due_date')
-                };
-
-                try {
-                    const response = await fetch(`${API_URL}/api/assignments/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (response.ok) {
-                        e.target.reset();
-                        setDefaultDate();
-                        showToast("Namų darbas sėkmingai paskirtas!", "success");
-                        loadAssignments();
-                    } else {
-                        const errResult = await response.json();
-                        showToast(errResult.message || "Klaida pridedant namų darbą.", "error");
-                    }
-                } catch (error) {
-                    showToast("Nepavyko prisijungti prie serverio.", "error");
-                }
-            }
-        });
-
-        async function deleteAssignment(assignmentId) {
-            if (!confirm('Ar tikrai norite ištrinti šį namų darbą?')) return;
-            try {
-                const response = await fetch(`${API_URL}/api/assignments/delete/${assignmentId}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    showToast("Namų darbas ištrintas.", "success");
-                    loadAssignments();
-                } else {
-                    showToast("Klaida trinant namų darbą.", "error");
-                }
-            } catch (error) {
-                showToast("Nepavyko prisijungti prie serverio.", "error");
             }
         }
 
