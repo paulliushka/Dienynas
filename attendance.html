@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus</title>
+    <title>Mokslus - Lankomumas</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
     <link rel="stylesheet" href="static/styles/style.css">
@@ -18,8 +18,8 @@
 
         <div class="card">
             <h2>Lankomumo įrašai</h2>
-            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 180px;">
+            <div class="grid-2-cols" style="margin-bottom: 12px;">
+                <div>
                     <label style="margin-top:0;">Filtruoti pagal būseną:</label>
                     <select id="filter_status" onchange="filterAttendance()">
                         <option value="">-- Visos būsenos --</option>
@@ -29,7 +29,7 @@
                         <option value="late">Vėluoja</option>
                     </select>
                 </div>
-                <div style="flex: 2; min-width: 220px;">
+                <div>
                     <label style="margin-top:0;">Paieška:</label>
                     <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterAttendance()">
                 </div>
@@ -55,16 +55,22 @@
     </div>
 
     <script>
-        let currentUser = {};
         let allAttendance = [];
 
         async function checkAuthAndInit() {
             try {
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
                 if (!response.ok) { window.location.href = '/'; return; }
-                currentUser = await response.json();
+                const currentUser = await response.json();
+
+                if (currentUser.role !== 'student') {
+                    showToast('Puslapis pasiekiamas tik mokiniams.', 'error');
+                    window.location.href = 'dashboard';
+                    return;
+                }
+
                 await loadAttendance();
-                initCustomSelects();
+                if (typeof initCustomSelects === 'function') initCustomSelects();
             } catch (err) {
                 window.location.href = '/';
             }
@@ -77,7 +83,7 @@
                 allAttendance = await response.json();
                 renderAttendance(allAttendance);
             } catch (error) {
-                showToast('Klaida užkraunant lankomumą.', 'error');
+                showToast('Nepavyko užkrauti lankomumo.', 'error');
             }
         }
 

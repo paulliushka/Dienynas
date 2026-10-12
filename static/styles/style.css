@@ -105,7 +105,7 @@ label {
 }
 
 /* ==========================================================================
-   4. ĮVESTIES LAUKAI
+   4. ĮVESTIES LAUKAI (FORMOS IR TOBULAI SUSIGLAUDŽIANTYS FILTRAI)
    ========================================================================== */
 input[type="text"],
 input[type="password"],
@@ -140,6 +140,38 @@ textarea:focus {
     box-shadow: 0 0 0 1px var(--accent-blue) !important;
     z-index: 5;
     position: relative;
+}
+
+/* Paieškos ir filtravimo juosta, kur visi elementai (įskaitant kalendorius ir custom select wrapperius) idealiai liečiasi be tarpų */
+.card div[style*="display: flex"] {
+    display: flex !important;
+    gap: 0 !important;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.card div[style*="display: flex"] > div,
+.card div[style*="display: flex"] > input,
+.card div[style*="display: flex"] > select,
+.card div[style*="display: flex"] > .custom-calendar-wrapper,
+.card div[style*="display: flex"] > .custom-select-wrapper {
+    margin-right: -1px !important;
+    margin-bottom: 0 !important;
+    flex: 1;
+    min-width: 160px;
+}
+
+.card div[style*="display: flex"] .custom-calendar-wrapper,
+.card div[style*="display: flex"] .custom-select-wrapper {
+    width: 100% !important;
+}
+
+.card div[style*="display: flex"] input,
+.card div[style*="display: flex"] select,
+.card div[style*="display: flex"] .custom-calendar-input,
+.card div[style*="display: flex"] .custom-select-trigger {
+    border-radius: 0 !important;
+    height: 28px !important;
 }
 
 /* ==========================================================================
@@ -260,7 +292,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   6. DASHBOARD IR KORTELĖS
+   6. DASHBOARD (VIRŠUTINĖ JUOSTA IR PROFILIS)
    ========================================================================== */
 .dashboard-header {
     display: flex;
@@ -328,6 +360,33 @@ textarea:focus {
     text-decoration: none !important;
 }
 
+.nav-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 2px;
+    background: #3a3b3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-blue);
+    margin-bottom: 12px;
+    font-size: 18px;
+    border: 1px solid var(--border-light);
+}
+
+.nav-card h3 {
+    color: var(--accent-blue);
+    font-size: 13px;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.nav-card p {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
 .logout-btn {
     background: linear-gradient(to bottom, #e06d6d 0%, #c9302c 100%);
     color: white;
@@ -349,7 +408,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   7. SĄRAŠAI IR LENTELĖS
+   7. SĄRAŠAI IR MOKINIŲ PASIRINKIMO DĖŽUTĖS
    ========================================================================== */
 .scroll-box {
     max-height: 160px;
@@ -377,6 +436,9 @@ textarea:focus {
     cursor: pointer;
 }
 
+/* ==========================================================================
+   8. LENTELĖS
+   ========================================================================== */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -423,59 +485,309 @@ tr:hover {
 }
 
 /* ==========================================================================
-   8. PAGALBINĖS KLASĖS (UTILITY CLASSES)
+   9. REGISTRACIJOS KODŲ SPALVOS (STATUSAS)
    ========================================================================== */
-.mt-15 {
-    margin-top: 15px !important;
+.reg-code-unused {
+    color: var(--success-text);
+    background-color: var(--success-bg);
+    border: 1px solid var(--success-border);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 11px;
+    display: inline-block;
 }
 
-.mb-8 {
-    margin-bottom: 8px !important;
+.reg-code-used {
+    color: var(--danger-text);
+    background-color: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 11px;
+    display: inline-block;
 }
 
-.mb-20 {
-    margin-bottom: 20px !important;
+/* ==========================================================================
+   10. ŽENKLIUKAI IR NUORODOS
+   ========================================================================== */
+.badge-owner {
+    background-color: #2a2b2c;
+    color: var(--accent-blue);
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-weight: bold;
+    margin-left: 4px;
+    border: 1px solid var(--border-color);
 }
 
-.d-none {
+.badge-grade {
+    font-weight: bold;
+    color: var(--accent-blue);
+}
+
+a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   11. CUSTOM DROPDOWN IR KALENDORIUS
+   ========================================================================== */
+.custom-calendar-wrapper {
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-inner-spin-button {
     display: none !important;
+    -webkit-appearance: none !important;
 }
 
-.info-panel {
-    background: var(--bg-input);
+.custom-calendar-input {
+    cursor: pointer !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%234a90e2' viewBox='0 0 24 24'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 8px center !important;
+    background-size: 14px 14px !important;
+    padding-right: 28px !important;
+}
+
+.custom-select-trigger {
+    width: 100%;
+    height: 28px;
+    padding: 0 28px 0 8px;
+    border: 1px solid #555555;
+    border-radius: 0;
+    font-size: 11px;
+    color: #ffffff;
+    background-color: var(--bg-input);
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.custom-select-trigger:hover {
+    border-color: var(--accent-blue);
+}
+
+.custom-select-arrow {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    margin-top: -3px;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--accent-blue);
+}
+
+.custom-calendar-popup,
+.custom-select-options {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: 1000;
+    width: 240px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--accent-blue);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.custom-calendar-popup {
     padding: 10px;
-    margin-bottom: 15px;
+}
+
+.custom-select-options {
+    max-height: 180px;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.custom-calendar-popup.show,
+.custom-select-wrapper.open .custom-select-options {
+    display: block;
+}
+
+.custom-select-option {
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.custom-select-option:hover {
+    background-color: var(--accent-blue);
+    color: #ffffff;
+}
+
+.custom-select-option.selected {
+    background-color: #357abd;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    background: #2a2b2c;
+    padding: 4px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.calendar-title {
+    font-weight: bold;
+    color: var(--accent-blue);
+    font-size: 11px;
+}
+
+.calendar-nav-btn {
+    background: var(--bg-input);
     border: 1px solid var(--border-light);
+    color: var(--accent-blue);
+    border-radius: 2px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 11px;
 }
 
-.grid-2-cols {
+.calendar-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+}
+
+.calendar-day-head {
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    padding-bottom: 2px;
+}
+
+.calendar-day {
+    padding: 4px 0;
+    font-size: 11px;
+    color: var(--text-primary);
+    border: 1px solid #333435;
+    cursor: pointer;
+}
+
+.calendar-day:hover:not(.empty) {
+    background-color: #2c2d2e;
+    color: var(--accent-blue);
+}
+
+.calendar-day.today {
+    border: 1px solid var(--accent-blue);
+    font-weight: bold;
+}
+
+.calendar-day.selected {
+    background-color: var(--accent-blue) !important;
+    color: #ffffff !important;
+}
+
+/* ==========================================================================
+   12. PAMOKŲ DIENŲ KORTELĖS IR MODALINIAI LANGAI (LESSONS.HTML)
+   ========================================================================== */
+.day-section {
     margin-bottom: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 12px;
 }
-
-.grid-2-cols-gap10 {
+.day-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--accent-blue);
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 4px;
+}
+.lesson-grid-list {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 10px;
 }
-
-.flex-actions-mt15 {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+.lesson-item-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+.lesson-item-card:hover {
+    border-color: var(--accent-blue);
+    background: #2a2b2c;
 }
 
-.flex-gap-4 {
-    display: flex;
-    gap: 4px;
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid var(--accent-blue);
+    padding: 20px;
+    width: 360px;
+    max-width: 90%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
 }
 
-.text-muted-italic {
-    color: #8a8d91;
-    font-style: italic;
+/* ==========================================================================
+   13. CENTRUOTI PUSLAPIAI (LOGIN, REGISTER, 404)
+   ========================================================================== */
+.centered-page-body,
+.error-page-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-main);
     margin: 0;
+}
+
+.register-card,
+.error-card {
+    max-width: 420px;
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 12px;
 }
 
 .readonly-input {
@@ -484,8 +796,35 @@ tr:hover {
     cursor: not-allowed;
 }
 
+.step-2 {
+    display: none;
+}
+
+.error-code {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--accent-blue);
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.error-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.error-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
 /* ==========================================================================
-   9. TOAST PRANEŠIMAI
+   14. TOAST / PRANEŠIMŲ SISTEMA (2010s DARK GLOSSY STYLE)
    ========================================================================== */
 #toast-container {
     position: fixed;
@@ -524,4 +863,54 @@ tr:hover {
     background: linear-gradient(to bottom, #5cb85c 0%, #4cae4c 100%);
     border-color: #398439;
     color: #ffffff;
+}
+
+.toast-info {
+    background: linear-gradient(to bottom, #5b8bd0 0%, #2d65b5 100%);
+    border-color: #1a4480;
+    color: #ffffff;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+    opacity: 0.8;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   15. ADAPTYVUMAS MOBILIESIEMS (RESPONSIVE)
+   ========================================================================== */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    .container {
+        width: 100%;
+        margin: 0;
+        padding: 8px;
+    }
+
+    .dashboard-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+
+    .grid-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    .btn {
+        width: 100%;
+    }
 }

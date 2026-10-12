@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus</title>
+    <title>Mokslus - Grupės</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
     <link rel="stylesheet" href="static/styles/style.css">
@@ -35,28 +35,27 @@
 
                 <label>Pasirinkite mokinius</label>
                 <div>
-                    <button type="button" class="btn btn-secondary" onclick="selectAllNewGroupStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
+                    <button type="button" class="btn btn-secondary mb-8" onclick="selectAllNewGroupStudents()">Pasirinkti visus mokinius</button>
                     <div id="students_container" class="scroll-box">
-                        <p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>
+                        <p class="text-muted-italic">Pirmiausia pasirinkite klasę...</p>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Sukurti</button>
+                <button type="submit" class="btn btn-primary mt-15">Sukurti</button>
             </form>
         </div>
 
         <div class="card">
             <h2>Esamos grupės</h2>
 
-            <!-- Paieškos ir filtravimo juosta -->
-            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 180px;">
+            <div class="grid-2-cols" style="margin-bottom: 12px;">
+                <div>
                     <label style="margin-top:0;">Filtruoti pagal klasę:</label>
                     <select id="filter_class" onchange="filterGroups()">
                         <option value="">-- Visos klasės --</option>
                     </select>
                 </div>
-                <div style="flex: 2; min-width: 220px;">
+                <div>
                     <label style="margin-top:0;">Paieška (grupė / mokytojas / mokinys):</label>
                     <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterGroups()">
                 </div>
@@ -91,6 +90,7 @@
                 if (!response.ok) { window.location.href = '/'; return; }
                 currentUser = await response.json();
                 if (currentUser.role === 'student') {
+                    showToast('Puslapis pasiekiamas tik mokytojams.', 'error');
                     window.location.href = 'dashboard';
                     return;
                 }
@@ -111,7 +111,7 @@
 
             await loadClassesFilter();
             await loadGroups();
-            initCustomSelects();
+            if (typeof initCustomSelects === 'function') initCustomSelects();
         }
 
         async function loadClasses() {
@@ -129,7 +129,7 @@
                 });
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                showToast("Klaida užkraunant klases.", "error");
+                showToast("Nepavyko užkrauti klasių.", "error");
             }
         }
 
@@ -171,7 +171,7 @@
                     container.appendChild(label);
                 });
             } catch (error) {
-                showToast("Klaida užkraunant mokytojus.", "error");
+                showToast("Nepavyko užkrauti mokytojų.", "error");
             }
         }
 
@@ -181,7 +181,7 @@
             studentsContainer.innerHTML = "";
 
             if (!className) {
-                studentsContainer.innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
+                studentsContainer.innerHTML = '<p class="text-muted-italic">Pirmiausia pasirinkite klasę...</p>';
                 return;
             }
 
@@ -190,7 +190,7 @@
                 const data = await response.json();
 
                 if (data.length === 0) {
-                    studentsContainer.innerHTML = "<p style='color: #8a8d91; font-style: italic; margin:0;'>Šioje klasėje mokinių nėra.</p>";
+                    studentsContainer.innerHTML = "<p class='text-muted-italic'>Šioje klasėje mokinių nėra.</p>";
                     return;
                 }
 
@@ -207,7 +207,7 @@
                     studentsContainer.appendChild(label);
                 });
             } catch (error) {
-                showToast("Klaida užkraunant mokinius.", "error");
+                showToast("Nepavyko užkrauti mokinių.", "error");
             }
         }
 
@@ -222,7 +222,7 @@
                 allGroups = await response.json();
                 renderGroups(allGroups);
             } catch (error) {
-                showToast("Klaida užkraunant grupes.", "error");
+                showToast("Nepavyko užkrauti grupių.", "error");
             }
         }
 
@@ -241,7 +241,7 @@
                 const isOwner = isTeacherMember || currentUser.role === 'administrator';
 
                 const ownerBadge = isTeacherMember ? '<span class="badge-owner">Mano grupė</span>' : '';
-                const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span style="color: #8a8d91; font-style: italic;">Grupėje mokinių nėra.</span>';
+                const studentsText = (g.student_names && g.student_names.length > 0) ? g.student_names.join(", ") : '<span class="text-muted-italic">Grupėje mokinių nėra.</span>';
 
                 let rowHtml = `
                     <td data-label="Grupė"><strong>${g.group_name}</strong> ${ownerBadge}</td>
@@ -252,9 +252,9 @@
 
                 let actionsTd = '';
                 if (isOwner) {
-                    actionsTd = `<a href="edit_group?id=${g.group_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>`;
+                    actionsTd = `<a href="editing/edit_group?id=${g.group_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteGroup(${g.group_id}); return false;">Ištrinti</a>`;
                 } else {
-                    actionsTd = '<span style="color: #8a8d91;">Neturite teisių</span>';
+                    actionsTd = '<span style="color: var(--text-muted);">Neturite teisių</span>';
                 }
                 rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
 
@@ -288,7 +288,7 @@
             const selectedTeachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
 
             if (selectedTeachers.length === 0 && currentUser.role === 'administrator') {
-                showToast("Pasirinkite bent vieną mokytoją!", "error");
+                showToast("Pasirinkite bent vieną mokytoją.", "error");
                 return;
             }
 
@@ -311,13 +311,13 @@
                     this.reset();
                     const classSelect = document.getElementById('class_select');
                     classSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                    document.getElementById("students_container").innerHTML = '<p style="color: #8a8d91; font-style: italic; margin: 0;">Pirmiausia pasirinkite klasę...</p>';
+                    document.getElementById("students_container").innerHTML = '<p class="text-muted-italic">Pirmiausia pasirinkite klasę...</p>';
                     await loadTeachers();
                     showToast("Grupė sėkmingai sukurta!", "success");
                     loadGroups();
                 } else {
                     const result = await response.json();
-                    showToast(result.message || "Klaida kuriant grupę.", "error");
+                    showToast(result.message || "Nepavyko sukurti grupės.", "error");
                 }
             } catch (error) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");
@@ -336,7 +336,7 @@
                     showToast("Grupė ištrinta.", "success");
                     loadGroups();
                 } else {
-                    showToast("Klaida trinant grupę.", "error");
+                    showToast("Nepavyko ištrinti grupės.", "error");
                 }
             } catch (error) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");
