@@ -36,7 +36,6 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
@@ -47,9 +46,7 @@
                     credentials: 'include',
                     body: JSON.stringify(data)
                 });
-
                 const result = await response.json();
-
                 if (response.ok) {
                     window.location.href = 'dashboard';
                 } else {
