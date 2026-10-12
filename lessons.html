@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Pamokų žurnalas</h1>
+        <h1>Pamokų žurnalas (pasirinkimas)</h1>
 
         <!-- Savaitės pasirinkimo juosta -->
         <div class="card" id="scheduleViewCard">
@@ -25,75 +25,12 @@
             <div id="daysScheduleContainer"></div>
         </div>
 
-        <!-- Konkrečios pamokos žurnalo redagavimo kortelė -->
-        <div class="card" id="journalCard" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h2 id="journalTitle" style="margin:0;">Pamokos žurnalas</h2>
-                <button type="button" class="btn btn-secondary" onclick="backToScheduleList()">← Atgal į savaitės tvarkaraštį</button>
-            </div>
-
-            <div style="background: var(--bg-input); padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-light);">
-                <p><strong>Diena:</strong> <span id="lblDay"></span> | <strong>Data:</strong> <span id="lblDate"></span> | <strong>Grupė:</strong> <span id="lblGroup"></span> | <strong>Laikas:</strong> <span id="lblOrder"></span> | <strong>Kabinetas:</strong> <span id="lblClassroom"></span></p>
-            </div>
-
-            <!-- Klasės darbas ir namų darbas su terminu -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                <div>
-                    <label>Klasės darbas / Tema</label>
-                    <textarea id="class_work_input" rows="3" placeholder="Įveskite klasės darbą..."></textarea>
-                </div>
-                <div>
-                    <label>Namų darbai</label>
-                    <textarea id="homework_input" rows="2" placeholder="Įveskite namų darbų užduotį..." style="margin-bottom: 8px;"></textarea>
-                    
-                    <label>Atlikti iki (Terminas)</label>
-                    <div class="custom-calendar-wrapper">
-                        <input type="date" id="homework_due_date" class="custom-calendar-input" required>
-                    </div>
-                </div>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="saveClassworkAndHomework()" style="margin-bottom: 20px;">Išsaugoti klasės ir namų darbus</button>
-
-            <!-- Mokinių sąrašas -->
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nr. Mokinys</th>
-                            <th>Lankomumas (N / V)</th>
-                            <th>Pažymys (1-10)</th>
-                            <th>Tipas</th>
-                            <th>Komentaras</th>
-                        </tr>
-                    </thead>
-                    <tbody id="journalTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
 
-    <!-- Komentaro iššokantis langas (Modal) -->
-    <div id="commentModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 style="color: var(--accent-blue); margin-bottom: 10px;">Įvesti pažymio komentarą</h3>
-            <p id="modalStudentName" style="margin-bottom: 8px; font-weight: bold;"></p>
-            <textarea id="modalCommentInput" rows="3" placeholder="Įrašykite komentarą (nebūtina)..." style="width: 100%; margin-bottom: 12px;"></textarea>
-            <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button type="button" class="btn btn-secondary" onclick="closeCommentModal()">Atšaukti</button>
-                <button type="button" class="btn btn-primary" onclick="saveCommentModal()">Išsaugoti</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="calendar.js"></script>
     <script>
         let currentUser = {};
         let allTimetables = [];
-        let currentActiveLesson = null;
-        let currentStudents = [];
-        let activeCommentStudentId = null;
         let weekOffset = 0;
 
         async function checkAuthAndInit() {
@@ -108,7 +45,6 @@
                 }
 
                 await loadTimetablesData();
-                initCalendarPickers();
             } catch (err) {
                 window.location.href = '/';
             }
@@ -183,290 +119,19 @@
                         card.innerHTML = `
                             <strong>${t.group_display}</strong><br>
                             <span style="color: var(--accent-blue);">${t.lesson_order}</span><br>
-                            <span style="color: var(--text-secondary);">Kabinetas: ${t.classroom}</span><br>
+                            <span style="color: var(--text-secondary);">Kabinetas: ${t.classroom || '-'}</span><br>
                             <span style="color: var(--text-muted);">Mokytojas: ${t.teacher}</span>
                         `;
-                        card.onclick = () => openLessonJournal(t, dayObj.date);
+                        // Paspaudus eiti į atskirą edit_lesson.html puslapį su URI parametrais
+                        card.onclick = () => {
+                            window.location.href = `edit_lesson?group_id=${t.group_id}&date=${dayObj.date}`;
+                        };
                         listDiv.appendChild(card);
                     });
                     dayDiv.appendChild(listDiv);
                 }
                 container.appendChild(dayDiv);
             });
-        }
-
-        // Suranda kitos pamokos datą tai pačiai grupei tvarkaraštyje
-        function calculateNextLessonDate(groupId, currentDateStr) {
-            const currentDate = new Date(currentDateStr);
-            const daysOrder = ['Pirmadienis', 'Antradienis', 'Trečiadienis', 'Ketvirtadienis', 'Penktadienis'];
-            
-            // Filtruojame visus šios grupės tvarkaraščio įrašus
-            const groupTimetables = allTimetables.filter(t => t.group_id === groupId);
-            if (groupTimetables.length === 0) {
-                // Jei nerasta, numatome po 2 dienų
-                const next = new Date(currentDate);
-                next.setDate(next.getDate() + 2);
-                return next.toISOString().split('T')[0];
-            }
-
-            // Randame artimiausią sekančią dieną kalendoriuje (ieškome per ateinančias 14 dienų)
-            for (let i = 1; i <= 14; i++) {
-                const checkDate = new Date(currentDate);
-                checkDate.setDate(currentDate.getDate() + i);
-                const dayName = daysOrder[checkDate.getDay() - 1]; // Pirmadienis = 1
-                
-                if (dayName) {
-                    const matches = groupTimetables.some(t => t.day_of_week === dayName);
-                    if (matches) {
-                        const year = checkDate.getFullYear();
-                        const month = String(checkDate.getMonth() + 1).padStart(2, '0');
-                        const day = String(checkDate.getDate()).padStart(2, '0');
-                        return `${year}-${month}-${day}`;
-                    }
-                }
-            }
-
-            // Fallback: +2 dienos
-            const fallback = new Date(currentDate);
-            fallback.setDate(fallback.getDate() + 2);
-            return fallback.toISOString().split('T')[0];
-        }
-
-        async function openLessonJournal(timetableItem, exactDate) {
-            currentActiveLesson = { ...timetableItem, exact_date: exactDate };
-            document.getElementById('scheduleViewCard').style.display = 'none';
-            document.getElementById('journalCard').style.display = 'block';
-
-            document.getElementById('lblDay').textContent = timetableItem.day_of_week;
-            document.getElementById('lblDate').textContent = exactDate;
-            document.getElementById('lblGroup').textContent = timetableItem.group_display;
-            document.getElementById('lblOrder').textContent = timetableItem.lesson_order;
-            document.getElementById('lblClassroom').textContent = timetableItem.classroom;
-
-            // Automatiškai nustatome terminą kitai pamokai
-            const defaultDueDate = calculateNextLessonDate(timetableItem.group_id, exactDate);
-            document.getElementById('homework_due_date').value = defaultDueDate;
-
-            await loadGroupStudentsAndJournalData(timetableItem.group_id, exactDate);
-        }
-
-        function backToScheduleList() {
-            document.getElementById('journalCard').style.display = 'none';
-            document.getElementById('scheduleViewCard').style.display = 'block';
-            renderWeekDaysSchedule();
-        }
-
-        async function loadGroupStudentsAndJournalData(groupId, exactDate) {
-            const tbody = document.getElementById('journalTableBody');
-            tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Kraunami duomenys...</td></tr>`;
-
-            try {
-                const resStu = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
-                currentStudents = await resStu.json();
-
-                const resJ = await fetch(`${API_URL}/api/lesson-journal/data?group_id=${groupId}&date=${exactDate}`, { credentials: 'include' });
-                const journalData = await resJ.json();
-
-                document.getElementById('class_work_input').value = journalData.class_work || '';
-                document.getElementById('homework_input').value = journalData.homework || '';
-                if (journalData.homework_due_date) {
-                    document.getElementById('homework_due_date').value = journalData.homework_due_date;
-                }
-
-                tbody.innerHTML = '';
-                if (currentStudents.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="empty-row">Šioje grupėje mokinių nėra.</td></tr>`;
-                    return;
-                }
-
-                currentStudents.forEach((s, idx) => {
-                    const studentId = s.user_id;
-                    const attStatus = journalData.attendance[studentId] || ''; 
-                    const gradeInfo = journalData.grades[studentId] || { grade: '', type: 'Klasės darbas', comment: '' };
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><strong>${idx + 1}. ${s.name} ${s.surname}</strong></td>
-                        <td>
-                            <div style="display: flex; gap: 4px;">
-                                <button type="button" class="btn-att ${attStatus === 'absent_unexcused' ? 'active-n' : ''}" onclick="toggleAttendance(${studentId}, 'absent_unexcused', this)">N</button>
-                                <button type="button" class="btn-att ${attStatus === 'late' ? 'active-v' : ''}" onclick="toggleAttendance(${studentId}, 'late', this)">V</button>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="grade-btn-group" data-student-id="${studentId}">
-                                ${[1,2,3,4,5,6,7,8,9,10].map(n => `
-                                    <button type="button" class="btn-grade-num ${String(gradeInfo.grade) === String(n) ? 'active-grade' : ''}" onclick="toggleGrade(${studentId}, '${n}', this)">${n}</button>
-                                `).join('')}
-                            </div>
-                        </td>
-                        <td>
-                            <select class="grade-type-sel" style="padding: 2px;">
-                                <option value="Klasės darbas" ${gradeInfo.type === 'Klasės darbas' ? 'selected' : ''}>Klasės darbas</option>
-                                <option value="Savarankiškas darbas" ${gradeInfo.type === 'Savarankiškas darbas' ? 'selected' : ''}>Savarankiškas darbas</option>
-                                <option value="Namų darbas" ${gradeInfo.type === 'Namų darbas' ? 'selected' : ''}>Namų darbas</option>
-                                <option value="Kontrolinis darbas" ${gradeInfo.type === 'Kontrolinis darbas' ? 'selected' : ''}>Kontrolinis darbas</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size:10px;" onclick="openCommentModal(${studentId}, '${s.name} ${s.surname}', '${(gradeInfo.comment || '').replace(/'/g, "\\'")}')">
-                                💬 ${gradeInfo.comment ? 'Komentaras (yra)' : 'Pridėti komentarą'}
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-            } catch (err) {
-                showToast('Klaida užkraunant pamokos duomenis.', 'error');
-            }
-        }
-
-        async function toggleAttendance(studentId, status, btnElement) {
-            const isActive = btnElement.classList.contains('active-n') || btnElement.classList.contains('active-v');
-            const row = btnElement.closest('tr');
-            row.querySelectorAll('.btn-att').forEach(b => { b.classList.remove('active-n', 'active-v'); });
-
-            let newStatus = '';
-            if (!isActive) {
-                if (status === 'absent_unexcused') btnElement.classList.add('active-n');
-                if (status === 'late') btnElement.classList.add('active-v');
-                newStatus = status;
-            }
-
-            try {
-                await fetch(`${API_URL}/api/lesson-journal/save-attendance`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        group_id: currentActiveLesson.group_id,
-                        student_id: studentId,
-                        date: currentActiveLesson.exact_date,
-                        status: newStatus
-                    })
-                });
-                showToast(newStatus ? 'Lankomumas atnaujintas' : 'Lankomumas pašalintas', 'success');
-            } catch (err) {
-                showToast('Nepavyko išsaugoti lankomumo.', 'error');
-            }
-        }
-
-        async function toggleGrade(studentId, gradeVal, btnElement) {
-            const groupDiv = btnElement.closest('.grade-btn-group');
-            const row = btnElement.closest('tr');
-            const typeVal = row.querySelector('.grade-type-sel').value;
-            const isAlreadyActive = btnElement.classList.contains('active-grade');
-
-            groupDiv.querySelectorAll('.btn-grade-num').forEach(b => b.classList.remove('active-grade'));
-
-            let finalGrade = '';
-            if (!isAlreadyActive) {
-                btnElement.classList.add('active-grade');
-                finalGrade = gradeVal;
-            }
-
-            try {
-                await fetch(`${API_URL}/api/lesson-journal/save-grade`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        group_id: currentActiveLesson.group_id,
-                        student_id: studentId,
-                        date: currentActiveLesson.exact_date,
-                        grade: finalGrade,
-                        type: typeVal,
-                        comment: ''
-                    })
-                });
-                if (finalGrade !== '') {
-                    showToast(`Pažymys ${finalGrade} įrašytas`, 'success');
-                } else {
-                    showToast('Pažymys pašalintas', 'info');
-                }
-            } catch (err) {
-                showToast('Klaida įrašant pažymį.', 'error');
-            }
-        }
-
-        function openCommentModal(studentId, studentName, currentComment) {
-            activeCommentStudentId = studentId;
-            document.getElementById('modalStudentName').textContent = studentName;
-            document.getElementById('modalCommentInput').value = currentComment;
-            document.getElementById('commentModal').style.display = 'flex';
-        }
-
-        function closeCommentModal() {
-            document.getElementById('commentModal').style.display = 'none';
-            activeCommentStudentId = null;
-        }
-
-        async function saveCommentModal() {
-            if (!activeCommentStudentId) return;
-            const commentText = document.getElementById('modalCommentInput').value.trim();
-            const rows = document.querySelectorAll('#journalTableBody tr');
-            
-            let targetStudentIdx = null;
-            currentStudents.forEach((s, idx) => {
-                if (s.user_id === activeCommentStudentId) targetStudentIdx = idx;
-            });
-
-            if (targetStudentIdx !== null) {
-                const targetRow = rows[targetStudentIdx];
-                const activeGradeBtn = targetRow.querySelector('.btn-grade-num.active-grade');
-                const gradeVal = activeGradeBtn ? activeGradeBtn.textContent : '';
-                const typeVal = targetRow.querySelector('.grade-type-sel').value;
-
-                try {
-                    await fetch(`${API_URL}/api/lesson-journal/save-grade`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            group_id: currentActiveLesson.group_id,
-                            student_id: activeCommentStudentId,
-                            date: currentActiveLesson.exact_date,
-                            grade: gradeVal,
-                            type: typeVal,
-                            comment: commentText
-                        })
-                    });
-                    showToast('Komentaras išsaugotas!', 'success');
-                    closeCommentModal();
-                    loadGroupStudentsAndJournalData(currentActiveLesson.group_id, currentActiveLesson.exact_date);
-                } catch (err) {
-                    showToast('Klaida išsaugant komentarą.', 'error');
-                }
-            }
-        }
-
-        async function saveClassworkAndHomework() {
-            const classWork = document.getElementById('class_work_input').value.trim();
-            const homeworkTask = document.getElementById('homework_input').value.trim();
-            const homeworkDueDate = document.getElementById('homework_due_date').value;
-
-            try {
-                const res = await fetch(`${API_URL}/api/lesson-journal/save`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        group_id: currentActiveLesson.group_id,
-                        date: currentActiveLesson.exact_date,
-                        class_work: classWork,
-                        homework_task: homeworkTask,
-                        homework_due_date: homeworkDueDate
-                    })
-                });
-                if (res.ok) {
-                    showToast('Pamokos darbai ir namų darbai sėkmingai išsaugoti!', 'success');
-                } else {
-                    showToast('Klaida išsaugant.', 'error');
-                }
-            } catch (err) {
-                showToast('Nepavyko pasiekti serverio.', 'error');
-            }
         }
 
         window.onload = checkAuthAndInit;

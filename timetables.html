@@ -15,7 +15,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <h1>Pamokų tvarkaraštis</h1>
             <div id="adminTeacherActions" style="display: none;">
-                <a href="edit_timetable" class="btn btn-primary">+ Pridėti / Redaguoti tvarkaraštį</a>
+                <a href="edit_timetable" class="btn btn-primary">+ Pridėti tvarkaraščio įrašą</a>
             </div>
         </div>
 
@@ -26,11 +26,14 @@
     </div>
 
     <script>
+        let userRole = '';
+
         async function init() {
             try {
                 const resProfile = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
                 if (!resProfile.ok) { window.location.href = '/'; return; }
                 const user = await resProfile.json();
+                userRole = user.role;
 
                 if (user.role === 'teacher' || user.role === 'administrator') {
                     document.getElementById('adminTeacherActions').style.display = 'block';
@@ -53,7 +56,6 @@
 
             days.forEach(day => {
                 const dayItems = timetables.filter(t => t.day_of_week === day);
-                // Rūšiuojame pagal pamokos eiliškumą
                 dayItems.sort((a, b) => (a.lesson_order || '').localeCompare(b.lesson_order || ''));
 
                 const dayDiv = document.createElement('div');
@@ -69,6 +71,16 @@
                     dayItems.forEach(t => {
                         const card = document.createElement('div');
                         card.className = 'lesson-item-card';
+                        
+                        // Jei mokytojas arba admin - leidžiame paspausti ir redaguoti
+                        if (userRole === 'teacher' || userRole === 'administrator') {
+                            card.style.cursor = 'pointer';
+                            card.title = 'Spauskite norėdami redaguoti';
+                            card.onclick = () => {
+                                window.location.href = `edit_timetable?timetable_id=${t.timetable_id}`;
+                            };
+                        }
+
                         card.innerHTML = `
                             <strong>${t.group_display}</strong><br>
                             <span style="color: var(--accent-blue);">Pamoka: ${t.lesson_order}</span><br>

@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <label>Namų darbai</label>
-                    <textarea id="homework_input" rows="2" placeholder="Įveskite namų darbus..." style="margin-bottom: 8px;"></textarea>
+                    <textarea id="homework_input" rows="3" placeholder="Įveskite namų darbus..." style="margin-bottom: 8px;"></textarea>
                     
                     <label>Atlikti iki (Terminas)</label>
                     <input type="date" id="homework_due_date" style="height: 28px;">
@@ -49,13 +49,14 @@
             </div>
         </div>
 
-        <a href="lessons" class="btn-back">← Atgal į pamokas</a>
+        <a href="lessons" class="btn-back">← Atgal į pamokų sąrašą</a>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('group_id');
         const dateStr = urlParams.get('date');
+        let currentStudents = [];
 
         async function init() {
             if (!groupId || !dateStr) {
@@ -71,7 +72,7 @@
         async function loadLessonData() {
             try {
                 const resStu = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
-                const students = await resStu.json();
+                currentStudents = await resStu.json();
 
                 const resJ = await fetch(`${API_URL}/api/lesson-journal/data?group_id=${groupId}&date=${dateStr}`, { credentials: 'include' });
                 const jData = await resJ.json();
@@ -85,7 +86,12 @@
                 const tbody = document.getElementById('journalTableBody');
                 tbody.innerHTML = '';
 
-                students.forEach((s, idx) => {
+                if (currentStudents.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty-row">Šioje grupėje mokinių nėra.</td></tr>`;
+                    return;
+                }
+
+                currentStudents.forEach((s, idx) => {
                     const studentId = s.user_id;
                     const attStatus = jData.attendance[studentId] || '';
                     const gradeInfo = jData.grades[studentId] || { grade: '', type: 'Klasės darbas' };
@@ -127,13 +133,17 @@
             const homeworkDueDate = document.getElementById('homework_due_date').value;
 
             try {
-                await fetch(`${API_URL}/api/lesson-journal/save`, {
+                const res = await fetch(`${API_URL}/api/lesson-journal/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({ group_id: groupId, date: dateStr, class_work: classWork, homework_task: homeworkTask, homework_due_date: homeworkDueDate })
                 });
-                showToast('Sėkmingai išsaugota!', 'success');
+                if (res.ok) {
+                    showToast('Sėkmingai išsaugota!', 'success');
+                } else {
+                    showToast('Klaida išsaugant.', 'error');
+                }
             } catch (err) {
                 showToast('Nepavyko išsaugoti.', 'error');
             }

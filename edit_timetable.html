@@ -10,11 +10,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Tvarkaraščio ir laikotarpių valdymas</h1>
+        <h1>Tvarkaraščio įrašo redagavimas</h1>
 
         <div class="card">
-            <h2>Pridėti naują pamoką į tvarkaraštį</h2>
-            <form id="addTimetableForm" onsubmit="handleSaveTimetable(event)">
+            <form id="editTimetableForm" onsubmit="handleUpdateTimetable(event)">
                 <div class="form-group">
                     <label>Grupė</label>
                     <select id="groupSelect" required></select>
@@ -30,7 +29,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Pamokos eiliškumas / Laikas (pvz., 1 pamoka / 08:00)</label>
+                    <label>Pamokos eiliškumas / Laikas</label>
                     <input type="text" id="lessonOrder" placeholder="pvz. 1 pamoka" required>
                 </div>
                 <div class="form-group">
@@ -38,7 +37,7 @@
                     <input type="text" id="classroom" placeholder="pvz. 214 kab.">
                 </div>
                 <div class="form-group">
-                    <label>Mokytojas (Galimas pavadavimas)</label>
+                    <label>Mokytojas (Pavadavimui)</label>
                     <select id="teacherSelect" required></select>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -51,35 +50,26 @@
                         <input type="date" id="endDate">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Išsaugoti į tvarkaraštį</button>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button type="submit" class="btn btn-primary">Atnaujinti įrašą</button>
+                    <button type="button" class="logout-btn" onclick="deleteTimetable()">Pašalinti pamoką</button>
+                </div>
             </form>
         </div>
 
-        <div class="card">
-            <h2>Esamas tvarkaraštis ir valdymas</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Diena</th>
-                            <th>Pamoka</th>
-                            <th>Grupė</th>
-                            <th>Kabinetas</th>
-                            <th>Mokytojas</th>
-                            <th>Laikotarpis</th>
-                            <th>Veiksmai</th>
-                        </tr>
-                    </thead>
-                    <tbody id="timetablesTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <a href="timetable" class="btn-back">← Atgal į tvarkaraštį</a>
+        <a href="timetables" class="btn-back">← Atgal į tvarkaraštį</a>
     </div>
 
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const timetableId = urlParams.get('timetable_id');
+
         async function init() {
+            if (!timetableId) {
+                showToast('Nenurodytas tvarkaraščio ID!', 'error');
+                return;
+            }
+
             try {
                 const [resGroups, resTeachers, resTt] = await Promise.all([
                     fetch(`${API_URL}/api/groups`, { credentials: 'include' }),
@@ -101,13 +91,27 @@
                     tSelect.innerHTML += `<option value="${t.user_id}">${t.name} ${t.surname}</option>`;
                 });
 
-                renderTable(timetables);
+                // Surandame konkretų redaguojamą įrašą
+                const currentItem = timetables.find(t => String(t.timetable_id) === String(timetableId));
+                if (currentItem) {
+                    gSelect.value = currentItem.group_id;
+                    document.getElementById('daySelect').value = currentItem.day_of_week;
+                    document.getElementById('lessonOrder').value = currentItem.lesson_order;
+                    document.getElementById('classroom').value = currentItem.classroom || '';
+                    if (currentItem.teacher_id) {
+                        tSelect.value = currentItem.teacher_id;
+                    }
+                    document.getElementById('startDate').value = currentItem.start_date || '';
+                    document.getElementById('endDate').value = currentItem.end_date || '';
+                } else {
+                    showToast('Tvarkaraščio įrašas nerastas.', 'error');
+                }
             } catch (err) {
                 showToast('Klaida užkraunant duomenis.', 'error');
             }
         }
 
-        async function handleSaveTimetable(e) {
+        async function handleUpdateTimetable(e) {
             e.preventDefault();
             const data = {
                 group_id: document.getElementById('groupSelect').value,
@@ -120,15 +124,15 @@
             };
 
             try {
-                const res = await fetch(`${API_URL}/api/timetables/add`, {
+                const res = await fetch(`${API_URL}/api/timetables/edit/${timetableId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(data)
                 });
                 if (res.ok) {
-                    showToast('Sėkmingai pridėta!', 'success');
-                    setTimeout(() => location.reload(), 1000);
+                    showToast('Sėkmingai atnaujinta!', 'success');
+                    setTimeout(() => window.location.href = 'timetable', 1000);
                 } else {
                     showToast('Klaida išsaugant.', 'error');
                 }
@@ -137,37 +141,15 @@
             }
         }
 
-        async function deleteTimetable(id) {
-            if (!confirm('Ar tikrai norite pašalinti šį įrašą?')) return;
+        async function deleteTimetable() {
+            if (!confirm('Ar tikrai norite ištrinti šį tvarkaraščio įrašą?')) return;
             try {
-                await fetch(`${API_URL}/api/timetables/delete/${id}`, { credentials: 'include' });
-                showToast('Pašalinta', 'success');
-                setTimeout(() => location.reload(), 800);
+                await fetch(`${API_URL}/api/timetables/delete/${timetableId}`, { credentials: 'include' });
+                showToast('Įrašas pašalintas', 'success');
+                setTimeout(() => window.location.href = 'timetable', 800);
             } catch (err) {
                 showToast('Nepavyko pašalinti.', 'error');
             }
-        }
-
-        function renderTable(timetables) {
-            const tbody = document.getElementById('timetablesTableBody');
-            tbody.innerHTML = '';
-            if (timetables.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="empty-row">Tvarkaraštis tuščias.</td></tr>`;
-                return;
-            }
-            timetables.forEach(t => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${t.day_of_week}</strong></td>
-                        <td>${t.lesson_order}</td>
-                        <td>${t.group_display}</td>
-                        <td>${t.classroom || '-'}</td>
-                        <td>${t.teacher || '-'}</td>
-                        <td>${t.start_date ? `${t.start_date} iki${t.end_date || '∞'}` : 'Neribotai'}</td>
-                        <td><button class="logout-btn" style="padding: 2px 6px; font-size: 10px;" onclick="deleteTimetable(${t.timetable_id})">Trinti</button></td>
-                    </tr>
-                `;
-            });
         }
 
         window.onload = init;
