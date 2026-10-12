@@ -12,15 +12,19 @@
 </head>
 <body>
     <div class="container">
-        <h1>Mokslus sistema</h1>
-        <div class="card">
-            <p id="welcomeUser" style="margin-bottom: 20px; font-weight: bold; font-size: 1.1em;"></p>
-            
-            <!-- Kortelių tinklelis su ikonėlėmis -->
-            <div id="navGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
-            
-            <button class="logout-btn" onclick="logout()" style="width: 100%;">Atsijungti</button>
+        <!-- Viršutinė stilinga juosta pagal tavo styles.css -->
+        <div class="dashboard-header">
+            <div class="user-welcome">
+                <h2 id="welcomeTitle">Mokslus sistema</h2>
+            </div>
+            <div class="dashboard-right">
+                <span id="roleBadge" class="badge-role"></span>
+                <a href="javascript:void(0);" onclick="logout()" class="logout-btn">Atsijungti</a>
+            </div>
         </div>
+
+        <!-- Kortelių tinklelis pagal tavo .grid-container ir .nav-card klases -->
+        <div id="navGrid" class="grid-container"></div>
     </div>
 
     <script>
@@ -30,44 +34,51 @@
                 if (!res.ok) { window.location.href = '/'; return; }
                 const user = await res.json();
 
-                document.getElementById('welcomeUser').textContent = `Prisijungęs: ${user.name} ${user.surname} (${user.role})`;
-                const nav = document.getElementById('navGrid');
-                nav.innerHTML = '';
+                document.getElementById('welcomeTitle').textContent = `Sveikas, ${user.name} ${user.surname}`;
+                document.getElementById('roleBadge').textContent = user.role;
+
+                const grid = document.getElementById('navGrid');
+                grid.innerHTML = '';
 
                 let links = [];
 
                 if (user.role === 'administrator') {
                     // Administratorius mato tik vartotojų valdymą
                     links = [
-                        { href: 'users', title: 'Vartotojų valdymas', icon: '👥' }
+                        { href: 'users', title: 'Vartotojų valdymas', desc: 'Kurkite naujus vartotojus ir generuokite registracijos kodus.', icon: '👥' }
                     ];
                 } else if (user.role === 'teacher') {
                     links = [
-                        { href: 'timetables', title: 'Tvarkaraščiai', icon: '📅' },
-                        { href: 'groups', title: 'Grupės', icon: '🏫' },
-                        { href: 'lessons', title: 'Pamokų žurnalas', icon: '📖' },
-                        { href: 'remarks', title: 'Pagyrimai ir pastabos', icon: '⭐' }
+                        { href: 'timetables', title: 'Tvarkaraščiai', desc: 'Pamokų eiliškumas, kabinetai ir mokytojų pavadavimai.', icon: '📅' },
+                        { href: 'groups', title: 'Grupės', desc: 'Mokinių ir mokytojų grupių valdymas bei sąrašai.', icon: '🏫' },
+                        { href: 'lessons', title: 'Pamokų žurnalas', desc: 'Klasės darbai, namų darbai, lankomumas ir pažymiai.', icon: '📖' },
+                        { href: 'remarks', title: 'Pagyrimai ir pastabos', desc: 'Mokinių drausmės įrašai, pastabos ir pagyrimai.', icon: '⭐' }
                     ];
                 } else if (user.role === 'student') {
                     links = [
-                        { href: 'timetables', title: 'Tvarkaraštis', icon: '📅' },
-                        { href: 'grades', title: 'Pažymiai', icon: '📊' },
-                        { href: 'assignments', title: 'Namų darbai', icon: '📝' },
-                        { href: 'attendance', title: 'Lankomumas', icon: '📋' },
-                        { href: 'remarks', title: 'Pagyrimai ir pastabos', icon: '⭐' }
+                        { href: 'timetables', title: 'Tvarkaraštis', desc: 'Jūsų savaitės pamokų tvarkaraštis ir kabinetai.', icon: '📅' },
+                        { href: 'grades', title: 'Pažymiai', desc: 'Gauti įvertinimai, kontroliniai darbai ir komentarai.', icon: '📊' },
+                        { href: 'assignments', title: 'Namų darbai', desc: 'Aktyvios namų darbų užduotys ir jų atlikimo terminai.', icon: '📝' },
+                        { href: 'attendance', title: 'Lankomumas', desc: 'Praleistos pamokos, vėlavimai ir lankomumo suvestinė.', icon: '📋' },
+                        { href: 'remarks', title: 'Pagyrimai ir pastabos', desc: 'Mokytojų pastabos ir pagyrimai jums.', icon: '⭐' }
                     ];
                 }
 
                 // Profilis prieinamas visiems
-                links.push({ href: 'profile', title: 'Mano profilis', icon: '⚙️' });
+                links.push({ href: 'profile', title: 'Mano profilis', desc: 'Tvarkykite savo paskyros duomenis ir slaptažodį.', icon: '⚙️' });
 
                 links.forEach(l => {
                     const card = document.createElement('a');
                     card.href = l.href;
-                    card.className = 'btn btn-primary';
-                    card.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 10px; text-decoration: none; text-align: center; gap: 8px; font-size: 15px; border-radius: 8px;';
-                    card.innerHTML = `<span style="font-size: 32px;">${l.icon}</span><span>${l.title}</span>`;
-                    nav.appendChild(card);
+                    card.className = 'nav-card';
+                    card.innerHTML = `
+                        <div>
+                            <div class="nav-card-icon">${l.icon}</div>
+                            <h3>${l.title}</h3>
+                            <p>${l.desc}</p>
+                        </div>
+                    `;
+                    grid.appendChild(card);
                 });
 
             } catch (err) {
