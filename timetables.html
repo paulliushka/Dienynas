@@ -12,15 +12,57 @@
 </head>
 <body>
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <h1>Pamokų tvarkaraštis</h1>
-            <div id="adminTeacherActions" style="display: none;">
-                <a href="edit_timetable" class="btn btn-primary">+ Pridėti tvarkaraščio įrašą</a>
-            </div>
+        <h1>Pamokų tvarkaraštis ir valdymas</h1>
+
+        <!-- Tvarkaraščio kūrimo forma (matoma mokytojams ir administratoriams) -->
+        <div class="card" id="createTimetableCard" style="display: none;">
+            <h2>Pridėti naują pamoką į tvarkaraštį</h2>
+            <form id="addTimetableForm" onsubmit="handleSaveTimetable(event)">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                    <div class="form-group">
+                        <label>Grupė</label>
+                        <select id="groupSelect" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Savaitės diena</label>
+                        <select id="daySelect" required>
+                            <option value="Pirmadienis">Pirmadienis</option>
+                            <option value="Antradienis">Antradienis</option>
+                            <option value="Trečiadienis">Trečiadienis</option>
+                            <option value="Ketvirtadienis">Ketvirtadienis</option>
+                            <option value="Penktadienis">Penktadienis</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pamokos eiliškumas / Laikas</label>
+                        <input type="text" id="lessonOrder" placeholder="pvz. 1 pamoka" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kabinetas</label>
+                        <input type="text" id="classroom" placeholder="pvz. 214 kab.">
+                    </div>
+                    <div class="form-group">
+                        <label>Mokytojas (Pavadavimui)</label>
+                        <select id="teacherSelect" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Galioja nuo (Data)</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Galioja iki (Data)</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 12px;">Pridėti į tvarkaraštį</button>
+            </form>
         </div>
 
         <!-- Savaitės dienų ir pamokų eiliškumo vaizdas -->
-        <div id="timetableContainer"></div>
+        <div class="card">
+            <h2>Esamos savaitės pamokos</h2>
+            <div id="timetableContainer"></div>
+        </div>
 
         <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
     </div>
@@ -36,15 +78,79 @@
                 userRole = user.role;
 
                 if (user.role === 'teacher' || user.role === 'administrator') {
-                    document.getElementById('adminTeacherActions').style.display = 'block';
+                    document.getElementById('createTimetableCard').style.display = 'block';
+                    await loadFormDropdowns();
                 }
 
-                const resTt = await fetch(`${API_URL}/api/timetables`, { credentials: 'include' });
-                const timetables = await resTt.json();
-
-                renderTimetableByDays(timetables);
+                await loadTimetables();
             } catch (err) {
                 showToast('Nepavyko užkrauti tvarkaraščio.', 'error');
+            }
+        }
+
+        async function loadFormDropdowns() {
+            try {
+                const [resGroups, resTeachers] = await Promise.all([
+                    fetch(`${API_URL}/api/groups`, { credentials: 'include' }),
+                    fetch(`${API_URL}/api/teachers`, { credentials: 'include' })
+                ]);
+                const groups = await resGroups.json();
+                const teachers = await resTeachers.json();
+
+                const gSelect = document.getElementById('groupSelect');
+                gSelect.innerHTML = '';
+                groups.forEach(g => {
+                    gSelect.innerHTML += `<option value="${g.group_id}">${g.group_name} (${g.class})</option>`;
+                });
+
+                const tSelect = document.getElementById('teacherSelect');
+                tSelect.innerHTML = '';
+                teachers.forEach(t => {
+                    tSelect.innerHTML += `<option value="${t.user_id}">${t.name} ${t.surname}</option>`;
+                });
+            } catch (err) {
+                showToast('Klaida užkraunant grupes ar mokytojus.', 'error');
+            }
+        }
+
+        async function loadTimetables() {
+            try {
+                const resTt = await fetch(`${API_URL}/api/timetables`, { credentials: 'include' });
+                const timetables = await resTt.json();
+                renderTimetableByDays(timetables);
+            } catch (err) {
+                showToast('Klaida užkraunant įrašus.', 'error');
+            }
+        }
+
+        async function handleSaveTimetable(e) {
+            e.preventDefault();
+            const data = {
+                group_id: document.getElementById('groupSelect').value,
+                day_of_week: document.getElementById('daySelect').value,
+                lesson_order: document.getElementById('lessonOrder').value,
+                classroom: document.getElementById('classroom').value,
+                teacher_id: document.getElementById('teacherSelect').value,
+                start_date: document.getElementById('startDate').value,
+                end_date: document.getElementById('endDate').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/timetables/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast('Tvarkaraščio įrašas sėkmingai sukurtas!', 'success');
+                    document.getElementById('addTimetableForm').reset();
+                    await loadTimetables();
+                } else {
+                    showToast('Klaida išsaugant įrašą.', 'error');
+                }
+            } catch (err) {
+                showToast('Tinklo klaida.', 'error');
             }
         }
 
@@ -72,7 +178,7 @@
                         const card = document.createElement('div');
                         card.className = 'lesson-item-card';
                         
-                        // Jei mokytojas arba admin - leidžiame paspausti ir redaguoti
+                        // Jei mokytojas arba admin - leidžiame paspausti ir redaguoti atskirame edit_timetable.html puslapyje
                         if (userRole === 'teacher' || userRole === 'administrator') {
                             card.style.cursor = 'pointer';
                             card.title = 'Spauskite norėdami redaguoti';
