@@ -142,7 +142,7 @@ textarea:focus {
     position: relative;
 }
 
-/* Paieškos ir filtravimo juosta, kur visi elementai (įskaitant kalendorius ir custom select wrapperius) idealiai liečiasi be tarpų */
+/* Paieškos ir filtravimo juosta, kur visi elementai idealiai liečiasi be tarpų */
 .card div[style*="display: flex"] {
     display: flex !important;
     gap: 0 !important;
@@ -292,7 +292,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   6. DASHBOARD (VIRŠUTINĖ JUOSTA IR PROFILIS)
+   6. DASHBOARD IR KORTELĖS
    ========================================================================== */
 .dashboard-header {
     display: flex;
@@ -408,7 +408,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   7. SĄRAŠAI IR MOKINIŲ PASIRINKIMO DĖŽUTĖS
+   7. SĄRAŠAI IR LENTELĖS
    ========================================================================== */
 .scroll-box {
     max-height: 160px;
@@ -436,9 +436,6 @@ textarea:focus {
     cursor: pointer;
 }
 
-/* ==========================================================================
-   8. LENTELĖS
-   ========================================================================== */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
@@ -485,7 +482,7 @@ tr:hover {
 }
 
 /* ==========================================================================
-   9. REGISTRACIJOS KODŲ SPALVOS (STATUSAS)
+   8. REGISTRACIJOS KODŲ SPALVOS IR ŽENKLIUKAI
    ========================================================================== */
 .reg-code-unused {
     color: var(--success-text);
@@ -511,9 +508,6 @@ tr:hover {
     display: inline-block;
 }
 
-/* ==========================================================================
-   10. ŽENKLIUKAI IR NUORODOS
-   ========================================================================== */
 .badge-owner {
     background-color: #2a2b2c;
     color: var(--accent-blue);
@@ -540,7 +534,7 @@ a:hover {
 }
 
 /* ==========================================================================
-   11. CUSTOM DROPDOWN IR KALENDORIUS
+   9. CUSTOM DROPDOWN IR KALENDORIUS
    ========================================================================== */
 .custom-calendar-wrapper {
     position: relative;
@@ -716,7 +710,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   12. PAMOKŲ DIENŲ KORTELĖS IR MODALINIAI LANGAI (LESSONS.HTML)
+   10. PAMOKŲ DIENŲ KORTELĖS IR MODALINIAI LANGAI
    ========================================================================== */
 .day-section {
     margin-bottom: 20px;
@@ -768,7 +762,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   13. CENTRUOTI PUSLAPIAI (LOGIN, REGISTER, 404)
+   11. CENTRUOTI PUSLAPIAI (LOGIN, REGISTER, 404)
    ========================================================================== */
 .centered-page-body,
 .error-page-body {
@@ -824,7 +818,63 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   14. TOAST / PRANEŠIMŲ SISTEMA (2010s DARK GLOSSY STYLE)
+   12. PAGALBINĖS KLASĖS (UTILITY CLASSES)
+   ========================================================================== */
+.mt-15 {
+    margin-top: 15px !important;
+}
+
+.mb-8 {
+    margin-bottom: 8px !important;
+}
+
+.mb-20 {
+    margin-bottom: 20px !important;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.info-panel {
+    background: var(--bg-input);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-light);
+}
+
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.grid-2-cols-gap10 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.flex-actions-mt15 {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.flex-gap-4 {
+    display: flex;
+    gap: 4px;
+}
+
+.text-muted-italic {
+    color: #8a8d91;
+    font-style: italic;
+    margin: 0;
+}
+
+/* ==========================================================================
+   13. TOAST / PRANEŠIMŲ SISTEMA (2010s DARK GLOSSY STYLE)
    ========================================================================== */
 #toast-container {
     position: fixed;
@@ -887,7 +937,7 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* ==========================================================================
-   15. ADAPTYVUMAS MOBILIESIEMS (RESPONSIVE)
+   14. ADAPTYVUMAS MOBILIESIEMS (RESPONSIVE)
    ========================================================================== */
 @media (max-width: 768px) {
     body {
