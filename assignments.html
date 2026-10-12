@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Mokslus - Namų darbai</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+    <script src="toast.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Namų darbai ir užduotys</h1>
+
+        <div class="card">
+            <h2>Esamos užduotys</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Grupė / Dalykas</th>
+                            <th>Užduotis</th>
+                            <th>Atlikti iki</th>
+                            <th>Mokytojas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
+    </div>
+
+    <script>
+        async function checkAuthAndInit() {
+            try {
+                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!response.ok) { window.location.href = '/'; return; }
+                const currentUser = await response.json();
+
+                if (currentUser.role !== 'student') {
+                    showToast('Namų darbų puslapis pasiekiamas tik mokiniams.', 'error');
+                    window.location.href = 'dashboard';
+                    return;
+                }
+
+                await loadAssignments();
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
+
+        async function loadAssignments() {
+            try {
+                const response = await fetch(`${API_URL}/api/assignments`, { credentials: 'include' });
+                if (response.status === 401) { window.location.href = '/'; return; }
+                const assignments = await response.json();
+                const tbody = document.getElementById('assignmentsTableBody');
+                tbody.innerHTML = '';
+
+                if (!Array.isArray(assignments) || assignments.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty-row">Namų darbų nerasta.</td></tr>`;
+                    return;
+                }
+
+                assignments.forEach(assign => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="Grupė"><strong>${assign.group_display}</strong></td>
+                        <td data-label="Užduotis">${assign.task}</td>
+                        <td data-label="Atlikti iki" style="color: var(--accent-blue); font-weight: bold;">${assign.due_date}</td>
+                        <td data-label="Mokytojas">${assign.teacher || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                showToast('Klaida užkraunant namų darbus.', 'error');
+            }
+        }
+
+        window.onload = checkAuthAndInit;
+    </script>
+</body>
+</html>
