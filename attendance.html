@@ -14,34 +14,6 @@
     <div class="container">
         <h1>Lankomumas</h1>
 
-        <div class="card" id="addAttendanceCard" style="display: none;">
-            <h2>Žymėti lankomumą</h2>
-            <form id="addAttendanceForm">
-                <label>Grupė</label>
-                <select name="group_id" id="group_select" onchange="loadStudentsByGroup()" required>
-                    <option value="">-- Pasirinkite grupę --</option>
-                </select>
-
-                <label>Mokinys</label>
-                <select name="student_id" id="student_select" required disabled>
-                    <option value="">-- Pirmiausia pasirinkite grupę --</option>
-                </select>
-
-                <label>Būsena</label>
-                <select name="status" required>
-                    <option value="present">Dalyvauja</option>
-                    <option value="absent_unexcused">Praleista (Nebuvo)</option>
-                    <option value="absent_excused">Pateisinta</option>
-                    <option value="late">Vėluoja</option>
-                </select>
-
-                <label>Data</label>
-                <input type="date" name="date" id="attendance_date" required>
-
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti lankomumą</button>
-            </form>
-        </div>
-
         <div class="card">
             <h2>Lankomumo įrašai</h2>
             <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
@@ -90,72 +62,10 @@
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
                 if (!response.ok) { window.location.href = '/'; return; }
                 currentUser = await response.json();
-                await initPage();
+                await loadAttendance();
+                initCustomSelects();
             } catch (err) {
                 window.location.href = '/';
-            }
-        }
-
-        async function initPage() {
-            if (currentUser.role === 'teacher') {
-                document.getElementById('addAttendanceCard').style.display = 'block';
-                setDefaultDate();
-                await loadTeacherGroups();
-            }
-            await loadAttendance();
-            initCustomSelects();
-        }
-
-        function setDefaultDate() {
-            const now = new Date();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const dateInput = document.getElementById('attendance_date');
-            if (dateInput) {
-                dateInput.value = `${now.getFullYear()}-${month}-${day}`;
-            }
-        }
-
-        async function loadTeacherGroups() {
-            try {
-                const response = await fetch(`${API_URL}/api/groups?only_mine=true`, { credentials: 'include' });
-                const groups = await response.json();
-                const select = document.getElementById('group_select');
-                select.innerHTML = '<option value="">-- Pasirinkite grupę --</option>';
-                groups.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = g.group_id;
-                    opt.textContent = `${g.group_name} (${g.class} klasė)`;
-                    select.appendChild(opt);
-                });
-            } catch (error) {
-                showToast('Klaida užkraunant grupes.', 'error');
-            }
-        }
-
-        async function loadStudentsByGroup() {
-            const groupId = document.getElementById('group_select').value;
-            const select = document.getElementById('student_select');
-
-            if (!groupId) {
-                select.innerHTML = '<option value="">-- Pirmiausia pasirinkite grupę --</option>';
-                select.disabled = true;
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/get_students_by_group/${groupId}`, { credentials: 'include' });
-                const students = await response.json();
-                select.innerHTML = '<option value="">-- Pasirinkite mokinį --</option>';
-                students.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.user_id;
-                    opt.textContent = `${s.name} ${s.surname}`;
-                    select.appendChild(opt);
-                });
-                select.disabled = false;
-            } catch (error) {
-                showToast('Klaida užkraunant mokinius.', 'error');
             }
         }
 
@@ -213,40 +123,6 @@
             });
             renderAttendance(filtered);
         }
-
-        document.addEventListener('submit', async function(e) {
-            if (e.target && e.target.id === 'addAttendanceForm') {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const payload = {
-                    student_id: formData.get('student_id'),
-                    group_id: formData.get('group_id'),
-                    status: formData.get('status'),
-                    date: formData.get('date')
-                };
-
-                try {
-                    const response = await fetch(`${API_URL}/api/attendance/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify(payload)
-                    });
-                    if (response.ok) {
-                        e.target.reset();
-                        setDefaultDate();
-                        document.getElementById('student_select').disabled = true;
-                        showToast("Lankomumas sėkmingai pažymėtas!", "success");
-                        loadAttendance();
-                    } else {
-                        const errResult = await response.json();
-                        showToast(errResult.message || "Klaida žymint lankomumą.", "error");
-                    }
-                } catch (error) {
-                    showToast("Nepavyko prisijungti prie serverio.", "error");
-                }
-            }
-        });
 
         window.onload = checkAuthAndInit;
     </script>
