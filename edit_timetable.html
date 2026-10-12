@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Mokslus - Tvarkaraščio redagavimas</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+    <script src="toast.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Tvarkaraščio ir laikotarpių valdymas</h1>
+
+        <div class="card">
+            <h2>Pridėti naują pamoką į tvarkaraštį</h2>
+            <form id="addTimetableForm" onsubmit="handleSaveTimetable(event)">
+                <div class="form-group">
+                    <label>Grupė</label>
+                    <select id="groupSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Savaitės diena</label>
+                    <select id="daySelect" required>
+                        <option value="Pirmadienis">Pirmadienis</option>
+                        <option value="Antradienis">Antradienis</option>
+                        <option value="Trečiadienis">Trečiadienis</option>
+                        <option value="Ketvirtadienis">Ketvirtadienis</option>
+                        <option value="Penktadienis">Penktadienis</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pamokos eiliškumas / Laikas (pvz., 1 pamoka / 08:00)</label>
+                    <input type="text" id="lessonOrder" placeholder="pvz. 1 pamoka" required>
+                </div>
+                <div class="form-group">
+                    <label>Kabinetas</label>
+                    <input type="text" id="classroom" placeholder="pvz. 214 kab.">
+                </div>
+                <div class="form-group">
+                    <label>Mokytojas (Galimas pavadavimas)</label>
+                    <select id="teacherSelect" required></select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="form-group">
+                        <label>Galioja nuo (Data)</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Galioja iki (Data)</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Išsaugoti į tvarkaraštį</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Esamas tvarkaraštis ir valdymas</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Diena</th>
+                            <th>Pamoka</th>
+                            <th>Grupė</th>
+                            <th>Kabinetas</th>
+                            <th>Mokytojas</th>
+                            <th>Laikotarpis</th>
+                            <th>Veiksmai</th>
+                        </tr>
+                    </thead>
+                    <tbody id="timetablesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <a href="timetable" class="btn-back">← Atgal į tvarkaraštį</a>
+    </div>
+
+    <script>
+        async function init() {
+            try {
+                const [resGroups, resTeachers, resTt] = await Promise.all([
+                    fetch(`${API_URL}/api/groups`, { credentials: 'include' }),
+                    fetch(`${API_URL}/api/teachers`, { credentials: 'include' }),
+                    fetch(`${API_URL}/api/timetables`, { credentials: 'include' })
+                ]);
+
+                const groups = await resGroups.json();
+                const teachers = await resTeachers.json();
+                const timetables = await resTt.json();
+
+                const gSelect = document.getElementById('groupSelect');
+                groups.forEach(g => {
+                    gSelect.innerHTML += `<option value="${g.group_id}">${g.group_name} (${g.class})</option>`;
+                });
+
+                const tSelect = document.getElementById('teacherSelect');
+                teachers.forEach(t => {
+                    tSelect.innerHTML += `<option value="${t.user_id}">${t.name} ${t.surname}</option>`;
+                });
+
+                renderTable(timetables);
+            } catch (err) {
+                showToast('Klaida užkraunant duomenis.', 'error');
+            }
+        }
+
+        async function handleSaveTimetable(e) {
+            e.preventDefault();
+            const data = {
+                group_id: document.getElementById('groupSelect').value,
+                day_of_week: document.getElementById('daySelect').value,
+                lesson_order: document.getElementById('lessonOrder').value,
+                classroom: document.getElementById('classroom').value,
+                teacher_id: document.getElementById('teacherSelect').value,
+                start_date: document.getElementById('startDate').value,
+                end_date: document.getElementById('endDate').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/api/timetables/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    showToast('Sėkmingai pridėta!', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Klaida išsaugant.', 'error');
+                }
+            } catch (err) {
+                showToast('Tinklo klaida.', 'error');
+            }
+        }
+
+        async function deleteTimetable(id) {
+            if (!confirm('Ar tikrai norite pašalinti šį įrašą?')) return;
+            try {
+                await fetch(`${API_URL}/api/timetables/delete/${id}`, { credentials: 'include' });
+                showToast('Pašalinta', 'success');
+                setTimeout(() => location.reload(), 800);
+            } catch (err) {
+                showToast('Nepavyko pašalinti.', 'error');
+            }
+        }
+
+        function renderTable(timetables) {
+            const tbody = document.getElementById('timetablesTableBody');
+            tbody.innerHTML = '';
+            if (timetables.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-row">Tvarkaraštis tuščias.</td></tr>`;
+                return;
+            }
+            timetables.forEach(t => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${t.day_of_week}</strong></td>
+                        <td>${t.lesson_order}</td>
+                        <td>${t.group_display}</td>
+                        <td>${t.classroom || '-'}</td>
+                        <td>${t.teacher || '-'}</td>
+                        <td>${t.start_date ? `${t.start_date} iki${t.end_date || '∞'}` : 'Neribotai'}</td>
+                        <td><button class="logout-btn" style="padding: 2px 6px; font-size: 10px;" onclick="deleteTimetable(${t.timetable_id})">Trinti</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

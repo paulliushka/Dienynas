@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <title>Mokslus - Tvarkaraštis</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+    <script src="toast.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h1>Pamokų tvarkaraštis</h1>
+            <div id="adminTeacherActions" style="display: none;">
+                <a href="edit_timetable" class="btn btn-primary">+ Pridėti / Redaguoti tvarkaraštį</a>
+            </div>
+        </div>
+
+        <!-- Savaitės dienų ir pamokų eiliškumo vaizdas -->
+        <div id="timetableContainer"></div>
+
+        <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
+    </div>
+
+    <script>
+        async function init() {
+            try {
+                const resProfile = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!resProfile.ok) { window.location.href = '/'; return; }
+                const user = await resProfile.json();
+
+                if (user.role === 'teacher' || user.role === 'administrator') {
+                    document.getElementById('adminTeacherActions').style.display = 'block';
+                }
+
+                const resTt = await fetch(`${API_URL}/api/timetables`, { credentials: 'include' });
+                const timetables = await resTt.json();
+
+                renderTimetableByDays(timetables);
+            } catch (err) {
+                showToast('Nepavyko užkrauti tvarkaraščio.', 'error');
+            }
+        }
+
+        function renderTimetableByDays(timetables) {
+            const container = document.getElementById('timetableContainer');
+            container.innerHTML = '';
+
+            const days = ['Pirmadienis', 'Antradienis', 'Trečiadienis', 'Ketvirtadienis', 'Penktadienis'];
+
+            days.forEach(day => {
+                const dayItems = timetables.filter(t => t.day_of_week === day);
+                // Rūšiuojame pagal pamokos eiliškumą
+                dayItems.sort((a, b) => (a.lesson_order || '').localeCompare(b.lesson_order || ''));
+
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day-section';
+                dayDiv.innerHTML = `<div class="day-title">${day}</div>`;
+
+                if (dayItems.length === 0) {
+                    dayDiv.innerHTML += `<div style="color: var(--text-muted); font-style: italic; padding: 6px 0;">Šią dieną pamokų nėra.</div>`;
+                } else {
+                    const listDiv = document.createElement('div');
+                    listDiv.className = 'lesson-grid-list';
+
+                    dayItems.forEach(t => {
+                        const card = document.createElement('div');
+                        card.className = 'lesson-item-card';
+                        card.innerHTML = `
+                            <strong>${t.group_display}</strong><br>
+                            <span style="color: var(--accent-blue);">Pamoka: ${t.lesson_order}</span><br>
+                            <span style="color: var(--text-secondary);">Kabinetas: ${t.classroom || '-'}</span><br>
+                            <span style="color: var(--text-muted);">Mokytojas: ${t.teacher || '-'}</span><br>
+                            ${t.start_date ? `<small style="color:var(--text-muted);">Galioja: ${t.start_date} iki${t.end_date || 'neribotai'}</small>` : ''}
+                        `;
+                        listDiv.appendChild(card);
+                    });
+                    dayDiv.appendChild(listDiv);
+                }
+                container.appendChild(dayDiv);
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
