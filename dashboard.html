@@ -54,14 +54,15 @@
 
                 const grid = document.getElementById('menuGrid');
                 const menuItems = [
-                    { href: 'profile', icon: '👤', title: 'Profilis', desc: 'Redakuokite paskyros duomenis ir slaptažodį.', roles: ['administrator', 'teacher', 'student'] },
+                    { href: 'lessons', icon: '📖', title: 'Pamokos', desc: 'Pamokos žurnalas: lankomumas, pažymiai ir namų darbai.', roles: ['teacher', 'administrator'] },
                     { href: 'grades', icon: '📊', title: 'Pažymiai', desc: 'Peržiūrėkite arba rašykite pažymius.', roles: ['administrator', 'teacher', 'student'] },
                     { href: 'assignments', icon: '📝', title: 'Namų darbai', desc: 'Užduotys ir namų darbai mokiniams.', roles: ['administrator', 'teacher', 'student'] },
                     { href: 'timetables', icon: '📅', title: 'Tvarkaraštis', desc: 'Pamokų tvarkaraščiai ir kabinetai.', roles: ['administrator', 'teacher', 'student'] },
                     { href: 'attendance', icon: '📋', title: 'Lankomumas', desc: 'Pamokų lankomumo stebėjimas ir žymėjimas.', roles: ['administrator', 'teacher', 'student'] },
                     { href: 'remarks', icon: '⭐', title: 'Pagyrimai ir pastabos', desc: 'Mokinių pasiekimai bei pastabos.', roles: ['administrator', 'teacher', 'student'] },
                     { href: 'groups', icon: '👥', title: 'Grupės', desc: 'Mokinių grupės ir jų valdymas.', roles: ['administrator', 'teacher'] },
-                    { href: 'users', icon: '⚙️', title: 'Vartotojai', desc: 'Sukurkite ir valdykite sistemos vartotojus.', roles: ['administrator'] }
+                    { href: 'users', icon: '⚙️', title: 'Vartotojai', desc: 'Sukurkite ir valdykite sistemos vartotojus.', roles: ['administrator'] },
+                    { href: 'profile', icon: '👤', title: 'Profilis', desc: 'Redakuokite paskyros duomenis ir slaptažodį.', roles: ['administrator', 'teacher', 'student'] }
                 ];
 
                 menuItems.forEach(item => {
