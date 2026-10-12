@@ -146,7 +146,7 @@
             try {
                 await fetch(`${API_URL}/api/timetables/delete/${timetableId}`, { credentials: 'include' });
                 showToast('Įrašas pašalintas', 'success');
-                setTimeout(() => window.location.href = 'timetable', 800);
+                setTimeout(() => window.location.href = 'timetables', 500);
             } catch (err) {
                 showToast('Nepavyko pašalinti.', 'error');
             }
