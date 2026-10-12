@@ -2,16 +2,19 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus - Tvarkaraščio redagavimas</title>
-    <link rel="icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles.css">
-    <script src="config.js"></script>
-    <script src="toast.js"></script>
+    <title>Mokslus - Redaguoti tvarkaraštį</title>
+    <link rel="icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" href="../static/images/apple-touch-icon.png">
+    <link rel="stylesheet" href="../static/styles/style.css">
+    <link rel="manifest" href="../static/pwa/manifest.json">
+    <script src="../static/js/calendar.js" defer></script>
+    <script src="../static/js/config.js" defer></script>
+    <script src="../static/js/select.js" defer></script>
+    <script src="../static/js/toast.js" defer></script>
 </head>
 <body>
     <div class="container">
-        <h1>Tvarkaraščio įrašo redagavimas</h1>
-
+        <h1>Redaguoti tvarkaraštį</h1>
         <div class="card">
             <form id="editTimetableForm" onsubmit="handleUpdateTimetable(event)">
                 <div class="form-group">
@@ -40,7 +43,7 @@
                     <label>Mokytojas (Pavadavimui)</label>
                     <select id="teacherSelect" required></select>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="grid-2-cols-gap10">
                     <div class="form-group">
                         <label>Galioja nuo (Data)</label>
                         <input type="date" id="startDate">
@@ -50,14 +53,14 @@
                         <input type="date" id="endDate">
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <div class="flex-actions-mt15">
                     <button type="submit" class="btn btn-primary">Atnaujinti įrašą</button>
                     <button type="button" class="logout-btn" onclick="deleteTimetable()">Pašalinti pamoką</button>
                 </div>
             </form>
         </div>
 
-        <a href="timetables" class="btn-back">← Atgal į tvarkaraštį</a>
+        <a href="../timetables" class="btn-back">← Atgal į tvarkaraštį</a>
     </div>
 
     <script>
@@ -65,12 +68,17 @@
         const timetableId = urlParams.get('timetable_id');
 
         async function init() {
-            if (!timetableId) {
-                showToast('Nenurodytas tvarkaraščio ID!', 'error');
-                return;
-            }
-
             try {
+                const profileRes = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!profileRes.ok) { window.location.href = '/'; return; }
+                const user = await profileRes.json();
+                if (user.role !== 'teacher') { window.location.href = '../dashboard'; return; }
+
+                if (!timetableId) {
+                    showToast('Nenurodytas tvarkaraščio ID.', 'error');
+                    return;
+                }
+
                 const [resGroups, resTeachers, resTt] = await Promise.all([
                     fetch(`${API_URL}/api/groups`, { credentials: 'include' }),
                     fetch(`${API_URL}/api/teachers`, { credentials: 'include' }),
@@ -91,7 +99,6 @@
                     tSelect.innerHTML += `<option value="${t.user_id}">${t.name} ${t.surname}</option>`;
                 });
 
-                // Surandame konkretų redaguojamą įrašą
                 const currentItem = timetables.find(t => String(t.timetable_id) === String(timetableId));
                 if (currentItem) {
                     gSelect.value = currentItem.group_id;
@@ -107,7 +114,7 @@
                     showToast('Tvarkaraščio įrašas nerastas.', 'error');
                 }
             } catch (err) {
-                showToast('Klaida užkraunant duomenis.', 'error');
+                showToast('Nepavyko užkrauti duomenų.', 'error');
             }
         }
 
@@ -132,12 +139,12 @@
                 });
                 if (res.ok) {
                     showToast('Sėkmingai atnaujinta!', 'success');
-                    setTimeout(() => window.location.href = 'timetable', 1000);
+                    setTimeout(() => window.location.href = '../timetables', 1000);
                 } else {
-                    showToast('Klaida išsaugant.', 'error');
+                    showToast('Nepavyko išsaugoti.', 'error');
                 }
             } catch (err) {
-                showToast('Tinklo klaida.', 'error');
+                showToast('Nepavyko prisijungti prie serverio.', 'error');
             }
         }
 
@@ -146,7 +153,7 @@
             try {
                 await fetch(`${API_URL}/api/timetables/delete/${timetableId}`, { credentials: 'include' });
                 showToast('Įrašas pašalintas', 'success');
-                setTimeout(() => window.location.href = 'timetables', 500);
+                setTimeout(() => window.location.href = '../timetables', 500);
             } catch (err) {
                 showToast('Nepavyko pašalinti.', 'error');
             }

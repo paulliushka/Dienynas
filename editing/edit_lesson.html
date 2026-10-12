@@ -2,38 +2,39 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus - Pamokos žurnalo redagavimas</title>
-    <link rel="icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles.css">
-    <script src="config.js"></script>
-    <script src="toast.js"></script>
+    <title>Mokslus - Redaguoti pamoką</title>
+    <link rel="icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" href="../static/images/apple-touch-icon.png">
+    <link rel="stylesheet" href="../static/styles/style.css">
+    <link rel="manifest" href="../static/pwa/manifest.json">
+    <script src="../static/js/calendar.js" defer></script>
+    <script src="../static/js/config.js" defer></script>
+    <script src="../static/js/select.js" defer></script>
+    <script src="../static/js/toast.js" defer></script>
 </head>
 <body>
     <div class="container">
-        <h1>Pamokos žurnalo redagavimas</h1>
-
+        <h1>Redaguoti pamoką</h1>
         <div class="card">
-            <div style="background: var(--bg-input); padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-light);">
+            <div class="info-panel">
                 <p><strong>Data:</strong> <span id="lblDate"></span> | <strong>Grupės ID:</strong> <span id="lblGroup"></span></p>
             </div>
 
-            <!-- Klasės darbas ir namų darbai su terminu -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="grid-2-cols">
                 <div>
                     <label>Klasės darbas / Tema</label>
                     <textarea id="class_work_input" rows="3" placeholder="Įveskite klasės darbą..."></textarea>
                 </div>
                 <div>
                     <label>Namų darbai</label>
-                    <textarea id="homework_input" rows="3" placeholder="Įveskite namų darbus..." style="margin-bottom: 8px;"></textarea>
+                    <textarea id="homework_input" rows="3" placeholder="Įveskite namų darbus..." class="mb-8"></textarea>
                     
                     <label>Atlikti iki (Terminas)</label>
-                    <input type="date" id="homework_due_date" style="height: 28px;">
+                    <input type="date" id="homework_due_date">
                 </div>
             </div>
-            <button type="button" class="btn btn-primary" onclick="saveLessonData()" style="margin-bottom: 20px;">Išsaugoti viską</button>
+            <button type="button" class="btn btn-primary mb-20" onclick="saveLessonData()">Išsaugoti viską</button>
 
-            <!-- Mokinių sąrašas (Lankomumas ir pažymiai) -->
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -49,7 +50,7 @@
             </div>
         </div>
 
-        <a href="lessons" class="btn-back">← Atgal į pamokų sąrašą</a>
+        <a href="../lessons" class="btn-back">← Atgal į pamokų sąrašą</a>
     </div>
 
     <script>
@@ -59,14 +60,22 @@
         let currentStudents = [];
 
         async function init() {
-            if (!groupId || !dateStr) {
-                showToast('Nenurodyta data arba grupė URI parametruose!', 'error');
-                return;
-            }
-            document.getElementById('lblDate').textContent = dateStr;
-            document.getElementById('lblGroup').textContent = groupId;
+            try {
+                const profileRes = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!profileRes.ok) { window.location.href = '/'; return; }
+                const user = await profileRes.json();
+                if (user.role !== 'teacher') { window.location.href = '../dashboard'; return; }
 
-            await loadLessonData();
+                if (!groupId || !dateStr) {
+                    showToast('Nenurodyta data arba grupė.', 'error');
+                    return;
+                }
+                document.getElementById('lblDate').textContent = dateStr;
+                document.getElementById('lblGroup').textContent = groupId;
+                await loadLessonData();
+            } catch (err) {
+                window.location.href = '/';
+            }
         }
 
         async function loadLessonData() {
@@ -100,7 +109,7 @@
                         <tr>
                             <td><strong>${idx + 1}. ${s.name} ${s.surname}</strong></td>
                             <td>
-                                <div style="display: flex; gap: 4px;">
+                                <div class="flex-gap-4">
                                     <button type="button" class="btn-att ${attStatus === 'absent_unexcused' ? 'active-n' : ''}" onclick="toggleAttendance(${studentId}, 'absent_unexcused', this)">N</button>
                                     <button type="button" class="btn-att ${attStatus === 'late' ? 'active-v' : ''}" onclick="toggleAttendance(${studentId}, 'late', this)">V</button>
                                 </div>
@@ -113,7 +122,7 @@
                                 </div>
                             </td>
                             <td>
-                                <select class="grade-type-sel" style="padding: 2px;">
+                                <select class="grade-type-sel">
                                     <option value="Klasės darbas" ${gradeInfo.type === 'Klasės darbas' ? 'selected' : ''}>Klasės darbas</option>
                                     <option value="Namų darbas" ${gradeInfo.type === 'Namų darbas' ? 'selected' : ''}>Namų darbas</option>
                                     <option value="Kontrolinis darbas" ${gradeInfo.type === 'Kontrolinis darbas' ? 'selected' : ''}>Kontrolinis darbas</option>
@@ -123,7 +132,7 @@
                     `;
                 });
             } catch (err) {
-                showToast('Klaida užkraunant žurnalo duomenis.', 'error');
+                showToast('Nepavyko užkrauti žurnalo duomenų.', 'error');
             }
         }
 
@@ -142,10 +151,10 @@
                 if (res.ok) {
                     showToast('Sėkmingai išsaugota!', 'success');
                 } else {
-                    showToast('Klaida išsaugant.', 'error');
+                    showToast('Nepavyko išsaugoti.', 'error');
                 }
             } catch (err) {
-                showToast('Nepavyko išsaugoti.', 'error');
+                showToast('Nepavyko prisijungti prie serverio.', 'error');
             }
         }
 

@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Mokslus - Redaguoti grupę</title>
-    <link rel="icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="styles.css">
-    <script src="config.js"></script>
-    <script src="toast.js"></script>
+    <link rel="icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" href="../static/images/apple-touch-icon.png">
+    <link rel="stylesheet" href="../static/styles/style.css">
+    <link rel="manifest" href="../static/pwa/manifest.json">
+    <script src="../static/js/calendar.js" defer></script>
+    <script src="../static/js/config.js" defer></script>
+    <script src="../static/js/select.js" defer></script>
+    <script src="../static/js/toast.js" defer></script>
 </head>
 <body>
     <div class="container">
         <h1>Grupės</h1>
-
         <div class="card">
             <h2>Redaguoti grupę</h2>
-
             <form id="editGroupForm">
                 <label>Pavadinimas</label>
                 <input type="text" name="group_name" id="group_name" required>
@@ -26,44 +26,40 @@
                     <option value="">-- Pasirinkite klasę --</option>
                 </select>
 
-                <div id="teacher_select_container" style="display: none;">
+                <div id="teacher_select_container" class="d-none">
                     <label>Pasirinkite mokytoją (-us)</label>
                     <div id="teachers_container" class="scroll-box"></div>
                 </div>
 
                 <label>Pasirinkite mokinius</label>
                 <div>
-                    <button type="button" class="btn btn-secondary" onclick="selectAllStudents()" style="margin-bottom: 8px;">Pasirinkti visus mokinius</button>
+                    <button type="button" class="btn btn-secondary mb-8" onclick="selectAllStudents()">Pasirinkti visus mokinius</button>
                     <div id="students_container" class="scroll-box">
-                        <p style="color: #8a8d91; font-style: italic; margin: 0;">Kraunami mokiniai...</p>
+                        <p class="text-muted-italic">Kraunami mokiniai...</p>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti</button>
+                <button type="submit" class="btn btn-primary mt-15">Išsaugoti</button>
             </form>
             <br>
-            <a href="groups" class="btn-back">← Grįžti atgal</a>
+            <a href="../groups" class="btn-back">← Grįžti atgal</a>
         </div>
     </div>
 
-    <script src="select.js"></script>
     <script>
         let currentUser = {};
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('id');
         let currentGroupStudents = [], currentGroupTeachers = [];
-        if (!groupId) { window.location.href = 'groups'; }
+        if (!groupId) { window.location.href = '../groups'; }
 
         async function checkAuthAndInit() {
             try {
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
-                if (!response.ok) {
-                    window.location.href = '/';
-                    return;
-                }
+                if (!response.ok) { window.location.href = '/'; return; }
                 currentUser = await response.json();
-                if (currentUser.role === 'student') {
-                    window.location.href = 'dashboard';
+                if (currentUser.role !== 'teacher') {
+                    window.location.href = '../dashboard';
                     return;
                 }
                 await initPage();
@@ -75,7 +71,7 @@
         async function initPage() {
             try {
                 const groupsResp = await fetch(`${API_URL}/api/groups/${groupId}`, { credentials: 'include' });
-                if (!groupsResp.ok) { window.location.href = 'groups'; return; }
+                if (!groupsResp.ok) { window.location.href = '../groups'; return; }
                 const group = await groupsResp.json();
 
                 currentGroupStudents = group.students || [];
@@ -96,14 +92,12 @@
 
                 classSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
-                if (currentUser.role === 'administrator' || currentUser.role === 'teacher') {
-                    document.getElementById('teacher_select_container').style.display = 'block';
-                    await loadTeachers();
-                }
+                document.getElementById('teacher_select_container').classList.remove('d-none');
+                await loadTeachers();
                 await fetchStudentsByClass();
-                initCustomSelects();
+                if (typeof initCustomSelects === 'function') initCustomSelects();
             } catch (error) { 
-                showToast("Klaida kraunant grupės duomenis.", "error");
+                showToast("Nepavyko užkrauti grupės duomenų.", "error");
             }
         }
 
@@ -128,7 +122,7 @@
                     container.appendChild(label);
                 });
             } catch (err) {
-                showToast("Klaida kraunant mokytojų sąrašą.", "error");
+                showToast("Nepavyko užkrauti mokytojų sąrašo.", "error");
             }
         }
 
@@ -156,7 +150,7 @@
                     studentsContainer.appendChild(label);
                 });
             } catch (err) {
-                showToast("Klaida kraunant mokinių sąrašą.", "error");
+                showToast("Nepavyko užkrauti mokinių sąrašo.", "error");
             }
         }
 
@@ -166,16 +160,12 @@
 
         document.getElementById('editGroupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
             const payload = {
                 group_name: document.getElementById('group_name').value,
                 class: document.getElementById('class_select').value,
-                students: Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value)
+                students: Array.from(document.querySelectorAll('.student-checkbox:checked')).map(cb => cb.value),
+                teachers: Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value)
             };
-
-            if (currentUser.role === 'administrator' || currentUser.role === 'teacher') {
-                payload.teachers = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value);
-            }
 
             try {
                 const res = await fetch(`${API_URL}/api/groups/edit/${groupId}`, {
@@ -186,10 +176,10 @@
                 });
 
                 if (res.ok) { 
-                    window.location.href = 'groups'; 
+                    window.location.href = '../groups'; 
                 } else { 
                     const r = await res.json();
-                    showToast(r.message || "Klaida išsaugant grupę.", "error"); 
+                    showToast(r.message || "Nepavyko išsaugoti grupės.", "error"); 
                 }
             } catch (err) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");

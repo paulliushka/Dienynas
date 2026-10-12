@@ -2,21 +2,21 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus - Redaguoti įrašą</title>
-    <link rel="icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="styles.css">
-    <script src="config.js"></script>
-    <script src="toast.js"></script>
+    <title>Mokslus - Redaguoti pastabą</title>
+    <link rel="icon" href="../favicon.ico">
+    <link rel="apple-touch-icon" href="../static/images/apple-touch-icon.png">
+    <link rel="stylesheet" href="../static/styles/style.css">
+    <link rel="manifest" href="../static/pwa/manifest.json">
+    <script src="../static/js/calendar.js" defer></script>
+    <script src="../static/js/config.js" defer></script>
+    <script src="../static/js/select.js" defer></script>
+    <script src="../static/js/toast.js" defer></script>
 </head>
 <body>
     <div class="container">
         <h1>Pagyrimai ir pastabos</h1>
-
         <div class="card">
-            <h2>Redaguoti įrašą</h2>
-
+            <h2>Redaguoti pagyrimo arba pastabos įrašą</h2>
             <form id="editRemarkForm">
                 <label>Grupė</label>
                 <input type="text" id="group_name" disabled class="readonly-input">
@@ -36,31 +36,26 @@
                 <label>Data</label>
                 <input type="date" name="date" id="date" required>
                 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti</button>
+                <button type="submit" class="btn btn-primary mt-15">Išsaugoti</button>
             </form>
             <br>
-            <a href="remarks" class="btn-back">← Grįžti atgal</a>
+            <a href="../remarks" class="btn-back">← Grįžti atgal</a>
         </div>
     </div>
 
-    <script src="calendar.js"></script>
-    <script src="select.js"></script>
     <script>
         let currentUser = {};
         const urlParams = new URLSearchParams(window.location.search);
         const remarkId = urlParams.get('id');
-        if (!remarkId) { window.location.href = 'remarks'; }
+        if (!remarkId) { window.location.href = '../remarks'; }
 
         async function checkAuthAndInit() {
             try {
                 const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
-                if (!response.ok) {
-                    window.location.href = '/';
-                    return;
-                }
+                if (!response.ok) { window.location.href = '/'; return; }
                 currentUser = await response.json();
                 if (currentUser.role !== 'teacher') {
-                    window.location.href = 'dashboard';
+                    window.location.href = '../dashboard';
                     return;
                 }
                 await loadRemark();
@@ -75,7 +70,7 @@
                 const remarks = await response.json();
                 const item = remarks.find(r => r.remark_id == remarkId);
                 
-                if (!item) { window.location.href = 'remarks'; return; }
+                if (!item) { window.location.href = '../remarks'; return; }
 
                 document.getElementById('group_name').value = item.group_display || '';
                 document.getElementById('student').value = item.student || '';
@@ -89,16 +84,15 @@
                 dateInput.value = item.date || '';
                 dateInput.dispatchEvent(new Event('change', { bubbles: true }));
 
-                initCalendarPickers();
-                initCustomSelects();
+                if (typeof initCalendarPickers === 'function') initCalendarPickers();
+                if (typeof initCustomSelects === 'function') initCustomSelects();
             } catch (error) { 
-                showToast("Klaida kraunant įrašo duomenis.", "error");
+                showToast("Nepavyko užkrauti įrašo duomenų.", "error");
             }
         }
 
         document.getElementById('editRemarkForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
             const data = Object.fromEntries(new FormData(this).entries());
             try {
                 const res = await fetch(`${API_URL}/api/remarks/edit/${remarkId}`, {
@@ -109,10 +103,10 @@
                 });
 
                 if (res.ok) { 
-                    window.location.href = 'remarks'; 
+                    window.location.href = '../remarks'; 
                 } else { 
                     const r = await res.json();
-                    showToast(r.message || "Klaida išsaugant įrašą.", "error"); 
+                    showToast(r.message || "Nepavyko išsaugoti įrašo.", "error"); 
                 }
             } catch (err) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");
