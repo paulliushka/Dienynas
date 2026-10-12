@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus - Pagrindinis puslapis</title>
+    <title>Mokslus - Pagrindinis</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
@@ -12,86 +12,75 @@
 </head>
 <body>
     <div class="container">
-        <div class="dashboard-header">
-            <div class="user-welcome">
-                <h2 id="welcomeText">Sveiki</h2>
-            </div>
-            <div class="dashboard-right">
-                <span id="roleBadge" class="badge-role"></span>
-                <button class="logout-btn" onclick="logout()">Atsijungti</button>
-            </div>
+        <h1>Mokslus sistema</h1>
+        <div class="card">
+            <p id="welcomeUser" style="margin-bottom: 20px; font-weight: bold; font-size: 1.1em;"></p>
+            
+            <!-- Kortelių tinklelis su ikonėlėmis -->
+            <div id="navGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
+            
+            <button class="logout-btn" onclick="logout()" style="width: 100%;">Atsijungti</button>
         </div>
-
-        <div class="grid-container" id="menuGrid"></div>
     </div>
 
     <script>
-        let currentUser = {};
-
-        async function checkAuthAndLoad() {
+        async function init() {
             try {
-                const response = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
-                if (!response.ok) {
-                    window.location.href = '/';
-                    return;
+                const res = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
+                if (!res.ok) { window.location.href = '/'; return; }
+                const user = await res.json();
+
+                document.getElementById('welcomeUser').textContent = `Prisijungęs: ${user.name} ${user.surname} (${user.role})`;
+                const nav = document.getElementById('navGrid');
+                nav.innerHTML = '';
+
+                let links = [];
+
+                if (user.role === 'administrator') {
+                    // Administratorius mato tik vartotojų valdymą
+                    links = [
+                        { href: 'users', title: 'Vartotojų valdymas', icon: '👥' }
+                    ];
+                } else if (user.role === 'teacher') {
+                    links = [
+                        { href: 'timetables', title: 'Tvarkaraščiai', icon: '📅' },
+                        { href: 'groups', title: 'Grupės', icon: '🏫' },
+                        { href: 'lessons', title: 'Pamokų žurnalas', icon: '📖' },
+                        { href: 'remarks', title: 'Pagyrimai ir pastabos', icon: '⭐' }
+                    ];
+                } else if (user.role === 'student') {
+                    links = [
+                        { href: 'timetables', title: 'Tvarkaraštis', icon: '📅' },
+                        { href: 'grades', title: 'Pažymiai', icon: '📊' },
+                        { href: 'assignments', title: 'Namų darbai', icon: '📝' },
+                        { href: 'attendance', title: 'Lankomumas', icon: '📋' },
+                        { href: 'remarks', title: 'Pagyrimai ir pastabos', icon: '⭐' }
+                    ];
                 }
-                currentUser = await response.json();
 
-                document.getElementById('welcomeText').textContent = `Sveiki, ${currentUser.name} ${currentUser.surname}!`;
-                
-                let roleName = 'Vartotojas';
-                if (currentUser.role === 'administrator') roleName = 'Administratorius';
-                if (currentUser.role === 'teacher') roleName = 'Mokytojas';
-                if (currentUser.role === 'student') {
-                    roleName = 'Mokinys';
-                    if (currentUser.class) roleName += ` (${currentUser.class} klasė)`;
-                }
-                document.getElementById('roleBadge').textContent = roleName;
+                // Profilis prieinamas visiems
+                links.push({ href: 'profile', title: 'Mano profilis', icon: '⚙️' });
 
-                const grid = document.getElementById('menuGrid');
-                // Pažymiai ir namų darbai matomi tik mokiniams (mokytojai juos valdo per Pamokas)
-                const menuItems = [
-                    { href: 'lessons', icon: '📖', title: 'Pamokos', desc: 'Pamokų žurnalas, lankomumas, pažymiai ir užduotys.', roles: ['teacher', 'administrator'] },
-                    { href: 'grades', icon: '📊', title: 'Pažymiai', desc: 'Peržiūrėkite savo pažymius.', roles: ['student'] },
-                    { href: 'assignments', icon: '📝', title: 'Namų darbai', desc: 'Užduotys ir namų darbai.', roles: ['student'] },
-                    { href: 'timetables', icon: '📅', title: 'Tvarkaraštis', desc: 'Pamokų tvarkaraščiai ir kabinetai.', roles: ['administrator', 'teacher', 'student'] },
-                    { href: 'attendance', icon: '📋', title: 'Lankomumas', desc: 'Pamokų lankomumo stebėjimas.', roles: ['administrator', 'teacher', 'student'] },
-                    { href: 'remarks', icon: '⭐', title: 'Pagyrimai ir pastabos', desc: 'Mokinių pasiekimai bei pastabos.', roles: ['administrator', 'teacher', 'student'] },
-                    { href: 'groups', icon: '👥', title: 'Grupės', desc: 'Mokinių grupės ir jų valdymas.', roles: ['administrator', 'teacher'] },
-                    { href: 'users', icon: '⚙️', title: 'Vartotojai', desc: 'Sukurkite ir valdykite sistemos vartotojus.', roles: ['administrator'] },
-                    { href: 'profile', icon: '👤', title: 'Profilis', desc: 'Redakuokite paskyros duomenis ir slaptažodį.', roles: ['administrator', 'teacher', 'student'] }
-                ];
-
-                menuItems.forEach(item => {
-                    if (item.roles.includes(currentUser.role)) {
-                        const card = document.createElement('a');
-                        card.href = item.href;
-                        card.className = 'nav-card';
-                        card.innerHTML = `
-                            <div>
-                                <div class="nav-card-icon">${item.icon}</div>
-                                <h3>${item.title}</h3>
-                                <p>${item.desc}</p>
-                            </div>
-                        `;
-                        grid.appendChild(card);
-                    }
+                links.forEach(l => {
+                    const card = document.createElement('a');
+                    card.href = l.href;
+                    card.className = 'btn btn-primary';
+                    card.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 10px; text-decoration: none; text-align: center; gap: 8px; font-size: 15px; border-radius: 8px;';
+                    card.innerHTML = `<span style="font-size: 32px;">${l.icon}</span><span>${l.title}</span>`;
+                    nav.appendChild(card);
                 });
+
             } catch (err) {
                 window.location.href = '/';
             }
         }
 
         async function logout() {
-            try {
-                await fetch(`${API_URL}/api/logout`, { method: 'POST', credentials: 'include' });
-                window.location.href = '/';
-            } catch (err) {
-                showToast("Klaida atsijungiant.", "error");
-            }
+            await fetch(`${API_URL}/api/logout`, { method: 'POST', credentials: 'include' });
+            window.location.href = '/';
         }
 
-        window.onload = checkAuthAndLoad;
+        window.onload = init;
     </script>
 </body>
 </html>
