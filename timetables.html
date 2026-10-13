@@ -202,7 +202,7 @@
                             <span style="color: var(--accent-blue);">Pamoka: ${t.lesson_order}</span><br>
                             <span style="color: var(--text-secondary);">Kabinetas: ${t.classroom || '-'}</span><br>
                             <span style="color: var(--text-muted);">Mokytojas: ${t.teacher || '-'}</span><br>
-                            ${t.start_date ? `<small style="color:var(--text-muted);">Galioja: ${t.start_date} iki${t.end_date || 'neribotai'}</small>` : ''}
+                            ${t.start_date ? `<small style="color:var(--text-muted);">Galioja: ${t.start_date} iki ${t.end_date || 'neribotai'}</small>` : ''}
                         `;
                         listDiv.appendChild(card);
                     });
