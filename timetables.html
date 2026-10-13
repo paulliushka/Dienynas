@@ -35,8 +35,17 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Pamokos eiliškumas / Laikas</label>
-                        <input type="text" id="lessonOrder" placeholder="pvz. 1 pamoka" required>
+                        <label>Pamoka ir laikas</label>
+                        <select id="lessonOrder" required>
+                            <option value="">-- Pasirinkite pamoką ir laiką --</option>
+                            <option value="1 pamoka (9:00-9:45)">1 pamoka (9:00 - 9:45)</option>
+                            <option value="2 pamoka (9:55-10:40)">2 pamoka (9:55 - 10:40)</option>
+                            <option value="3 pamoka (10:55-11:40)">3 pamoka (10:55 - 11:40)</option>
+                            <option value="4 pamoka (12:00-12:45)">4 pamoka (12:00 - 12:45)</option>
+                            <option value="5 pamoka (13:15-14:00)">5 pamoka (13:15 - 14:00)</option>
+                            <option value="6 pamoka (14:10-14:55)">6 pamoka (14:10 - 14:55)</option>
+                            <option value="7 pamoka (15:10-15:55)">7 pamoka (15:10 - 15:55)</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Kabinetas</label>
@@ -47,12 +56,12 @@
                         <select id="teacherSelect" required></select>
                     </div>
                     <div class="form-group">
-                        <label>Galioja nuo (Data)</label>
-                        <input type="date" id="startDate">
+                        <label>Galioja nuo (YYYY-MM-DD)</label>
+                        <input type="text" id="startDate" class="calendar-input" placeholder="YYYY-MM-DD">
                     </div>
                     <div class="form-group">
-                        <label>Galioja iki (Data)</label>
-                        <input type="date" id="endDate">
+                        <label>Galioja iki (YYYY-MM-DD)</label>
+                        <input type="text" id="endDate" class="calendar-input" placeholder="YYYY-MM-DD">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary mt-12">Pridėti į tvarkaraštį</button>
@@ -84,6 +93,7 @@
 
                 await loadTimetables();
                 if (typeof initCustomSelects === 'function') initCustomSelects();
+                if (typeof initCalendarPickers === 'function') initCalendarPickers();
             } catch (err) {
                 showToast('Nepavyko užkrauti tvarkaraščio.', 'error');
             }

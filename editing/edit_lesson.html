@@ -29,8 +29,8 @@
                     <label>Namų darbai</label>
                     <textarea id="homework_input" rows="3" placeholder="Įveskite namų darbus..." class="mb-8"></textarea>
                     
-                    <label>Atlikti iki (Terminas)</label>
-                    <input type="date" id="homework_due_date">
+                    <label>Atlikti iki (YYYY-MM-DD)</label>
+                    <input type="text" id="homework_due_date" class="calendar-input" placeholder="YYYY-MM-DD">
                 </div>
             </div>
             <button type="button" class="btn btn-primary mb-20" onclick="saveLessonData()">Išsaugoti viską</button>
@@ -64,7 +64,7 @@
                 const profileRes = await fetch(`${API_URL}/api/profile`, { credentials: 'include' });
                 if (!profileRes.ok) { window.location.href = '/'; return; }
                 const user = await profileRes.json();
-                if (user.role !== 'teacher') { window.location.href = '../dashboard'; return; }
+                if (user.role !== 'teacher' && user.role !== 'administrator') { window.location.href = '../dashboard'; return; }
 
                 if (!groupId || !dateStr) {
                     showToast('Nenurodyta data arba grupė.', 'error');
@@ -73,6 +73,8 @@
                 document.getElementById('lblDate').textContent = dateStr;
                 document.getElementById('lblGroup').textContent = groupId;
                 await loadLessonData();
+                if (typeof initCalendarPickers === 'function') initCalendarPickers();
+                if (typeof initCustomSelects === 'function') initCustomSelects();
             } catch (err) {
                 window.location.href = '/';
             }
