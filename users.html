@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus</title>
+    <title>Mokslus - Vartotojai</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
     <link rel="stylesheet" href="static/styles/style.css">
@@ -19,8 +19,8 @@
         <div class="card">
             <h2>Sukurti naują vartotoją</h2>
             
-            <div id="regCodeResult" class="info-box info-box-success" style="display: none;">
-                <strong>Vartotojas sėkmingai sukurtas!</strong> Registracijos kodas: <span id="generatedCode" class="code-display"></span>
+            <div id="regCodeResult" class="info-panel d-none">
+                <strong>Vartotojas sėkmingai sukurtas!</strong> Registracijos kodas: <span id="generatedCode" style="font-family: monospace; font-weight: bold;"></span>
             </div>
 
             <form id="addUserForm">
@@ -40,7 +40,7 @@
                 <label>Klasė (tik mokiniams)</label>
                 <input type="text" name="class" placeholder="Klasė" id="class" required>
                 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Sukurti</button>
+                <button type="submit" class="btn btn-primary mt-15">Sukurti</button>
             </form>
         </div>
 
@@ -75,12 +75,13 @@
                 if (!response.ok) { window.location.href = '/'; return; }
                 currentUser = await response.json();
                 if (currentUser.role !== 'administrator') {
+                    showToast('Puslapis pasiekiamas tik administratoriams.', 'error');
                     window.location.href = 'dashboard';
                     return;
                 }
                 toggleClassField();
                 await loadUsers();
-                initCustomSelects();
+                if (typeof initCustomSelects === 'function') initCustomSelects();
             } catch (err) {
                 window.location.href = '/';
             }
@@ -132,20 +133,19 @@
                         <td data-label="Rolė">${roleTranslations[u.role] || u.role}</td>
                         <td data-label="Klasė">${u.class ? u.class : '-'}</td>
                         <td data-label="Veiksmai">
-                            <a href="edit_user?id=${u.user_id}">Redaguoti</a> | 
+                            <a href="editing/edit_user?id=${u.user_id}">Redaguoti</a> | 
                             <a href="javascript:void(0);" onclick="deleteUser(${u.user_id}); return false;">Ištrinti</a>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (error) {
-                showToast("Klaida užkraunant vartotojus.", "error");
+                showToast("Nepavyko užkrauti vartotojų.", "error");
             }
         }
 
         document.getElementById('addUserForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
@@ -170,13 +170,13 @@
                     const resultBox = document.getElementById('regCodeResult');
                     if (result.reg_code) {
                         document.getElementById('generatedCode').textContent = result.reg_code;
-                        resultBox.style.display = 'block';
+                        resultBox.classList.remove('d-none');
                     } else {
-                        resultBox.style.display = 'none';
+                        resultBox.classList.add('d-none');
                     }
                     showToast("Vartotojas sėkmingai sukurtas!", "success");
                 } else {
-                    showToast(result.message || "Klaida pridedant vartotoją.", "error");
+                    showToast(result.message || "Nepavyko sukurti vartotojo.", "error");
                 }
             } catch (error) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");
@@ -196,7 +196,7 @@
                     showToast("Vartotojas ištrintas.", "success");
                     loadUsers();
                 } else {
-                    showToast("Klaida trinant vartotoją.", "error");
+                    showToast("Nepavyko ištrinti.", "error");
                 }
             } catch (error) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");

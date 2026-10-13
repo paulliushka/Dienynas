@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus</title>
+    <title>Mokslus - Tvarkaraštis</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
     <link rel="stylesheet" href="static/styles/style.css">
@@ -16,11 +16,10 @@
     <div class="container">
         <h1>Pamokų tvarkaraštis ir valdymas</h1>
 
-        <!-- Tvarkaraščio kūrimo forma (matoma mokytojams ir administratoriams) -->
-        <div class="card" id="createTimetableCard" style="display: none;">
+        <div class="card d-none" id="createTimetableCard">
             <h2>Pridėti naują pamoką į tvarkaraštį</h2>
             <form id="addTimetableForm" onsubmit="handleSaveTimetable(event)">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <div class="grid-container">
                     <div class="form-group">
                         <label>Grupė</label>
                         <select id="groupSelect" required></select>
@@ -56,11 +55,10 @@
                         <input type="date" id="endDate">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="margin-top: 12px;">Pridėti į tvarkaraštį</button>
+                <button type="submit" class="btn btn-primary mt-12">Pridėti į tvarkaraštį</button>
             </form>
         </div>
 
-        <!-- Savaitės dienų ir pamokų eiliškumo vaizdas -->
         <div class="card">
             <h2>Esamos savaitės pamokos</h2>
             <div id="timetableContainer"></div>
@@ -80,11 +78,12 @@
                 userRole = user.role;
 
                 if (user.role === 'teacher' || user.role === 'administrator') {
-                    document.getElementById('createTimetableCard').style.display = 'block';
+                    document.getElementById('createTimetableCard').classList.remove('d-none');
                     await loadFormDropdowns();
                 }
 
                 await loadTimetables();
+                if (typeof initCustomSelects === 'function') initCustomSelects();
             } catch (err) {
                 showToast('Nepavyko užkrauti tvarkaraščio.', 'error');
             }
@@ -111,7 +110,7 @@
                     tSelect.innerHTML += `<option value="${t.user_id}">${t.name} ${t.surname}</option>`;
                 });
             } catch (err) {
-                showToast('Klaida užkraunant grupes ar mokytojus.', 'error');
+                showToast('Nepavyko užkrauti duomenų.', 'error');
             }
         }
 
@@ -121,7 +120,7 @@
                 const timetables = await resTt.json();
                 renderTimetableByDays(timetables);
             } catch (err) {
-                showToast('Klaida užkraunant įrašus.', 'error');
+                showToast('Nepavyko užkrauti įrašų.', 'error');
             }
         }
 
@@ -149,7 +148,7 @@
                     document.getElementById('addTimetableForm').reset();
                     await loadTimetables();
                 } else {
-                    showToast('Klaida išsaugant įrašą.', 'error');
+                    showToast('Nepavyko išsaugoti.', 'error');
                 }
             } catch (err) {
                 showToast('Tinklo klaida.', 'error');
@@ -180,12 +179,11 @@
                         const card = document.createElement('div');
                         card.className = 'lesson-item-card';
                         
-                        // Jei mokytojas arba admin - leidžiame paspausti ir redaguoti atskirame edit_timetable.html puslapyje
                         if (userRole === 'teacher' || userRole === 'administrator') {
                             card.style.cursor = 'pointer';
                             card.title = 'Spauskite norėdami redaguoti';
                             card.onclick = () => {
-                                window.location.href = `edit_timetable?timetable_id=${t.timetable_id}`;
+                                window.location.href = `editing/edit_timetable?timetable_id=${t.timetable_id}`;
                             };
                         }
 

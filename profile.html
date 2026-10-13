@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus</title>
+    <title>Mokslus - Profilis</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
     <link rel="stylesheet" href="static/styles/style.css">
@@ -32,7 +32,7 @@
                 <label>Naujas slaptažodis (palikite tuščią, jei nekeičiate)</label>
                 <input type="password" name="password" id="password" placeholder="Naujas slaptažodis...">
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Išsaugoti</button>
+                <button type="submit" class="btn btn-primary mt-15">Išsaugoti</button>
             </form>
             <br>
             <a href="dashboard" class="btn-back">← Grįžti į pagrindinį</a>
@@ -73,7 +73,7 @@
                     showToast("Profilio duomenys sėkmingai atnaujinti!", "success");
                     document.getElementById('password').value = '';
                 } else {
-                    showToast(result.message || "Klaida išsaugant pakeitimus.", "error");
+                    showToast(result.message || "Nepavyko išsaugoti.", "error");
                 }
             } catch (err) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");

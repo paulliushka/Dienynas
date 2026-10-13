@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus</title>
+    <title>Mokslus - Registracija</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
     <link rel="stylesheet" href="static/styles/style.css">
@@ -15,15 +15,15 @@
 <body class="centered-page-body">
     <div class="card register-card">
         <h1>Registracija</h1>
-        <p style="margin-bottom: 16px;">Įveskite mokyklos suteiktą registracijos kodą.</p>
+        <p class="mb-16">Įveskite mokyklos suteiktą registracijos kodą.</p>
 
         <form id="codeForm" onsubmit="handleVerifyCode(event)">
             <div class="form-group">
                 <label for="regCode">Registracijos kodas</label>
-                <input type="text" id="regCode" placeholder="pvz. REG-8F32A9" required style="text-transform: uppercase;">
+                <input type="text" id="regCode" placeholder="pvz. REG-8F32A9" required class="text-uppercase">
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Tikrinti kodą</button>
-            <a href="/" class="btn-back" style="display: block; text-align: center; margin-top: 10px;">Atgal į prisijungimą</a>
+            <button type="submit" class="btn btn-primary w-100 mt-8">Tikrinti kodą</button>
+            <a href="/" class="btn-back d-block text-center mt-10">Atgal į prisijungimą</a>
         </form>
 
         <form id="registerForm" class="step-2" onsubmit="handleCompleteRegistration(event)">
@@ -47,7 +47,7 @@
                 <label for="regPassword">Slaptažodis</label>
                 <input type="password" id="regPassword" required>
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Užbaigti registraciją</button>
+            <button type="submit" class="btn btn-primary w-100 mt-8">Užbaigti registraciją</button>
         </form>
     </div>
 
@@ -108,7 +108,7 @@
 
                 const data = await res.json();
                 if (res.ok) {
-                    showToast('Registracija sėkminga! Peradresuojama į prisijungimą...', 'success');
+                    showToast('Registracija sėkminga! Peradresuojama...', 'success');
                     setTimeout(() => { window.location.href = '/'; }, 500);
                 } else {
                     showToast(data.message || 'Klaida registruojantis.', 'error');

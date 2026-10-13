@@ -2,7 +2,7 @@
 <html lang="lt">
 <head>
     <meta charset="UTF-8">
-    <title>Mokslus</title>
+    <title>Mokslus - Pagyrimai ir pastabos</title>
     <link rel="icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="static/images/apple-touch-icon.png">
     <link rel="stylesheet" href="static/styles/style.css">
@@ -16,7 +16,7 @@
     <div class="container">
         <h1>Pagyrimai ir pastabos</h1>
 
-        <div class="card" id="addRemarkCard" style="display: none;">
+        <div class="card d-none" id="addRemarkCard">
             <h2>Įrašyti pagyrimą arba pastabą</h2>
 
             <form id="addRemarkForm">
@@ -42,25 +42,24 @@
                 <label>Data</label>
                 <input type="date" name="date" id="remark_date" required>
 
-                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">Įrašyti</button>
+                <button type="submit" class="btn btn-primary mt-15">Įrašyti</button>
             </form>
         </div>
 
         <div class="card">
             <h2>Įrašų sąrašas</h2>
 
-            <!-- Paieškos ir filtravimo juosta -->
-            <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 180px;">
-                    <label style="margin-top:0;">Filtruoti pagal tipą:</label>
+            <div class="grid-2-cols mb-12">
+                <div>
+                    <label class="mt-0">Filtruoti pagal tipą:</label>
                     <select id="filter_type" onchange="filterRemarks()">
                         <option value="">-- Visi tipai --</option>
                         <option value="praise">Pagyrimai</option>
                         <option value="reprimand">Pastabos</option>
                     </select>
                 </div>
-                <div style="flex: 2; min-width: 220px;">
-                    <label style="margin-top:0;">Paieška (mokinys / turinys / mokytojas):</label>
+                <div>
+                    <label class="mt-0">Paieška (mokinys / turinys / mokytojas):</label>
                     <input type="text" id="filter_search" placeholder="Įveskite paieškos žodį..." oninput="filterRemarks()">
                 </div>
             </div>
@@ -102,14 +101,14 @@
 
         async function initPage() {
             if (currentUser.role === 'teacher') {
-                document.getElementById('addRemarkCard').style.display = 'block';
+                document.getElementById('addRemarkCard').classList.remove('d-none');
                 setDefaultDate();
                 await loadTeacherGroups();
             }
 
             await loadRemarks();
-            initCalendarPickers();
-            initCustomSelects();
+            if (typeof initCalendarPickers === 'function') initCalendarPickers();
+            if (typeof initCustomSelects === 'function') initCustomSelects();
         }
 
         function setDefaultDate() {
@@ -138,7 +137,7 @@
                 });
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                showToast('Klaida užkraunant grupes.', 'error');
+                showToast('Nepavyko užkrauti grupių.', 'error');
             }
         }
 
@@ -167,7 +166,7 @@
                 select.disabled = false;
                 select.dispatchEvent(new Event('change', { bubbles: true }));
             } catch (error) {
-                showToast('Klaida užkraunant mokinius.', 'error');
+                showToast('Nepavyko užkrauti mokinių.', 'error');
             }
         }
 
@@ -178,7 +177,7 @@
                 allRemarks = await response.json();
                 renderRemarks(allRemarks);
             } catch (error) {
-                showToast('Klaida užkraunant įrašų sąrašą.', 'error');
+                showToast('Nepavyko užkrauti įrašų sąrašo.', 'error');
             }
         }
 
@@ -221,8 +220,8 @@
 
                 if (showActions) {
                     const actionsTd = isGroupTeacher 
-                        ? `<a href="edit_remark?id=${r.remark_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteRemark(${r.remark_id}); return false;">Ištrinti</a>`
-                        : '<span style="color: #8a8d91;">Neturite teisių</span>';
+                        ? `<a href="editing/edit_remark?id=${r.remark_id}">Redaguoti</a> | <a href="javascript:void(0);" onclick="deleteRemark(${r.remark_id}); return false;">Ištrinti</a>`
+                        : '<span style="color: var(--text-muted);">Neturite teisių</span>';
                     
                     rowHtml += `<td data-label="Veiksmai">${actionsTd}</td>`;
                 }
@@ -277,7 +276,7 @@
                         loadRemarks();
                     } else {
                         const errResult = await response.json();
-                        showToast(errResult.message || "Klaida įrašant pastabą / pagyrimą.", "error");
+                        showToast(errResult.message || "Nepavyko įrašyti.", "error");
                     }
                 } catch (error) {
                     showToast("Nepavyko prisijungti prie serverio.", "error");
@@ -297,7 +296,7 @@
                     showToast("Įrašas ištrintas.", "success");
                     loadRemarks();
                 } else {
-                    showToast("Klaida trinant įrašą.", "error");
+                    showToast("Nepavyko ištrinti įrašo.", "error");
                 }
             } catch (error) {
                 showToast("Nepavyko prisijungti prie serverio.", "error");
